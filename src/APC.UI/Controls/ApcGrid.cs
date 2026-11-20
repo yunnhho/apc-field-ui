@@ -65,6 +65,22 @@ namespace APC.UI.Controls
             base.OnColumnAdded(e);
         }
 
+        /// <summary>
+        /// DataGridView의 Fill 열 폭은 이전 폭에서 조금씩 고쳐 가는 방식이라, 화면에 뜨기 전 좁은 폭(100px대)에서 한 번 잡힌
+        /// 오차가 남는다(첫 열만 좁았다가 조회 때마다 3px씩 늘어나던 문제). 크기가 바뀌면 FillWeight대로 다시 나눈다
+        /// (사용자가 끌어서 바꾼 폭은 FillWeight에 남으므로 유지된다).
+        /// </summary>
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+            foreach (DataGridViewColumn c in Columns)
+            {
+                if (c.AutoSizeMode != DataGridViewAutoSizeColumnMode.Fill) continue;
+                c.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                c.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            }
+        }
+
         protected override void OnCellPainting(DataGridViewCellPaintingEventArgs e)
         {
             base.OnCellPainting(e);

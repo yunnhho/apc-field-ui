@@ -10,7 +10,7 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 테두리 없는 APCSOFT 창. 타이틀바(로고·제목·최소화·닫기 이미지 버튼), 드래그 이동,
+    /// 테두리 없는 APCSOFT 창. 타이틀바(로고·제목·[설정]·최소화·닫기 이미지 버튼), 드래그 이동,
     /// 더블클릭 최대화, 가장자리 리사이즈. 최대화해도 작업표시줄을 가리지 않는다.
     /// </summary>
     public partial class ApcForm : Form
@@ -27,7 +27,7 @@ namespace APC.UI.Controls
         private const int HTBOTTOM = 15, HTBOTTOMLEFT = 16, HTBOTTOMRIGHT = 17;
         private const int WS_MINIMIZEBOX = 0x20000, WS_MAXIMIZEBOX = 0x10000;
 
-        private enum WinButton { None, Minimize, Close }
+        private enum WinButton { None, Settings, Minimize, Close }
 
         private string _titleText = string.Empty;
         private WinButton _hover;
@@ -59,6 +59,28 @@ namespace APC.UI.Controls
             get { return _resizable; }
             set { _resizable = value; UpdatePadding(); }
         }
+
+        private bool _showSettings;
+
+        /// <summary>
+        /// 타이틀바 최소화 왼쪽에 설정(톱니) 버튼. 설정 화면이 있는 창에서만 켠다. 누르면 <see cref="SettingsClick"/>.
+        /// 화면(ApcTemplateView)에서는 직접 켜지 말고 UseSettingsButton을 쓴다.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool ShowSettings
+        {
+            get { return _showSettings; }
+            set
+            {
+                // 그림이 없는 옛 고객사 테마면 그리는 순간이 아니라 켜는 순간 실패하게(파일 이름이 메시지에 나온다)
+                if (value && ApcTheme.Current != null) ApcTheme.GetImage("win_settings_normal");
+                _showSettings = value;
+                Invalidate(TitleBarRect);
+            }
+        }
+
+        /// <summary>타이틀바 설정 버튼을 눌렀다(<see cref="ShowSettings"/>가 true일 때만).</summary>
+        public event EventHandler SettingsClick;
 
         public int TitleBarHeight { get { return (int)Math.Round(BaseTitleHeight * ApcTheme.Scale); } }
 
@@ -95,8 +117,10 @@ namespace APC.UI.Controls
             int w = (int)(BaseWinButtonW * s), h = (int)(BaseWinButtonH * s), gap = (int)(4 * s);
             int y = (TitleBarHeight - h) / 2;
             int closeX = ClientSize.Width - gap - w;
+            int minX = closeX - gap / 2 - w;
             return b == WinButton.Close ? new Rectangle(closeX, y, w, h)
-                 : b == WinButton.Minimize ? new Rectangle(closeX - gap / 2 - w, y, w, h)
+                 : b == WinButton.Minimize ? new Rectangle(minX, y, w, h)
+                 : b == WinButton.Settings ? new Rectangle((MinimizeBox ? minX : closeX) - gap / 2 - w, y, w, h)
                  : Rectangle.Empty;
         }
 
@@ -104,6 +128,7 @@ namespace APC.UI.Controls
         {
             if (ButtonRect(WinButton.Close).Contains(p)) return WinButton.Close;
             if (MinimizeBox && ButtonRect(WinButton.Minimize).Contains(p)) return WinButton.Minimize;
+            if (_showSettings && ButtonRect(WinButton.Settings).Contains(p)) return WinButton.Settings;
             return WinButton.None;
         }
 
@@ -139,7 +164,7 @@ namespace APC.UI.Controls
                 x += lw + (int)(12 * s);
             }
 
-            int right = (MinimizeBox ? ButtonRect(WinButton.Minimize) : ButtonRect(WinButton.Close)).Left - (int)(8 * s);
+            int right = LeftmostButton().Left - (int)(8 * s);
             var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis;
             if (ShowLogo)
             {
@@ -154,8 +179,17 @@ namespace APC.UI.Controls
                 TextClip.Draw(g, this, _titleText, ApcTheme.GetFont(FontStyle.Bold), Rectangle.FromLTRB(x, 0, right, TitleBarHeight), ApcTheme.C(c.Text), flags);
             }
 
+            if (_showSettings) DrawWinButton(g, WinButton.Settings, "win_settings", true);
             if (MinimizeBox) DrawWinButton(g, WinButton.Minimize, "win_minimize", true);
             DrawWinButton(g, WinButton.Close, "win_close", true);
+        }
+
+        internal Rectangle SettingsButtonBounds { get { return ButtonRect(WinButton.Settings); } }
+        internal Rectangle MinimizeButtonBounds { get { return ButtonRect(WinButton.Minimize); } }
+
+        private Rectangle LeftmostButton()
+        {
+            return ButtonRect(_showSettings ? WinButton.Settings : MinimizeBox ? WinButton.Minimize : WinButton.Close);
         }
 
         private Font _titleFont;
@@ -217,7 +251,8 @@ namespace APC.UI.Controls
             if (pressed != WinButton.None && pressed == HitButton(e.Location))
             {
                 if (pressed == WinButton.Close) Close();
-                else WindowState = FormWindowState.Minimized;
+                else if (pressed == WinButton.Minimize) WindowState = FormWindowState.Minimized;
+                else { var handler = SettingsClick; if (handler != null) handler(this, EventArgs.Empty); }
             }
             base.OnMouseUp(e);
         }

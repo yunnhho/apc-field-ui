@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 using APC.UI.Controls;
 using APC.UI.Theming;
@@ -62,17 +62,23 @@ namespace APC.UI.Demo.Templates
         // 스캔 피드백은 ApcScanBox가 e.Accepted로 한 번만 낸다.
         private void OnScanned(object sender, ScanEventArgs e) { e.Accepted = AddLot(e.Code); }
 
+        /// <summary>스캔 처리(빨간 깜빡임)가 끝난 뒤 경고창을 띄운다 — 스캔 이벤트 안에서 모달을 열지 않는다.</summary>
+        private void WarnAfterScan(string message)
+        {
+            BeginInvoke((MethodInvoker)(() => ApcDialog.Alert(FindForm(), message)));
+        }
+
         private bool AddLot(string code)
         {
             if (!code.StartsWith(LotPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                Alarm.Push("LOT 바코드가 아닙니다: " + code);
+                WarnAfterScan("LOT 바코드가 아닙니다: " + code);
                 return false;
             }
             foreach (DataGridViewRow row in _grid.Rows)
                 if ((string)row.Cells[1].Value == code)
                 {
-                    Alarm.Push("이미 스캔한 LOT: " + code);
+                    WarnAfterScan("이미 스캔한 LOT: " + code);
                     return false;
                 }
             _grid.Rows.Insert(0, StatusKind.Warn, code, "하우징 A-120", 120, DateTime.Now.ToString("HH:mm:ss"));
