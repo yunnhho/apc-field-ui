@@ -20,19 +20,15 @@ namespace APC.UI.Demo.Templates
         private readonly GroupHeaderGrid _grid = new GroupHeaderGrid { Dock = DockStyle.Fill, ReadOnly = true };
         private readonly Label _clock = Caption("");
         private readonly Timer _clockTimer = new Timer { Interval = 1000 };
-        private readonly List<ApcButton> _tabs = new List<ApcButton>();
+        private readonly ApcTabStrip _tabs = new ApcTabStrip();
 
         public FailureAnalysisView() : base("연마기 불량 방지 시스템")
         {
             var tabRow = Row();
-            for (int i = 0; i < Groups.Length; i++)
-            {
-                int index = i;
-                var tab = Button(Groups[i], ApcButtonVariant.Normal, 230);
-                tab.Click += (s, e) => SelectGroup(index);
-                _tabs.Add(tab);
-                tabRow.Controls.Add(tab);
-            }
+            _tabs.SetTabs(Groups);   // 첫 탭이 선택된다. 표 내용은 아래 SelectGroup(0)에서
+            _tabs.Width = _tabs.PreferredTabsWidth;
+            _tabs.Margin = new Padding(0, S(46) - _tabs.Height, 0, 0);   // 탭 아래끝이 표 위끝에 닿게
+            tabRow.Controls.Add(_tabs);
             var testMode = Caption("ⓘ 시험 모드 : 가상 장비로 동작합니다.");
             testMode.ForeColor = ApcTheme.Status(StatusKind.Info);
             testMode.Margin = new Padding(S(12), S(8), 0, 0);
@@ -64,6 +60,7 @@ namespace APC.UI.Demo.Templates
             _clockTimer.Start();
             _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             SelectGroup(0);
+            _tabs.SelectedIndexChanged += (s, e) => SelectGroup(_tabs.SelectedIndex);
         }
 
         /// <summary>설정 진입: 관리자 확인 → 설정 dialog(샘플은 비밀번호 검사 생략).</summary>
@@ -113,8 +110,6 @@ namespace APC.UI.Demo.Templates
 
         private void SelectGroup(int index)
         {
-            for (int i = 0; i < _tabs.Count; i++) _tabs[i].Variant = i == index ? ApcButtonVariant.Primary : ApcButtonVariant.Normal;
-
             string prefix = index == 2 ? "고속 연마기 ST-GB-" : "저속 연마기 ST-GR-";
             int firstMachine = index == 1 ? 4 : 1;
             int machines = index == 2 ? 8 : 3;

@@ -1,4 +1,4 @@
-# APC.UI API (v1.15.0.0)
+# APC.UI API (v1.16.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -219,6 +219,19 @@
 - `bool Selected { get; set; }` — 선택 표시(바탕이 표 선택 행 색). 타일을 눌러 아래 카드·그래프가 그 설비를 보여 줄 때 그 타일 하나만 true.
 - `string StatusText { get; set; }`
 - `string Text { get; set; }` — 설비명(굵게, 램프 오른쪽 윗줄).
+
+## ApcTabStrip
+
+`APC.UI.Controls` · class : Control
+
+탭 줄(설비군·라인 전환 등). 선택 탭은 흰 바탕 + 위쪽 강조선 + 굵은 글자로 아래 내용과 이어져 보이고, 나머지는 묶음 제목 띠와 같은 회색 그라데이션이다 — 실행 버튼(파란 Primary)과 모양이 겹치지 않는다. 탭 폭은 글자에 맞춰 자동(잘리지 않음). 내용 전환은 에서 화면이 한다. 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
+- `ApcTabStrip()`
+- `event EventHandler SelectedIndexChanged` — 선택이 바뀌면(클릭·←/→·SelectedIndex 대입) 발생.
+- `int PreferredTabsWidth { get; }` — 모든 탭을 담는 데 필요한 폭(배치용). 탭 폭 합.
+- `int SelectedIndex { get; set; }` — 선택된 탭 번호(없으면 -1). 범위 밖이면 ArgumentOutOfRangeException.
+- `int TabCount { get; }`
+- `string GetTabText(int index)`
+- `void SetTabs(params string[] tabs)` — 탭 글자 목록을 한 번에 정한다. 탭이 있으면 첫 탭이 선택된다(이벤트 발생).
 
 ## ApcTemplateView
 

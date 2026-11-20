@@ -19,7 +19,7 @@ namespace APC.UI.Tools
         private static readonly HashSet<string> Forbidden = new HashSet<string>
         {
             "Button", "TextBox", "MaskedTextBox", "RichTextBox", "ComboBox", "ListBox", "NumericUpDown",
-            "DateTimePicker", "DataGridView", "GroupBox", "CheckedListBox", "ListView",
+            "DateTimePicker", "DataGridView", "GroupBox", "CheckedListBox", "ListView", "TabControl",
         };
         private static readonly HashSet<string> FieldTypes = new HashSet<string>
         {

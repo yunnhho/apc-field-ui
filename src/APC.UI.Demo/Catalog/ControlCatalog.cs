@@ -61,6 +61,11 @@ namespace APC.UI.Demo.Catalog
             foreach (Control c in new Control[] { text, readOnly, off }) c.Margin = new Padding(0, 0, S(8), 0);
             Body.Controls.Add(Row(Caption("입력칸"), text, readOnly, off));
 
+            var tabs = new ApcTabStrip();
+            tabs.SetTabs("저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08");
+            tabs.Width = tabs.PreferredTabsWidth;
+            Body.Controls.Add(Row(Caption("탭 (ApcTabStrip)"), tabs));
+
             var scan = new ApcScanBox { Width = S(260) };
             var ok = Button("성공 플래시", ApcButtonVariant.Normal, 120);
             ok.Click += (s, e) => scan.Flash(true);
