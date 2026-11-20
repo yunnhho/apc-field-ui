@@ -121,7 +121,8 @@ namespace APC.UI.Tools
             if (c is ComboBox combo && combo.Items.Count > 0)
             {
                 int widest = combo.Items.Cast<object>().Max(i => TextRenderer.MeasureText(combo.GetItemText(i), combo.Font).Width);
-                return widest + Math.Max(c.Height - 2, 24) + TextPad;   // 화살표 영역(FieldFrame.ButtonWidth와 같은 식)
+                // 화살표 영역(FieldFrame.ButtonWidth와 같은 식) + 글자 양쪽 여백 7px씩(ApcComboBox.OnPaint의 pad, 100% 배율)
+                return widest + Math.Max(c.Height - 2, 24) + 2 * 7;
             }
             return 0;
         }

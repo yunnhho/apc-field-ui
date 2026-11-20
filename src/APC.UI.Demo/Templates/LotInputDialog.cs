@@ -75,7 +75,7 @@ namespace APC.UI.Demo.Templates
                 barrels[i] = Convert.ToString(_grid.Rows[i].Cells[ColBarrel].Value).Trim();
                 if (lots[i].Length == 0)
                 {
-                    ApcDialog.Alert(this, _slots[i] + " 칸의 LOT를 스캔하세요.");
+                    ApcDialog.Warn(this, _slots[i] + " 칸의 LOT를 스캔하세요.");
                     _grid.CurrentCell = _grid.Rows[i].Cells[ColLot];
                     return;
                 }

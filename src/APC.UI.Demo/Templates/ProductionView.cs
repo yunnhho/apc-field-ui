@@ -65,7 +65,7 @@ namespace APC.UI.Demo.Templates
         /// <summary>스캔 처리(빨간 깜빡임)가 끝난 뒤 경고창을 띄운다 — 스캔 이벤트 안에서 모달을 열지 않는다.</summary>
         private void WarnAfterScan(string message)
         {
-            BeginInvoke((MethodInvoker)(() => ApcDialog.Alert(FindForm(), message)));
+            BeginInvoke((MethodInvoker)(() => ApcDialog.Warn(FindForm(), message)));
         }
 
         private bool AddLot(string code)

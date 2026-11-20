@@ -54,7 +54,7 @@ namespace APC.UI.Demo.Templates
             if (_lot.Text.Trim().Length == 0)
             {
                 _lot.Flash(false);
-                ApcDialog.Alert(FindForm(), "LOT를 스캔하거나 입력하세요.");
+                ApcDialog.Warn(FindForm(), "LOT를 스캔하거나 입력하세요.");
                 return;
             }
             _grid.Rows.Insert(0, DateTime.Now.ToString("HH:mm:ss"), _type.SelectedItem, _qty.Value, _lot.Text.Trim());

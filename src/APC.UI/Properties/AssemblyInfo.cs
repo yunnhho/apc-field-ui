@@ -5,6 +5,6 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("APCSOFT 현장 프로그램 WinForms 컨트롤·테마 라이브러리")]
 [assembly: AssemblyCompany("APCSOFT")]
 [assembly: AssemblyProduct("APC.UI")]
-[assembly: AssemblyVersion("1.14.0.0")]
-[assembly: AssemblyFileVersion("1.14.0.0")]
+[assembly: AssemblyVersion("1.15.0.0")]
+[assembly: AssemblyFileVersion("1.15.0.0")]
 [assembly: InternalsVisibleTo("APC.UI.Checks")]

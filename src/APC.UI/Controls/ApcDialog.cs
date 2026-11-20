@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using APC.UI.Theming;
@@ -24,10 +24,19 @@ namespace APC.UI.Controls
                 return dlg.ShowDialog(owner) == DialogResult.OK;
         }
 
-        /// <summary>알림(입력 오류 안내 등). 버튼은 "확인" 하나, Enter·Esc로 닫힌다.</summary>
+        /// <summary>
+        /// 경고창(입력 오류·조작 경고: 기간 역순, 빈 LOT, 잘못된·중복 스캔 등). 제목 "경고" + 노란 램프.
+        /// 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
+        /// </summary>
+        public static void Warn(IWin32Window owner, string message)
+        {
+            using (var dlg = CreateAlert(message, true)) dlg.ShowDialog(owner);
+        }
+
+        /// <summary>안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 <see cref="Warn"/>.</summary>
         public static void Alert(IWin32Window owner, string message)
         {
-            using (var dlg = CreateAlert(message)) dlg.ShowDialog(owner);
+            using (var dlg = CreateAlert(message, false)) dlg.ShowDialog(owner);
         }
 
         internal static ApcForm Create(string message)
@@ -35,10 +44,11 @@ namespace APC.UI.Controls
             return Create(message, "확인", ApcButtonVariant.Danger);
         }
 
-        internal static ApcForm CreateAlert(string message)
+        internal static ApcForm CreateAlert(string message, bool warning)
         {
             var dlg = Create(message, "확인", ApcButtonVariant.Primary);
-            dlg.TitleText = "알림";
+            dlg.TitleText = warning ? "경고" : "알림";
+            AddKindIcon(dlg, warning ? "lamp_warn" : "lamp_info");
             ApcButton ok = null;
             foreach (Control c in dlg.Controls)
             {
@@ -47,12 +57,31 @@ namespace APC.UI.Controls
                 if (b.DialogResult == DialogResult.OK) ok = b;
             }
             var cancel = (Control)dlg.CancelButton;
+            ok.Bounds = cancel.Bounds;   // 버튼 하나는 오른쪽 끝(취소 자리)에
             dlg.Controls.Remove(cancel);
             cancel.Dispose();
             ok.TabIndex = 0;
             dlg.AcceptButton = dlg.CancelButton = ok;
             dlg.Shown += (sender, e) => ok.Focus();
             return dlg;
+        }
+
+        /// <summary>메시지 왼쪽에 종류 램프(경고 노랑 / 알림 파랑) — 색만이 아니라 제목 글자로도 구분된다.</summary>
+        private static void AddKindIcon(ApcForm dlg, string lamp)
+        {
+            if (ApcTheme.Current == null) return;
+            Label label = null;
+            foreach (Control c in dlg.Controls) if (c is Label) label = (Label)c;
+            int size = ApcTheme.Px(24), gap = ApcTheme.Px(12);
+            var icon = new PictureBox
+            {
+                Image = ApcTheme.GetImage(lamp),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                Bounds = new Rectangle(label.Left, label.Top + (label.Height - size) / 2, size, size),
+            };
+            label.SetBounds(icon.Right + gap, label.Top, label.Right - icon.Right - gap, label.Height);
+            dlg.Controls.Add(icon);
         }
 
         internal static ApcForm Create(string message, string okText, ApcButtonVariant okVariant)

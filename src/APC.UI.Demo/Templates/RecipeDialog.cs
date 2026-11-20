@@ -52,7 +52,7 @@ namespace APC.UI.Demo.Templates
             string error = _name.Text.Trim().Length == 0 ? "모델명을 입력하세요."
                          : _loadMin.Value >= _loadMax.Value ? "하중 하한이 상한보다 작아야 합니다."
                          : _dispMin.Value >= _dispMax.Value ? "변위 하한이 상한보다 작아야 합니다." : null;
-            if (error != null) { ApcDialog.Alert(this, error); return; }
+            if (error != null) { ApcDialog.Warn(this, error); return; }
             if (!ApcDialog.Confirm(this, "레시피 '" + _name.Text.Trim() + "'를 저장할까요?", "저장", ApcButtonVariant.Primary)) return;
 
             Model = _name.Text.Trim();

@@ -1,4 +1,4 @@
-# APC.UI API (v1.14.0.0)
+# APC.UI API (v1.15.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -64,7 +64,8 @@
 되돌릴 수 없는 동작(삭제, 작업 종료 등) 확인. 기본 포커스와 Enter·Esc는 모두 '취소' — 바코드 스캔의 Enter나 습관적 Enter로 실수 확인되지 않게 한다.
 - `static bool Confirm(IWin32Window owner, string message)` — 파괴적 동작 확인: 확인 버튼은 빨간 "확인".
 - `static bool Confirm(IWin32Window owner, string message, string okText, ApcButtonVariant okVariant)` — 확인 버튼 글자·종류 지정. 저장처럼 위험하지 않은 확인은 ("저장", Primary).
-- `static void Alert(IWin32Window owner, string message)` — 알림(입력 오류 안내 등). 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
+- `static void Alert(IWin32Window owner, string message)` — 안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 .
+- `static void Warn(IWin32Window owner, string message)` — 경고창(입력 오류·조작 경고: 기간 역순, 빈 LOT, 잘못된·중복 스캔 등). 제목 "경고" + 노란 램프. 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
 
 ## ApcForm
 

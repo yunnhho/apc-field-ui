@@ -19,7 +19,7 @@ namespace APC.UI.Demo.Templates
 
         public SettingsDialog(string[] blocks)
         {
-            SetupDialog("시스템 설정", 960);
+            SetupDialog("시스템 설정", 1000);
 
             var group = AddGroup("블럭별 통신");
             AddCaptionRow(group, "블럭", "타이머 COM", "신호", "로직", "속도계 IP", "포트");
@@ -28,8 +28,8 @@ namespace APC.UI.Demo.Templates
                 var port = Ports[i % Ports.Length];
                 var connect = new ApcButton { Text = "연결 시도", Width = ApcTheme.Px(100) };
                 connect.Click += (s, e) => ApcDialog.Alert(this, port + " 연결 시도 결과를 여기에 표시(샘플)");
-                AddFieldRow(group, blocks[i], Combo(Ports, i % Ports.Length, 100),
-                    Combo(Signals, i == 2 ? 1 : 0, 110), Combo(Logics, 0, 90),
+                AddFieldRow(group, blocks[i], Combo(Ports, i % Ports.Length, 110),
+                    Combo(Signals, i == 2 ? 1 : 0, 110), Combo(Logics, 0, 100),
                     new ApcTextBox { Text = "192.168.0." + (101 + i), Width = ApcTheme.Px(140) },
                     new ApcNumericBox { Minimum = 1, Maximum = 65535, Value = 502, Width = ApcTheme.Px(90) }, connect);
             }

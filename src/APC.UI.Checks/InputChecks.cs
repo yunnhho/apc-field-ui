@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using APC.UI.Controls;
@@ -123,7 +123,13 @@ namespace APC.UI.Checks
                 Check(ok != null && ok.Text == "저장" && ok.Variant == ApcButtonVariant.Primary, "confirm: ok text/variant overridable");
                 Check(dlg.AcceptButton == dlg.CancelButton, "confirm: Enter still cancels with custom ok");
             }
-            using (var alert = ApcDialog.CreateAlert("하중 하한이 상한보다 큽니다"))
+            using (var warn = ApcDialog.CreateAlert("하중 하한이 상한보다 큽니다", true))
+            using (var info = ApcDialog.CreateAlert("COM3 연결됨", false))
+            {
+                Func<Form, int> icons = f => { int n = 0; foreach (Control c in f.Controls) if (c is PictureBox) n++; return n; };
+                Check(warn.TitleText == "경고" && info.TitleText == "알림" && icons(warn) == 1 && icons(info) == 1, "alert: warning and info differ by title and lamp");
+            }
+            using (var alert = ApcDialog.CreateAlert("하중 하한이 상한보다 큽니다", true))
             {
                 int buttons = 0;
                 foreach (Control c in alert.Controls) if (c is ApcButton) buttons++;
