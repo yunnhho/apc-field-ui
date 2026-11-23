@@ -1,4 +1,4 @@
-# APC.UI API (v1.13.0.0)
+# APC.UI API (v1.16.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -64,17 +64,20 @@
 되돌릴 수 없는 동작(삭제, 작업 종료 등) 확인. 기본 포커스와 Enter·Esc는 모두 '취소' — 바코드 스캔의 Enter나 습관적 Enter로 실수 확인되지 않게 한다.
 - `static bool Confirm(IWin32Window owner, string message)` — 파괴적 동작 확인: 확인 버튼은 빨간 "확인".
 - `static bool Confirm(IWin32Window owner, string message, string okText, ApcButtonVariant okVariant)` — 확인 버튼 글자·종류 지정. 저장처럼 위험하지 않은 확인은 ("저장", Primary).
-- `static void Alert(IWin32Window owner, string message)` — 알림(입력 오류 안내 등). 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
+- `static void Alert(IWin32Window owner, string message)` — 안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 .
+- `static void Warn(IWin32Window owner, string message)` — 경고창(입력 오류·조작 경고: 기간 역순, 빈 LOT, 잘못된·중복 스캔 등). 제목 "경고" + 노란 램프. 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
 
 ## ApcForm
 
 `APC.UI.Controls` · class : Form
 
-테두리 없는 APCSOFT 창. 타이틀바(로고·제목·최소화·닫기 이미지 버튼), 드래그 이동, 더블클릭 최대화, 가장자리 리사이즈. 최대화해도 작업표시줄을 가리지 않는다.
+테두리 없는 APCSOFT 창. 타이틀바(로고·제목·[설정]·최소화·닫기 이미지 버튼), 드래그 이동, 더블클릭 최대화, 가장자리 리사이즈. 최대화해도 작업표시줄을 가리지 않는다.
 - `ApcForm()`
 - `Rectangle ContentBounds { get; }` — 타이틀바·1px 테두리를 뺀 내용 영역(클라이언트 좌표) = Padding 안쪽.
 - `bool Resizable { get; set; }`
 - `bool ShowLogo { get; set; }` — 타이틀바 왼쪽 로고 + 가운데 큰 제목(메인 창). false면 로고 없이 왼쪽 제목(dialog, SetupDialog가 끈다).
+- `bool ShowSettings { get; set; }` — 타이틀바 최소화 왼쪽에 설정(톱니) 버튼. 설정 화면이 있는 창에서만 켠다. 누르면 . 화면(ApcTemplateView)에서는 직접 켜지 말고 UseSettingsButton을 쓴다.
+- `event EventHandler SettingsClick` — 타이틀바 설정 버튼을 눌렀다(가 true일 때만).
 - `int ResizeGrip { get; }` — 가장자리 리사이즈 감지 폭(px).
 - `int TitleBarHeight { get; }`
 - `protected ApcGroup AddGroup(string title)` — 제목 있는 묶음(ApcGroup). 행은 AddFieldRow(group, ...)로 넣는다.
@@ -217,6 +220,19 @@
 - `string StatusText { get; set; }`
 - `string Text { get; set; }` — 설비명(굵게, 램프 오른쪽 윗줄).
 
+## ApcTabStrip
+
+`APC.UI.Controls` · class : Control
+
+탭 줄(설비군·라인 전환 등). 선택 탭은 흰 바탕 + 위쪽 강조선 + 굵은 글자로 아래 내용과 이어져 보이고, 나머지는 묶음 제목 띠와 같은 회색 그라데이션이다 — 실행 버튼(파란 Primary)과 모양이 겹치지 않는다. 탭 폭은 글자에 맞춰 자동(잘리지 않음). 내용 전환은 에서 화면이 한다. 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
+- `ApcTabStrip()`
+- `event EventHandler SelectedIndexChanged` — 선택이 바뀌면(클릭·←/→·SelectedIndex 대입) 발생.
+- `int PreferredTabsWidth { get; }` — 모든 탭을 담는 데 필요한 폭(배치용). 탭 폭 합.
+- `int SelectedIndex { get; set; }` — 선택된 탭 번호(없으면 -1). 범위 밖이면 ArgumentOutOfRangeException.
+- `int TabCount { get; }`
+- `string GetTabText(int index)`
+- `void SetTabs(params string[] tabs)` — 탭 글자 목록을 한 번에 정한다. 탭이 있으면 첫 탭이 선택된다(이벤트 발생).
+
 ## ApcTemplateView
 
 `APC.UI.Controls` · class : UserControl
@@ -232,6 +248,7 @@
 - `protected static Label SectionTitle(string text)` — 구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).
 - `protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)` — 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px. height는 칸 높이(배율 적용한 값, 예: S(150)).
 - `protected static int S(int px)` — 배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.
+- `protected void UseSettingsButton(EventHandler onClick)` — 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다. 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
 
 ## ApcTextBox
 

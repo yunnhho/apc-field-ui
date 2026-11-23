@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -107,7 +107,7 @@ namespace APC.UI.Tools
             return p != null && !(bool)p.GetValue(root, null);
         }
 
-        // dialog 하단 버튼 줄: 크기 고정, 아래 여백 Pad, 위 내용과 GroupGap
+        // dialog 하단 버튼 줄: 높이 고정·폭 110(글자가 길면 글자만큼), 아래 여백 Pad, 위 내용과 GroupGap
         private static void CheckFooter(Form root, List<string> issues, Theme theme)
         {
             var leaves = new List<KeyValuePair<Control, Rectangle>>();
@@ -120,8 +120,10 @@ namespace APC.UI.Tools
             string path = Describe(root);
 
             int w = theme.Px(FooterButtonWidth), h = theme.Px(FooterButtonHeight);
-            foreach (var b in footer.Where(b => Math.Abs(b.Value.Width - w) > Tol || Math.Abs(b.Value.Height - h) > Tol))
-                issues.Add(path + ": 하단 버튼 크기 " + Describe(b.Key) + " " + b.Value.Width + "x" + b.Value.Height + "(기준 " + w + "x" + h + ") — SetFooter로");
+            // 폭 기준은 110, 글자가 길면 글자 + 양쪽 여백(ApcForm.FooterW와 같은 식)
+            Func<Control, int> wantW = c => Math.Max(w, TextRenderer.MeasureText(c.Text, c.Font).Width + theme.Px(24));
+            foreach (var b in footer.Where(b => Math.Abs(b.Value.Width - wantW(b.Key)) > Tol || Math.Abs(b.Value.Height - h) > Tol))
+                issues.Add(path + ": 하단 버튼 크기 " + Describe(b.Key) + " " + b.Value.Width + "x" + b.Value.Height + "(기준 " + wantW(b.Key) + "x" + h + ") — SetFooter로");
 
             var cb = (Rectangle)root.GetType().GetProperty("ContentBounds").GetValue(root, null);
             int margin = cb.Bottom - bottom, pad = theme.Px(Pad);

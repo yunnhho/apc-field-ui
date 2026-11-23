@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using APC.UI.Theming;
@@ -28,6 +28,40 @@ namespace APC.UI.Controls
             Controls.Add(Body);     // Fill은 마지막에 도킹되도록 먼저 추가
             Controls.Add(Alarm);
             Controls.Add(Header);
+        }
+
+        private EventHandler _onSettings;
+        private ApcForm _settingsHost;
+
+        /// <summary>
+        /// 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다.
+        /// 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
+        /// </summary>
+        protected void UseSettingsButton(EventHandler onClick)
+        {
+            if (onClick == null) throw new ArgumentNullException("onClick");
+            _onSettings = onClick;
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            if (_onSettings == null || _settingsHost != null) return;
+            _settingsHost = FindForm() as ApcForm;
+            if (_settingsHost == null) return;
+            _settingsHost.ShowSettings = true;
+            _settingsHost.SettingsClick += _onSettings;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && _settingsHost != null)
+            {
+                _settingsHost.SettingsClick -= _onSettings;
+                _settingsHost.ShowSettings = false;
+                _settingsHost = null;
+            }
+            base.Dispose(disposing);
         }
 
         /// <summary>배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.</summary>

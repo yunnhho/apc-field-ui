@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using APC.UI.Controls;
@@ -10,6 +10,7 @@ namespace APC.UI.Checks
     {
         private static void RunInputChecks()
         {
+            RunTabStripChecks();
             int fieldH = (int)Math.Round(ApcTextBox.BaseHeight * ApcTheme.Scale);
 
             using (var box = new ApcTextBox { Width = 200 })
@@ -123,7 +124,13 @@ namespace APC.UI.Checks
                 Check(ok != null && ok.Text == "저장" && ok.Variant == ApcButtonVariant.Primary, "confirm: ok text/variant overridable");
                 Check(dlg.AcceptButton == dlg.CancelButton, "confirm: Enter still cancels with custom ok");
             }
-            using (var alert = ApcDialog.CreateAlert("하중 하한이 상한보다 큽니다"))
+            using (var warn = ApcDialog.CreateAlert("하중 하한이 상한보다 큽니다", true))
+            using (var info = ApcDialog.CreateAlert("COM3 연결됨", false))
+            {
+                Func<Form, int> icons = f => { int n = 0; foreach (Control c in f.Controls) if (c is PictureBox) n++; return n; };
+                Check(warn.TitleText == "경고" && info.TitleText == "알림" && icons(warn) == 1 && icons(info) == 1, "alert: warning and info differ by title and lamp");
+            }
+            using (var alert = ApcDialog.CreateAlert("하중 하한이 상한보다 큽니다", true))
             {
                 int buttons = 0;
                 foreach (Control c in alert.Controls) if (c is ApcButton) buttons++;
@@ -143,6 +150,30 @@ namespace APC.UI.Checks
                 int n = 0;
                 for (int y = 0; y < 40; y++) for (int x = 0; x < 40; x++) if (bmp.GetPixel(x, y).R < 128) n++;
                 return n;
+            }
+        }
+
+        private static void RunTabStripChecks()
+        {
+            using (var tabs = new ApcTabStrip())
+            {
+                int fired = 0;
+                tabs.SelectedIndexChanged += (s, e) => fired++;
+                tabs.SetTabs("저속 연마기 ST-GR-01~03", "B", "고속 연마기 ST-GB-01~08 (긴 이름)");
+                Check(tabs.SelectedIndex == 0 && fired == 1, "tabstrip: SetTabs selects first tab once");
+                tabs.SelectedIndex = 0;
+                Check(fired == 1, "tabstrip: same index does not fire");
+                tabs.SelectedIndex = 2;
+                Check(fired == 2, "tabstrip: index change fires");
+                var b0 = tabs.TabBounds(0); var b1 = tabs.TabBounds(1); var b2 = tabs.TabBounds(2);
+                Check(b1.Left == b0.Right && b2.Left == b1.Right, "tabstrip: tabs placed side by side");
+                Check(b1.Width >= ApcTheme.Px(120), "tabstrip: short tab keeps min width");
+                int need = TextRenderer.MeasureText(tabs.GetTabText(2), ApcTheme.GetFont(FontStyle.Bold)).Width;
+                Check(b2.Width > need, "tabstrip: long tab widens to fit bold text (no cut)");
+                Check(tabs.PreferredTabsWidth == b2.Right, "tabstrip: preferred width = sum of tabs");
+                bool threw = false;
+                try { tabs.SelectedIndex = 3; } catch (ArgumentOutOfRangeException) { threw = true; }
+                Check(threw && tabs.SelectedIndex == 2, "tabstrip: out-of-range index rejected");
             }
         }
     }

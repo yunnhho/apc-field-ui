@@ -22,9 +22,11 @@ namespace APC.UI.Demo.Catalog
             confirm.Click += (s, e) => MessageBox.Show(ApcDialog.Confirm(FindForm(), "정말 삭제할까요? 되돌릴 수 없습니다.") ? "확인" : "취소");
             var save = Button("저장 확인창", ApcButtonVariant.Normal, 130);
             save.Click += (s, e) => MessageBox.Show(ApcDialog.Confirm(FindForm(), "레시피를 저장할까요?", "저장", ApcButtonVariant.Primary) ? "저장" : "취소");
-            var alert = Button("알림창", ApcButtonVariant.Normal, 110);
-            alert.Click += (s, e) => ApcDialog.Alert(FindForm(), "하중 하한이 상한보다 큽니다.");
-            Body.Controls.Add(Row(Caption("알람 띠 / 확인창"), alarmDemo, confirm, save, alert));
+            var warn = Button("경고창", ApcButtonVariant.Normal, 110);
+            warn.Click += (s, e) => ApcDialog.Warn(FindForm(), "하중 하한이 상한보다 큽니다.");
+            var info = Button("알림창", ApcButtonVariant.Normal, 110);
+            info.Click += (s, e) => ApcDialog.Alert(FindForm(), "COM3 연결되었습니다.");
+            Body.Controls.Add(Row(Caption("알람 띠 / 확인창"), alarmDemo, confirm, save, warn, info));
 
             var grid = new ApcGrid { Height = S(150), Dock = DockStyle.Top, ReadOnly = true };
             grid.Columns.Add(new ApcLampColumn());
@@ -58,6 +60,11 @@ namespace APC.UI.Demo.Catalog
             var off = new ApcTextBox { Width = S(160), Text = "비활성", Enabled = false };
             foreach (Control c in new Control[] { text, readOnly, off }) c.Margin = new Padding(0, 0, S(8), 0);
             Body.Controls.Add(Row(Caption("입력칸"), text, readOnly, off));
+
+            var tabs = new ApcTabStrip();
+            tabs.SetTabs("저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08");
+            tabs.Width = tabs.PreferredTabsWidth;
+            Body.Controls.Add(Row(Caption("탭 (ApcTabStrip)"), tabs));
 
             var scan = new ApcScanBox { Width = S(260) };
             var ok = Button("성공 플래시", ApcButtonVariant.Normal, 120);

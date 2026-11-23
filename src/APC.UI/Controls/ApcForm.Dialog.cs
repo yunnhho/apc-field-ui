@@ -271,15 +271,24 @@ namespace APC.UI.Controls
             if (!hasFooter) return;
             int by = cb.Bottom - pad - btnH, gap = ApcTheme.Px(ApcLayout.ItemGap);
             // [확정][취소]: 취소가 오른쪽 끝
-            int right = cb.Right - pad - btnW;
-            if (_footerCancel != null) { _footerCancel.SetBounds(right, by, btnW, btnH); right -= gap + btnW; }
-            _footerConfirm.SetBounds(right, by, btnW, btnH);
+            int right;
+            if (_footerCancel != null) { int cw = FooterW(_footerCancel, btnW); _footerCancel.SetBounds(cb.Right - pad - cw, by, cw, btnH); right = _footerCancel.Left - gap; }
+            else right = cb.Right - pad;
+            int fw = FooterW(_footerConfirm, btnW);
+            _footerConfirm.SetBounds(right - fw, by, fw, btnH);
             int lx = x;
             foreach (var l in _footerLeft)
             {
-                l.SetBounds(lx, by, btnW, btnH);
-                lx += btnW + gap;
+                int lw = FooterW(l, btnW);
+                l.SetBounds(lx, by, lw, btnH);
+                lx += lw + gap;
             }
+        }
+
+        /// <summary>바닥 버튼 폭: 기본 110, 글자가 길면(비밀번호 변경 등, 글꼴 12) 글자 + 양쪽 여백만큼 넓힌다.</summary>
+        private static int FooterW(ApcButton b, int min)
+        {
+            return Math.Max(min, TextRenderer.MeasureText(b.Text, b.Font).Width + ApcTheme.Px(24));
         }
 
         // 블록 i 앞 간격: 입력 행끼리 RowGap, 구획 제목 다음 ItemGap, 그 밖 GroupGap

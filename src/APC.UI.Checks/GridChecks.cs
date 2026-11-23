@@ -28,6 +28,27 @@ namespace APC.UI.Checks
                       && new ApcLampValue(StatusKind.Run, "a").CompareTo(new ApcLampValue(StatusKind.Run, "b")) < 0, "grid: lamp value sorts by status then text");
                 Check(g.CellBorderStyle == DataGridViewCellBorderStyle.Single && g.GridColor.ToArgb() == ApcTheme.C(ApcTheme.Current.Colors.Border).ToArgb(), "grid: cell lines use border color (not faded)");
             }
+            // 조회(Rows.Clear → 다시 채우기)를 반복해도 Fill 열 폭이 그대로(세로 스크롤바가 생겼다 없어질 때 첫 열만 늘어나던 문제).
+            using (var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new Point(-32000, -32000), ClientSize = new Size(700, 300) })
+            {
+                var g = new ApcGrid { Dock = DockStyle.Fill, ReadOnly = true };
+                foreach (var n in new[] { "일자", "설비", "품목", "양품", "불량" }) g.Columns.Add(n, n);
+                foreach (DataGridViewColumn c in g.Columns) c.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                Action fill = () => { g.Rows.Clear(); for (int i = 0; i < 33; i++) g.Rows.Add("2026-11-20", "사출기 01", "하우징 A-120", "1,100", 3); Application.DoEvents(); };
+                fill();   // 템플릿처럼 화면에 뜨기 전(기본 폭 240px일 때) 채운다
+                var host = new Panel { Dock = DockStyle.Fill, Padding = new Padding(16) };   // 템플릿처럼 Body 패널 안, 창이 작게 떴다가 커짐
+                host.Controls.Add(g);
+                form.ClientSize = new Size(150, 120);
+                form.Controls.Add(host);
+                form.Show();
+                Application.DoEvents();
+                form.ClientSize = new Size(1280, 300);
+                Application.DoEvents();
+                int first = g.Columns[0].Width;
+                for (int k = 0; k < 6; k++) fill();
+                Check(g.Columns[0].Width == first && Math.Abs(first - g.Columns[1].Width) <= 1,
+                    "grid: fill column width equal and stable across repeated refills (" + first + " → " + g.Columns[0].Width + ", col1 " + g.Columns[1].Width + ")");
+            }
             using (var g = new ApcGrid())
                 Check(ApcGrid.HeightForRows(3) == g.ColumnHeadersHeight + 3 * ApcTheme.MinHeight + 2, "grid: HeightForRows = header + rows + border");
             using (var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new Point(-32000, -32000) })

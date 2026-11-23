@@ -81,7 +81,7 @@ namespace APC.UI.Demo.Templates
                 Footer = (humi.HasValue ? "습도 " + humi.Value.ToString("0.0") + " %RH · " : "") + footer,
                 Status = status,
                 ShowLamp = true,
-                Size = new Size(S(340), S(170)),
+                Size = new Size(S(372), S(170)),
                 Margin = new Padding(0, 0, S(16), S(16)),
             };
         }

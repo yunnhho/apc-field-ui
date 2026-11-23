@@ -66,6 +66,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 - 타일을 누르면 아래 카드·그래프가 그 설비를 보여 주는 화면은 그 타일만 `Selected = true`(나머지 false). 표 행을 고르는 화면은 `ApcGrid { ClearInitialSelection = false }` + 그 행 선택. 선택 표시가 없으면 어느 설비 값인지 화면에서 모른다.
 - `Columns()` 밖의 고정 높이 표·그래프를 `Body`에 Top으로 쌓을 때는 `Columns(S(높이), new Control[] { grid })`로 감싼다(Dock·줄 아래 간격을 헬퍼가 준다). 그냥 Add하면 Dock이 없어 겹치거나 아래 간격이 없다.
 - `ApcGroup` 안에 `Columns()` 줄을 넣을 때 그룹 높이는 `group.HeightFor((S(높이) + S(12)) × 줄 수)`. 짐작한 숫자로 맞추지 않는다.
+- **설정 버튼은 화면 안에 두지 않는다.** 설정 화면이 있는 프로그램만 화면 생성자에서 `UseSettingsButton((s, e) => OpenSettings())` → 창 타이틀바 최소화 왼쪽에 톱니 버튼이 생긴다(화면 Dispose 때 꺼짐). 설정이 없으면 부르지 않는다. 열기 순서: `AdminPasswordDialog` → `SettingsDialog`(`FailureAnalysisView.OpenSettings`). 화면 없이 창만 있으면 `ApcForm.ShowSettings = true` + `SettingsClick`.
 - `ApcGrid`는 사용자가 누르기 전엔 선택 행이 없다(`CurrentRow == null`). "선택한 행" 버튼은 null이면 아무것도 하지 않게 한다.
 
 ### 4b. dialog
@@ -76,9 +77,9 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | dialog 유형 | 템플릿 |
 |---|---|
 | 보기용 상세(상태 줄 + 센서 표 + 추이 + 닫기) | `EquipmentDetailDialog` |
-| 입력 폼(이름표+입력칸 행, 검증 `Alert` → `Confirm("저장")` → 결과 속성 → OK). LOT 번호·모델·작업자처럼 몇 칸 입력도 여기 | `RecipeDialog` |
+| 입력 폼(이름표+입력칸 행, 검증 `Warn` → `Confirm("저장")` → 결과 속성 → OK). LOT 번호·모델·작업자처럼 몇 칸 입력도 여기 | `RecipeDialog` |
 | 관리자 비밀번호 확인(설정 진입 전 등) | `AdminPasswordDialog` |
-| 칸·슬롯별 LOT 입력(표에 바로 스캔, 칸 수 가변, 빈 칸 Alert). 행마다 같은 항목을 넣는 설정(구역별 상하한 등)도 이 입력 표 방식 | `LotInputDialog` |
+| 칸·슬롯별 LOT 입력(표에 바로 스캔, 칸 수 가변, 빈 칸 Warn). 행마다 같은 항목을 넣는 설정(구역별 상하한 등)도 이 입력 표 방식 | `LotInputDialog` |
 | 통신·장비 설정(블록마다 한 행인 묶음 + 칸 제목 줄 `AddCaptionRow` + 공통 설정 + 비밀번호 변경) | `SettingsDialog` |
 
 - **dialog 배치는 `ApcForm` 헬퍼로만 한다.** 숫자(여백·행 높이·버튼 크기·`ClientSize`)를 직접 정하지 않는다 — 치수는 `ApcLayout`이 정하고 표시 직전에 한 번에 배치된다. 생성자에서 위→아래 순서로 부른다:
@@ -112,10 +113,11 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 추이 그래프 | `ApcTrendChart`(`SetValues`, XLabels, Reference, UpperLimit/LowerLimit) |
 | 상태 램프 | `ApcLamp` |
 | 설정 묶음(제목 있는 상자, GroupBox 대신) | `ApcGroup`(Text=제목, 안은 Dock/FlowLayoutPanel) |
+| 탭(설비군·라인 전환, TabControl 대신) | `ApcTabStrip`(`SetTabs(...)`, `Width = PreferredTabsWidth`, `SelectedIndexChanged`에서 내용 전환). 버튼을 탭처럼 쓰지 않는다(선택 탭이 실행 버튼과 같은 모양이 됨). 탭 아래끝을 표·내용 위끝에 붙인다 — `FailureAnalysisView` |
 | 입력 표(칸에 바로 입력·스캔) | `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + 열별 `ReadOnly`(읽기 전용 열은 자동 회색) |
 
-- **표준 컨트롤 금지**: `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`Form`과 `Control`을 상속해 직접 그린 카드·타일·그래프를 만들지 않는다. 위 표의 Apc 컨트롤을 쓴다. 표준으로 쓰는 것은 `Label`과 배치용 `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`뿐. 표에 없는 요소가 꼭 필요하면 만들지 말고 사용자에게 알린다(라이브러리에 추가할 후보).
-- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. 입력 오류 안내는 `ApcDialog.Alert(this, "...")`. 메인 화면의 이상 알림은 `Alarm.Push("...")`(알람바).
+- **표준 컨트롤 금지**: `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`과 `Control`을 상속해 직접 그린 카드·타일·그래프를 만들지 않는다. 위 표의 Apc 컨트롤을 쓴다. 표준으로 쓰는 것은 `Label`과 배치용 `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`뿐. 표에 없는 요소가 꼭 필요하면 만들지 말고 사용자에게 알린다(라이브러리에 추가할 후보).
+- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. **경고 메시지는 하단 알람바가 아니라 경고창**: 입력 오류·조작 경고(기간 역순, 빈 LOT, 잘못된·중복 스캔, 이미 진행 중인 작업 등)는 메인 화면에서도 `ApcDialog.Warn(FindForm(), "...")`(제목 "경고" + 노란 램프, dialog 안에서는 `this`). 스캔 화면도 같다 — 스캔 이벤트 처리 중이면 `BeginInvoke`로 처리가 끝난 뒤 띄운다(`ProductionView.WarnAfterScan`). 잘못된 것이 없는 안내(연결 결과·완료)는 `ApcDialog.Alert`(제목 "알림" + 파란 램프). 알람바 `Alarm.Push("...")`는 설비 이상·NG 판정(빨강)만.
 - 상태 표시는 `StatusKind`(Run/Warn/Alarm/Stop/Info) + `ApcLamp`/`ApcLampColumn`. 색은 테마가 정한다.
 
 ## 4-1. 디테일 기준 (사용자 확정, 요구서가 다르게 정하면 요구서)
@@ -132,7 +134,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 공정 상태 → 상태색 | 아래 "상태색" 목록 |
 | 헤더 요약 | 아래 "헤더 요약" 목록 |
 | 상태 경계값 | 상·하한은 허용 한계다: 상한과 같은 값은 알람·NG가 아니다 — **초과**부터 NG·알람(하한은 미만부터). 경고 근접은 시작값과 같은 값부터 경고(`>=`/`<=`)라, 경고 구간이 있으면 상한과 같은 값은 경고("상한 근접 60.0 %RH (상한 60.0)"), 없으면 OK. 문구도 같게: 기준 "5.0 이하 OK"·"기준 50.0 이하 · 경고 45.0 이상"(규칙 설명 "같으면 OK"는 화면에 쓰지 않는다), 알람 "상한 초과 65.4 ℃ (상한 65.0)" — 상한과 같은 값에 "초과"·"도달 알람"을 쓰지 않는다. 상태 문구·램프·카드 색이 같은 판정 함수 하나를 쓴다. 같은 측정 항목(예: 사이클 타임)은 메인 타일·카드, 알람 이력, 상세 dialog 표에서 모두 그 함수 하나로 판정한다(이력에서 25.9 s가 경고인데 상세 표에서 26.3 s가 정상이면 틀린 것) |
-| 글꼴 | 테마 글꼴·`fontSize` 그대로(10). `new Font(...)`·`FontSize * 배수` 금지, 글자는 `ApcTheme.GetFont()`만(굵게 `ApcTheme.GetFont(FontStyle.Bold)`). 굵게는 구획 제목(`SectionTitle`)·묶음 제목(`ApcGroup`)·값 강조에만 — 입력칸 앞 이름표(`Caption`, `AddFieldRow`)는 보통 굵기. 판정판·카드 큰 글자는 컨트롤이 정함 |
+| 글꼴 | 테마 글꼴·`fontSize` 그대로(12). `new Font(...)`·`FontSize * 배수` 금지, 글자는 `ApcTheme.GetFont()`만(굵게 `ApcTheme.GetFont(FontStyle.Bold)`). 굵게는 구획 제목(`SectionTitle`)·묶음 제목(`ApcGroup`)·값 강조에만 — 입력칸 앞 이름표(`Caption`, `AddFieldRow`)는 보통 굵기. 판정판·카드 큰 글자는 컨트롤이 정함 |
 | 단위 표기 | 입력은 이름표 괄호 `하중 상한 (kN)`, 표시는 `ApcValueCard.Unit`·표 열 제목 `최대 하중(kN)`. 값 칸 안에 단위를 붙이지 않음 |
 | 간격 | 숫자로 정하지 않는다. 화면은 `Columns()`·`Row()`, dialog는 4b 헬퍼가 정한다(값은 `ApcLayout`) |
 | 샘플 데이터 | 아래 "샘플 데이터" 목록 |

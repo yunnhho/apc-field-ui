@@ -70,7 +70,7 @@ namespace APC.UI.Checks
         {
             var t = ThemeLoader.Load(Path.Combine(Root, Path.Combine("themes", "default")));
             Check(t.FontFamily == "맑은 고딕", "theme: korean fontFamily round-trips");
-            Check(t.FontSize == 10, "theme: font size");
+            Check(t.FontSize == 12, "theme: font size 12 (현장 확정)");
             Check(t.Scan.MaxKeyIntervalMs == 50 && t.Scan.MinLength == 4, "theme: scan defaults");
             Check(ThemeLoader.GetStatusColor(t, StatusKind.Alarm) == ThemeLoader.ParseColor("#DC2626"), "theme: alarm color");
             Check(Throws<ThemeException>(() => ThemeLoader.Load(Fx("missing")), "theme.json"), "theme: missing file names file");

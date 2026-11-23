@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 using APC.UI.Controls;
 
@@ -40,7 +40,7 @@ namespace APC.UI.Demo.Templates
         {
             if (_from.Value.Date > _to.Value.Date)
             {
-                Alarm.Push("시작일이 종료일보다 늦습니다");
+                ApcDialog.Warn(FindForm(), "시작일이 종료일보다 늦습니다.");   // 조작·입력 경고는 경고창(Warn), 알람바는 설비 이상만
                 return;
             }
             _grid.Rows.Clear();

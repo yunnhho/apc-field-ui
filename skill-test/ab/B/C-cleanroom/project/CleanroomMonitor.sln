@@ -1,0 +1,19 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanroomMonitor", "CleanroomMonitor.csproj", "{F966DD51-F3EA-4598-907D-8A9C20F8268B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F966DD51-F3EA-4598-907D-8A9C20F8268B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F966DD51-F3EA-4598-907D-8A9C20F8268B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F966DD51-F3EA-4598-907D-8A9C20F8268B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F966DD51-F3EA-4598-907D-8A9C20F8268B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

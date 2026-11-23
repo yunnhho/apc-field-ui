@@ -9,7 +9,7 @@ using APC.UI.Theming;
 namespace APC.UI.Demo.Templates
 {
     /// <summary>
-    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 설비군 탭 + 시험 모드 안내 + 시계,
+    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 설비군 탭 + 시험 모드 안내 + 시계, 설정은 타이틀바 톱니(UseSettingsButton),
     /// 2단 헤더 그리드(B1/B2 묶음)가 화면 폭을 채움, 행 동작은 아이콘 열(ApcIconColumn: 할 수 없으면 회색), 상태는 램프 + 문구 한 칸(ApcLampValue).
     /// </summary>
     internal sealed class FailureAnalysisView : ApcTemplateView
@@ -20,25 +20,21 @@ namespace APC.UI.Demo.Templates
         private readonly GroupHeaderGrid _grid = new GroupHeaderGrid { Dock = DockStyle.Fill, ReadOnly = true };
         private readonly Label _clock = Caption("");
         private readonly Timer _clockTimer = new Timer { Interval = 1000 };
-        private readonly List<ApcButton> _tabs = new List<ApcButton>();
+        private readonly ApcTabStrip _tabs = new ApcTabStrip();
 
         public FailureAnalysisView() : base("연마기 불량 방지 시스템")
         {
             var tabRow = Row();
-            for (int i = 0; i < Groups.Length; i++)
-            {
-                int index = i;
-                var tab = Button(Groups[i], ApcButtonVariant.Normal, 230);
-                tab.Click += (s, e) => SelectGroup(index);
-                _tabs.Add(tab);
-                tabRow.Controls.Add(tab);
-            }
+            _tabs.SetTabs(Groups);   // 첫 탭이 선택된다. 표 내용은 아래 SelectGroup(0)에서
+            _tabs.Width = _tabs.PreferredTabsWidth;
+            _tabs.Margin = new Padding(0, S(46) - _tabs.Height, 0, 0);   // 탭 아래끝이 표 위끝에 닿게
+            tabRow.Controls.Add(_tabs);
             var testMode = Caption("ⓘ 시험 모드 : 가상 장비로 동작합니다.");
             testMode.ForeColor = ApcTheme.Status(StatusKind.Info);
             testMode.Margin = new Padding(S(12), S(8), 0, 0);
             tabRow.Controls.Add(testMode);
 
-            var settings = Button("설정", ApcButtonVariant.Normal, 80);
+            UseSettingsButton((s, e) => OpenSettings());   // 설정은 화면 안 버튼이 아니라 창 타이틀바(최소화 왼쪽) 톱니
             // 시계: 어두운 상자에 굵은 흰 글자(멀리서도 읽히게). 폭은 글자 기준 고정(초가 바뀌어도 흔들리지 않게)
             _clock.AutoSize = false;
             _clock.Size = new Size(S(200), S(ApcLayout.FieldHeight));
@@ -46,10 +42,9 @@ namespace APC.UI.Demo.Templates
             _clock.Font = ApcTheme.GetFont(FontStyle.Bold);
             _clock.BackColor = ApcTheme.C(ApcTheme.Current.Colors.Header[1]);
             _clock.ForeColor = ApcTheme.C(ApcTheme.Current.Colors.TextInverse);
-            _clock.Margin = new Padding(0, 0, S(ApcLayout.ItemGap), 0);
+            _clock.Margin = Padding.Empty;
             var right = new FlowLayoutPanel { Dock = DockStyle.Right, AutoSize = true, WrapContents = false, BackColor = Color.Transparent };
             right.Controls.Add(_clock);
-            right.Controls.Add(settings);
             var top = new Panel { Dock = DockStyle.Top, Height = S(46), BackColor = Color.Transparent };
             tabRow.Dock = DockStyle.Fill;
             top.Controls.Add(tabRow);
@@ -65,6 +60,16 @@ namespace APC.UI.Demo.Templates
             _clockTimer.Start();
             _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             SelectGroup(0);
+            _tabs.SelectedIndexChanged += (s, e) => SelectGroup(_tabs.SelectedIndex);
+        }
+
+        /// <summary>설정 진입: 관리자 확인 → 설정 dialog(샘플은 비밀번호 검사 생략).</summary>
+        private void OpenSettings()
+        {
+            var owner = FindForm();
+            using (var pw = new AdminPasswordDialog())
+                if (pw.ShowDialog(owner) != DialogResult.OK) return;
+            using (var dlg = new SettingsDialog()) dlg.ShowDialog(owner);
         }
 
         private void BuildColumns()
@@ -105,8 +110,6 @@ namespace APC.UI.Demo.Templates
 
         private void SelectGroup(int index)
         {
-            for (int i = 0; i < _tabs.Count; i++) _tabs[i].Variant = i == index ? ApcButtonVariant.Primary : ApcButtonVariant.Normal;
-
             string prefix = index == 2 ? "고속 연마기 ST-GB-" : "저속 연마기 ST-GR-";
             int firstMachine = index == 1 ? 4 : 1;
             int machines = index == 2 ? 8 : 3;
