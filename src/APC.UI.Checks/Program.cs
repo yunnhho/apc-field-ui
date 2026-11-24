@@ -79,6 +79,11 @@ namespace APC.UI.Checks
             Check(Throws<ThemeException>(() => ThemeLoader.Load(Fx("alarm-blue")), "status.alarm"), "theme: alarm hue changed rejected");
             Check(!Throws<ThemeException>(() => ThemeLoader.Load(Fx("alarm-dark")), ""), "theme: darker alarm red accepted");
             Check(!Throws<ThemeException>(() => ThemeLoader.Load(Fx("bom")), ""), "theme: UTF-8 BOM (Notepad/PowerShell) accepted");
+            Check(t.Colors.Brand == "#E60012" && t.Colors.BorderStrong == "#9AA7B4" && t.Colors.Panel[0] == "#FDFDFE", "theme: steel-ink tokens");
+            var old = ThemeLoader.Load(Path.Combine(Root, Path.Combine("themes", "sample")));
+            Check(old.Colors.Panel[0] == "#FFFFFF" && old.Colors.Panel[1] == "#FFFFFF", "theme: missing panel defaults to white");
+            Check(old.Colors.BorderStrong == old.Colors.Border, "theme: missing borderStrong = border");
+            Check(old.Colors.Brand == old.Colors.Text, "theme: missing brand = text (no red)");
         }
     }
 }

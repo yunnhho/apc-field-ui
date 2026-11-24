@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -65,6 +65,7 @@ namespace APC.UI.Theming
             Require(t.Scan, path, "scan");
             Require(t.Logo, path, "logo");
 
+            ApplyDefaults(t.Colors);
             Pair(t.Colors.Background, path, "colors.background");
             Pair(t.Colors.Header, path, "colors.header");
             Pair(t.Colors.TitleBar, path, "colors.titleBar");
@@ -75,6 +76,9 @@ namespace APC.UI.Theming
             ColorField(t.Colors.TextInverse, path, "colors.textInverse");
             ColorField(t.Colors.GridLine, path, "colors.gridLine");
             ColorField(t.Colors.GridSelected, path, "colors.gridSelected");
+            Pair(t.Colors.Panel, path, "colors.panel");
+            ColorField(t.Colors.BorderStrong, path, "colors.borderStrong");
+            ColorField(t.Colors.Brand, path, "colors.brand");
 
             if (t.ButtonSlice == null || t.ButtonSlice.Length != 4) Fail(path, "buttonSlice", "[좌,위,우,아래] 4개 값 필요");
             if (t.Scan.MaxKeyIntervalMs <= 0) Fail(path, "scan.maxKeyIntervalMs", "0보다 커야 함");
@@ -96,6 +100,14 @@ namespace APC.UI.Theming
             bool ok = from <= to ? (h >= from && h <= to) : (h >= from || h <= to);
             if (!ok || c.GetSaturation() <= GraySaturationMax)
                 Fail(path, field, "상태색의 색상은 바꿀 수 없음(명도만 조정 가능). 허용 hue " + from + "~" + to + "°, 현재 " + h.ToString("0") + "°");
+        }
+
+        /// <summary>1.20 이전 theme.json에는 panel·borderStrong·brand가 없다. 예전 모습(흰 카드·기존 테두리·붉은색 없음)이 되게 채운다.</summary>
+        private static void ApplyDefaults(ThemeColors c)
+        {
+            if (c.Panel == null) c.Panel = new[] { "#FFFFFF", "#FFFFFF" };
+            if (c.BorderStrong == null) c.BorderStrong = c.Border;
+            if (c.Brand == null) c.Brand = c.Text;
         }
 
         private static Color ColorField(string hex, string path, string field)
