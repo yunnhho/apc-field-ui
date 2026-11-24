@@ -1,4 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <path d="M19.5 14.5 A8 8 0 1 1 17.3 6.2" fill="none" stroke="#3B82F6" stroke-width="3" stroke-linecap="round"/>
-  <path d="M21.5 3 L21.5 10 L14.5 10 Z" fill="#3B82F6" stroke="#3B82F6" stroke-width="1" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+  <defs>
+    <radialGradient id="face" cx="40%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#B4CDEE"/>
+      <stop offset="1" stop-color="#5079B8"/>
+    </radialGradient>
+  </defs>
+  <circle cx="12" cy="12" r="11" fill="url(#face)" stroke="#33589A" stroke-width="1"/>
+  <ellipse cx="12" cy="7" rx="6.5" ry="3.2" fill="#FFFFFF" fill-opacity="0.28"/>
+  <g transform="translate(0 0)">
+  <g transform="translate(0 0.6)" opacity="0.35"><path d="M17.6 13.6 A6 6 0 1 1 15.9 7.4" fill="none" stroke="#1E3A6B" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M18.6 4.6 L18.6 9.6 L13.6 9.6 Z" fill="#1E3A6B" stroke="#1E3A6B" stroke-width="1.2" stroke-linejoin="round"/></g>
+  <path d="M17.6 13.6 A6 6 0 1 1 15.9 7.4" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M18.6 4.6 L18.6 9.6 L13.6 9.6 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linejoin="round"/>
+  </g>
 </svg>

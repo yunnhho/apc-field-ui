@@ -38,7 +38,7 @@ namespace APC.UI.Controls
 
     public class ApcIconCell : DataGridViewTextBoxCell
     {
-        private const int BaseIcon = 24;
+        private const int BaseIcon = 28;   // 34px 행에서 위아래 3px 여백
 
         public override Type ValueType { get { return typeof(object); } }
 

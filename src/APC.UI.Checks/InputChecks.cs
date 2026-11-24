@@ -8,6 +8,24 @@ namespace APC.UI.Checks
 {
     internal static partial class Program
     {
+        // 입력 중인 칸만 연한 파랑 바탕(11/24 결정: 입력칸 ② 강조). 포커스를 옮기면 원래 흰 바탕으로.
+        private static void CheckFocusedFieldFill()
+        {
+            using (var f = new ApcForm { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new Point(-32000, -32000) })
+            {
+                var a = new ApcTextBox { Top = 60, Width = 150 };
+                var b = new ApcTextBox { Top = 120, Width = 150 };
+                f.Controls.Add(a); f.Controls.Add(b);
+                f.Show();
+                Application.DoEvents();
+                a.Focus(); Application.DoEvents();
+                int fill = APC.UI.Drawing.FieldFrame.FocusFill.ToArgb(), white = Color.White.ToArgb();
+                bool first = a.Focused && a.BackColor.ToArgb() == fill && b.BackColor.ToArgb() == white;
+                b.Focus(); Application.DoEvents();
+                Check(first && b.Focused && b.BackColor.ToArgb() == fill && a.BackColor.ToArgb() == white, "textbox: focused field gets focus fill, others white");
+            }
+        }
+
         private static void RunInputChecks()
         {
             RunTabStripChecks();
@@ -34,6 +52,7 @@ namespace APC.UI.Checks
                 Check(box.BackColor.ToArgb() == ApcTheme.C(ApcTheme.Current.Colors.GridLine).ToArgb(), "textbox: read-only fill");
             }
             Check(typeof(ApcTextBox).IsAssignableFrom(typeof(ApcScanBox)), "scanbox shares the field look (derives ApcTextBox)");
+            CheckFocusedFieldFill();
 
             using (var cb = new ApcComboBox())
             {

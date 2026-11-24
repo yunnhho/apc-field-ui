@@ -64,7 +64,7 @@ namespace APC.UI.Controls
         /// <summary>바탕색을 상태(사용 가능·읽기 전용)에 맞춘다. 스캔 플래시 등으로 바꾼 색을 되돌릴 때도 쓴다.</summary>
         protected void ResetFieldColor()
         {
-            BackColor = FieldFrame.Fill(Enabled, ReadOnly);
+            BackColor = FieldFrame.Fill(Enabled, ReadOnly, Focused);
         }
 
         protected override void WndProc(ref Message m)
@@ -125,8 +125,9 @@ namespace APC.UI.Controls
                 SetWindowPos(Handle, IntPtr.Zero, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
         }
 
-        protected override void OnGotFocus(EventArgs e) { base.OnGotFocus(e); RedrawFrame(); }
-        protected override void OnLostFocus(EventArgs e) { base.OnLostFocus(e); RedrawFrame(); }
+        // 바탕색이 바뀌면 OnBackColorChanged가 테두리도 다시 그린다
+        protected override void OnGotFocus(EventArgs e) { base.OnGotFocus(e); ResetFieldColor(); RedrawFrame(); }
+        protected override void OnLostFocus(EventArgs e) { base.OnLostFocus(e); ResetFieldColor(); RedrawFrame(); }
         protected override void OnBackColorChanged(EventArgs e) { base.OnBackColorChanged(e); RedrawFrame(); }
         protected override void OnFontChanged(EventArgs e) { base.OnFontChanged(e); RecalcFrame(); }
 

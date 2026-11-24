@@ -60,7 +60,7 @@ namespace APC.UI.Controls
         {
             var g = e.Graphics;
             var rect = ClientRectangle;
-            using (var b = new SolidBrush(FieldFrame.Fill(Enabled, _text.ReadOnly))) g.FillRectangle(b, rect);
+            using (var b = new SolidBrush(FieldFrame.Fill(Enabled, _text.ReadOnly, _text.Focused))) g.FillRectangle(b, rect);
             var glyph = FieldFrame.TextColor(Enabled && !_text.ReadOnly);
             for (int i = 0; i < SegmentCount; i++)
             {
