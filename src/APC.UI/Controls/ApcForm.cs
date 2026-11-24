@@ -16,6 +16,7 @@ namespace APC.UI.Controls
     public partial class ApcForm : Form
     {
         private const int BaseTitleHeight = 40;
+        private const int BaseTitleHeightTwoLine = 54;
         private const int BaseResizeGrip = 6;
         private const int BaseLogoHeight = 22;
         private const int BaseWinButtonW = 46;
@@ -51,6 +52,21 @@ namespace APC.UI.Controls
             set { _titleText = value ?? string.Empty; Text = _titleText; Invalidate(TitleBarRect); }
         }
 
+        private string _functionText = string.Empty;
+
+        /// <summary>
+        /// 제목 아랫줄의 기능명(예: "작업 시작 · LOT 스캔"). 브랜드 색으로 그린다.
+        /// 메인 창(ShowLogo)에서만 보이고, 비어 있으면 한 줄 제목·기본 높이.
+        /// </summary>
+        [DefaultValue("")]
+        public string FunctionText
+        {
+            get { return _functionText; }
+            set { _functionText = value ?? string.Empty; UpdatePadding(); Invalidate(); }
+        }
+
+        private bool TwoLineTitle { get { return _showLogo && _functionText.Length > 0; } }
+
         private bool _resizable = true;
 
         [DefaultValue(true)]
@@ -82,7 +98,7 @@ namespace APC.UI.Controls
         /// <summary>타이틀바 설정 버튼을 눌렀다(<see cref="ShowSettings"/>가 true일 때만).</summary>
         public event EventHandler SettingsClick;
 
-        public int TitleBarHeight { get { return (int)Math.Round(BaseTitleHeight * ApcTheme.Scale); } }
+        public int TitleBarHeight { get { return (int)Math.Round((TwoLineTitle ? BaseTitleHeightTwoLine : BaseTitleHeight) * ApcTheme.Scale); } }
 
         /// <summary>가장자리 리사이즈 감지 폭(px).</summary>
         public int ResizeGrip { get { return (int)(BaseResizeGrip * ApcTheme.Scale); } }
@@ -162,17 +178,16 @@ namespace APC.UI.Controls
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.DrawImage(logo, new Rectangle(x, (TitleBarHeight - lh) / 2, lw, lh));
                 x += lw + (int)(12 * s);
+                int sh = (int)(BaseSeparatorHeight * s);
+                using (var sep = new Pen(SeparatorColor)) g.DrawLine(sep, x, (TitleBarHeight - sh) / 2, x, (TitleBarHeight + sh) / 2);
+                x += (int)(12 * s);
             }
 
             int right = LeftmostButton().Left - (int)(8 * s);
             var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis;
             if (ShowLogo)
             {
-                // 메인 창: 프로그램 이름을 창 가운데 크게(로고·버튼과 겹치면 그 사이로 좁힌다)
-                var font = TitleFont();
-                int tw = TextRenderer.MeasureText(g, _titleText, font).Width;
-                int left = Math.Max(x, (ClientSize.Width - tw) / 2);
-                TextClip.Draw(g, this, _titleText, font, Rectangle.FromLTRB(left, 0, Math.Max(left, right), TitleBarHeight), ApcTheme.C(c.Text), flags);
+                DrawMainTitle(g, Rectangle.FromLTRB(x, 0, Math.Max(x, right), TitleBarHeight), flags);
             }
             else
             {
@@ -190,6 +205,42 @@ namespace APC.UI.Controls
         private Rectangle LeftmostButton()
         {
             return ButtonRect(_showSettings ? WinButton.Settings : MinimizeBox ? WinButton.Minimize : WinButton.Close);
+        }
+
+        private const int BaseSeparatorHeight = 28;
+        private static readonly Color SeparatorColor = Color.FromArgb(0xC4, 0xCC, 0xD5);
+
+        /// <summary>메인 창: 로고 │ 프로그램 이름(크게), 기능명이 있으면 그 아래 브랜드 색 작은 줄. 왼쪽 정렬, 버튼 앞에서 말줄임.</summary>
+        private void DrawMainTitle(Graphics g, Rectangle area, TextFormatFlags flags)
+        {
+            var c = ApcTheme.Current.Colors;
+            var font = TitleFont();
+            if (!TwoLineTitle)
+            {
+                TextClip.Draw(g, this, _titleText, font, area, ApcTheme.C(c.Text), flags);
+                return;
+            }
+            var sub = FunctionFont();
+            int h1 = TextRenderer.MeasureText(g, "가", font).Height;
+            int h2 = TextRenderer.MeasureText(g, "가", sub).Height;
+            int top = area.Top + (area.Height - h1 - h2) / 2;
+            TextClip.Draw(g, this, _titleText, font, new Rectangle(area.Left, top, area.Width, h1), ApcTheme.C(c.Text), flags);
+            TextClip.Draw(g, this, _functionText, sub, new Rectangle(area.Left, top + h1, area.Width, h2), ApcTheme.C(c.Brand), flags);
+        }
+
+        private Font _functionFont;
+
+        /// <summary>기능명 글꼴: 테마 글꼴 굵게, 1pt 작게.</summary>
+        private Font FunctionFont()
+        {
+            var b = ApcTheme.GetFont(FontStyle.Bold);
+            float size = Math.Max(1f, b.Size - 1f);
+            if (_functionFont == null || _functionFont.Name != b.Name || _functionFont.Size != size)
+            {
+                if (_functionFont != null) _functionFont.Dispose();
+                _functionFont = new Font(b.FontFamily, size, FontStyle.Bold);
+            }
+            return _functionFont;
         }
 
         private Font _titleFont;
@@ -214,7 +265,7 @@ namespace APC.UI.Controls
         public bool ShowLogo
         {
             get { return _showLogo; }
-            set { _showLogo = value; Invalidate(TitleBarRect); }
+            set { _showLogo = value; UpdatePadding(); Invalidate(); }
         }
 
 
@@ -403,6 +454,7 @@ namespace APC.UI.Controls
             {
                 ApcTheme.Changed -= OnThemeChanged;
                 if (_titleFont != null) _titleFont.Dispose();
+                if (_functionFont != null) _functionFont.Dispose();
             }
             base.Dispose(disposing);
         }

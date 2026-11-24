@@ -18,6 +18,7 @@ namespace APC.UI.Demo
         {
             float s = ApcTheme.Scale;
             TitleText = "APC.UI 갤러리 — " + ApcTheme.Current.Name;
+            FunctionText = "컨트롤 · 화면 템플릿";
             StartPosition = FormStartPosition.CenterScreen;
             Size = new Size((int)(1600 * s), (int)(900 * s));
             MinimumSize = new Size((int)(1024 * s), (int)(640 * s));

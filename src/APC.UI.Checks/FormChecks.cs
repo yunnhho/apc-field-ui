@@ -17,6 +17,18 @@ namespace APC.UI.Checks
                 Check(f.MaximizedArea.Height <= area.Height && f.MaximizedArea.Width <= area.Width, "maximize stays inside working area");
             }
 
+            using (var f = new ApcForm())
+            {
+                int one = f.TitleBarHeight;
+                f.FunctionText = "작업 시작 · LOT 스캔";
+                Check(f.TitleBarHeight > one && f.Padding.Top == f.TitleBarHeight + 1, "form: function text grows title bar");
+                f.FunctionText = null;
+                Check(f.FunctionText == "" && f.TitleBarHeight == one && f.Padding.Top == one + 1, "form: clearing function text restores height");
+                f.ShowLogo = false;
+                f.FunctionText = "x";
+                Check(f.TitleBarHeight == one, "form: dialog ignores function text");
+            }
+
             using (var dlg = ApcDialog.Create("삭제할까요?"))
             {
                 Check(dlg.CancelButton != null && dlg.AcceptButton == dlg.CancelButton, "confirm: Enter and Esc both cancel");

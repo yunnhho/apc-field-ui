@@ -92,6 +92,7 @@
 - `protected void AddFieldRow(string caption, Control field, params Control[] trailing)` — 이름표 + 입력칸 한 줄. trailing이 없으면 입력칸이 남은 폭을 채우고, 있으면 모두 자기 Width로 왼→오.
 - `protected void SetFooter(ApcButton cancel, ApcButton confirm, params ApcButton[] left)` — 하단 버튼 줄: 오른쪽 [확정][취소](취소가 끝, cancel은 null 가능), 왼쪽 보조 버튼. Esc = 취소(없으면 확정).
 - `protected void SetupDialog(string title, int width, int height = 0)` — dialog 기본 속성과 크기(배율 전 px). height 0 = 내용으로 자동(AddContentFill을 쓰면 필수).
+- `string FunctionText { get; set; }` — 제목 아랫줄의 기능명(예: "작업 시작 · LOT 스캔"). 브랜드 색으로 그린다. 메인 창(ShowLogo)에서만 보이고, 비어 있으면 한 줄 제목·기본 높이.
 - `string TitleText { get; set; }`
 
 ## ApcGrid
@@ -419,6 +420,8 @@
 
 - `ThemeColors()`
 - `string Border { get; set; }`
+- `string BorderStrong { get; set; }` — 입력칸 테두리. 없으면 border.
+- `string Brand { get; set; }` — 브랜드 색. 창 제목의 기능명에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.
 - `string GridLine { get; set; }`
 - `string GridSelected { get; set; }`
 - `string Text { get; set; }`
@@ -427,6 +430,7 @@
 - `string[] Background { get; set; }` — 그라데이션 [시작, 끝]
 - `string[] GridHeader { get; set; }`
 - `string[] Header { get; set; }`
+- `string[] Panel { get; set; }` — 패널·카드 바탕 그라데이션 [시작, 끝]. 없으면 흰색.
 - `string[] TitleBar { get; set; }` — 창 타이틀바(로고가 올라가므로 밝은 톤)
 
 ## ThemeData
