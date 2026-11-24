@@ -14,7 +14,7 @@ namespace APC.UI.Checks
     {
         private static readonly string[] Templates =
         {
-            "EquipmentView", "TempHumiView", "JudgeView", "FailureAnalysisView", "WorkStartView", "ProductionView",
+            "EquipmentView", "TempHumiView", "JudgeView", "FailureAnalysisView", "TrendMatrixView", "WorkStartView", "ProductionView",
             "DefectView", "HistoryView", "EquipmentDetailDialog", "RecipeDialog", "AdminPasswordDialog", "LotInputDialog", "SettingsDialog",
         };
 

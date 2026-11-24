@@ -27,6 +27,23 @@ namespace APC.UI.Checks
 
             Check(ApcTheme.Px(100) == (int)System.Math.Round(100 * ApcTheme.Scale), "theme: Px scales like template S()");
 
+            using (var legend = new ApcStatusLegend())
+            {
+                legend.SetItems(new ApcLampValue(StatusKind.Run, "관리선 내"));
+                int one = legend.Width;
+                legend.SetItems(new ApcLampValue(StatusKind.Run, "관리선 내"), new ApcLampValue(StatusKind.Alarm, "SPEC 초과"));
+                Check(one > 0 && legend.Width > one && legend.Width == legend.PreferredWidth, "legend: width follows items");
+            }
+            using (var info = new ApcInfoStrip())
+            {
+                info.SetItems("공정", "설비");
+                info.SetValue("설비", "12인치 적층기");
+                Check(info.GetValue("설비") == "12인치 적층기" && info.GetValue("공정") == "", "info strip: values by name, unset = empty");
+                bool threw = false;
+                try { info.SetValue("없는 이름", "x"); } catch (System.ArgumentException) { threw = true; }
+                Check(threw, "info strip: unknown name rejected");
+            }
+
 
             var c = ApcTheme.Current.Colors;
             Check(Cards.EmphasisColor(StatusKind.Run) == ApcTheme.C(c.Text), "card: normal value uses text color (not green)");

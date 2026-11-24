@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using APC.UI.Controls;
-using APC.UI.Drawing;
 using APC.UI.Theming;
 
 namespace APC.UI.Demo.Templates
@@ -17,7 +16,7 @@ namespace APC.UI.Demo.Templates
         private const int ColCurrent = 9, ColSend = 11, ColReset = 12, ColStatus = 13;
         private static readonly string[] Groups = { "저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08" };
 
-        private readonly GroupHeaderGrid _grid = new GroupHeaderGrid { Dock = DockStyle.Fill, ReadOnly = true };
+        private readonly ApcGrid _grid = new ApcGrid { Dock = DockStyle.Fill, ReadOnly = true };
         private readonly Label _clock = Caption("");
         private readonly Timer _clockTimer = new Timer { Interval = 1000 };
         private readonly ApcTabStrip _tabs = new ApcTabStrip();
@@ -104,8 +103,8 @@ namespace APC.UI.Demo.Templates
             foreach (var name in new[] { "target", "current", "rpm" })
                 _grid.Columns[name].DefaultCellStyle.Font = ApcTheme.GetFont(FontStyle.Bold);   // 작업자가 보는 값 강조
 
-            _grid.ColumnGroups.Add(new ColumnGroup("B1", 2, 4));
-            _grid.ColumnGroups.Add(new ColumnGroup("B2", 5, 7));
+            _grid.AddColumnGroup("B1", 2, 4);
+            _grid.AddColumnGroup("B2", 5, 7);
         }
 
         private void SelectGroup(int index)
@@ -182,82 +181,6 @@ namespace APC.UI.Demo.Templates
         {
             if (disposing) _clockTimer.Dispose();
             base.Dispose(disposing);
-        }
-
-        internal sealed class ColumnGroup
-        {
-            public ColumnGroup(string text, int first, int last) { Text = text; First = first; Last = last; }
-            public string Text { get; private set; }
-            public int First { get; private set; }
-            public int Last { get; private set; }
-            public bool Contains(int col) { return col >= First && col <= Last; }
-        }
-
-        /// <summary>
-        /// 2단 헤더(묶음 제목 + 하위 컬럼).
-        /// ponytail: 데모 전용. 다른 현장 프로그램에서도 필요해지면 ApcGrid로 올린다.
-        /// </summary>
-        private sealed class GroupHeaderGrid : ApcGrid
-        {
-            public readonly List<ColumnGroup> ColumnGroups = new List<ColumnGroup>();
-
-            public GroupHeaderGrid()
-            {
-                ColumnHeadersHeight = ApcTheme.MinHeight * 2;
-            }
-
-            private ColumnGroup GroupOf(int col)
-            {
-                foreach (var g in ColumnGroups) if (g.Contains(col)) return g;
-                return null;
-            }
-
-            protected override void OnCellPainting(DataGridViewCellPaintingEventArgs e)
-            {
-                if (e.RowIndex == -1 && e.ColumnIndex >= 0 && GroupOf(e.ColumnIndex) != null)
-                {
-                    // 묶음 컬럼: 위 절반은 OnPaint에서 묶음 제목, 아래 절반에 하위 제목
-                    var c = ApcTheme.Current.Colors;
-                    Gradients.Fill(e.Graphics, e.CellBounds, c.GridHeader);
-                    var half = e.CellBounds.Height / 2;
-                    var sub = new Rectangle(e.CellBounds.X, e.CellBounds.Y + half, e.CellBounds.Width, e.CellBounds.Height - half);
-                    using (var pen = new Pen(ApcTheme.C(c.Border)))
-                    {
-                        e.Graphics.DrawLine(pen, sub.Right - 1, sub.Top, sub.Right - 1, sub.Bottom - 1);   // 머리줄 구분선은 끝까지 닿게(ApcGrid와 같음)
-                        e.Graphics.DrawLine(pen, e.CellBounds.Left, e.CellBounds.Bottom - 1, e.CellBounds.Right, e.CellBounds.Bottom - 1);
-                    }
-                    ApcGrid.DrawHeaderText(e.Graphics, sub, Convert.ToString(e.Value), ColumnHeadersDefaultCellStyle.Font);
-                    e.Handled = true;
-                    return;
-                }
-                if (e.RowIndex == -1 && e.ColumnIndex >= 0) e.CellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                base.OnCellPainting(e);
-            }
-
-            protected override void OnPaint(PaintEventArgs e)
-            {
-                base.OnPaint(e);
-                var c = ApcTheme.Current.Colors;
-                foreach (var g in ColumnGroups)
-                {
-                    // 화면에 보이는 하위 컬럼 헤더만 합친다(가로 스크롤로 일부·전부 숨을 수 있음).
-                    var span = Rectangle.Empty;
-                    for (int col = g.First; col <= g.Last; col++)
-                    {
-                        var r = GetCellDisplayRectangle(col, -1, false);
-                        if (r.Width > 0) span = span.IsEmpty ? r : Rectangle.Union(span, r);
-                    }
-                    if (span.IsEmpty) continue;
-                    var top = new Rectangle(span.Left, span.Top, span.Width, ColumnHeadersHeight / 2);
-                    Gradients.Fill(e.Graphics, top, c.GridHeader);
-                    using (var pen = new Pen(ApcTheme.C(c.Border)))
-                    {
-                        e.Graphics.DrawLine(pen, top.Left, top.Bottom - 1, top.Right, top.Bottom - 1);
-                        e.Graphics.DrawLine(pen, top.Right - 1, top.Top, top.Right - 1, top.Bottom);
-                    }
-                    ApcGrid.DrawHeaderText(e.Graphics, top, g.Text, ColumnHeadersDefaultCellStyle.Font);
-                }
-            }
         }
     }
 }

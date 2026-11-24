@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
@@ -33,14 +34,51 @@ namespace APC.UI.Controls
         }
 
         /// <summary>머리줄 + 행 rows개가 빈 줄·스크롤바 없이 들어가는 표 높이(배율 적용 px). dialog의 AddContent 표 높이에 쓴다.</summary>
-        public static int HeightForRows(int rows) { return HeaderHeight() + ApcTheme.MinHeight * Math.Max(0, rows) + 2; }
+        public static int HeightForRows(int rows) { return HeightForRows(rows, false); }
+
+        /// <summary>HeightForRows와 같고, 묶음 머리줄(AddColumnGroup)이 있는 표면 columnGroups = true(머리줄 2단).</summary>
+        public static int HeightForRows(int rows, bool columnGroups)
+        {
+            return HeaderHeight() * (columnGroups ? 2 : 1) + ApcTheme.MinHeight * Math.Max(0, rows) + 2;
+        }
+
+        private readonly List<ColumnGroup> _groups = new List<ColumnGroup>();
+
+        /// <summary>
+        /// 묶음 머리줄: 열 firstColumn~lastColumn(열 번호, 포함) 위에 묶음 제목 한 칸("온도 (℃)" 위, 아래 칸에 "NI"·"SN").
+        /// 처음 부르면 머리줄이 2단이 되고, 묶이지 않은 열 제목은 두 단에 걸쳐 가운데에 그린다. 열을 모두 추가한 뒤 부른다.
+        /// </summary>
+        public void AddColumnGroup(string text, int firstColumn, int lastColumn)
+        {
+            if (firstColumn < 0 || lastColumn < firstColumn || lastColumn >= Columns.Count)
+                throw new ArgumentOutOfRangeException("lastColumn", "묶음 열 범위가 잘못됐습니다: " + firstColumn + "~" + lastColumn + " (열 " + Columns.Count + "개)");
+            if (_groups.Any(g => firstColumn <= g.Last && lastColumn >= g.First))
+                throw new ArgumentException("다른 묶음과 열이 겹칩니다: " + firstColumn + "~" + lastColumn, "firstColumn");
+            _groups.Add(new ColumnGroup(text ?? string.Empty, firstColumn, lastColumn));
+            ColumnHeadersHeight = HeaderHeight() * 2;
+            Invalidate();
+        }
+
+        private ColumnGroup GroupOf(int column)
+        {
+            foreach (var g in _groups) if (column >= g.First && column <= g.Last) return g;
+            return null;
+        }
+
+        private sealed class ColumnGroup
+        {
+            public ColumnGroup(string text, int first, int last) { Text = text; First = first; Last = last; }
+            public string Text { get; private set; }
+            public int First { get; private set; }
+            public int Last { get; private set; }
+        }
 
         private static int HeaderHeight() { return (int)Math.Round(ApcTheme.MinHeight * 1.15); }
 
         private void ApplyTheme()
         {
             RowTemplate.Height = ApcTheme.MinHeight;
-            ColumnHeadersHeight = HeaderHeight();
+            ColumnHeadersHeight = HeaderHeight() * (_groups.Count > 0 ? 2 : 1);
             if (ApcTheme.Current == null) return;
 
             var c = ApcTheme.Current.Colors;
@@ -87,19 +125,53 @@ namespace APC.UI.Controls
             if (e.Handled || e.RowIndex != -1 || ApcTheme.Current == null) return;
 
             var c = ApcTheme.Current.Colors;
+            // 묶인 열은 아래 단에만 제목. 위 단(묶음 제목)은 OnPaint가 여러 열에 걸쳐 그린다.
+            var text = e.CellBounds;
+            if (e.ColumnIndex >= 0 && GroupOf(e.ColumnIndex) != null)
+            {
+                int half = text.Height / 2;
+                text = new Rectangle(text.X, text.Y + half, text.Width, text.Height - half);
+            }
             Gradients.Fill(e.Graphics, e.CellBounds, c.GridHeader);
             using (var pen = new Pen(ApcTheme.C(c.Border)))
             {
                 // 표 머리줄 구분선은 위아래 끝까지 닿게. 끝이 떨어진 구분선은 설정창 같은 곳의 칸 제목 줄 전용이다.
-                e.Graphics.DrawLine(pen, e.CellBounds.Right - 1, e.CellBounds.Top, e.CellBounds.Right - 1, e.CellBounds.Bottom - 1);
+                e.Graphics.DrawLine(pen, text.Right - 1, text.Top, text.Right - 1, text.Bottom - 1);
                 e.Graphics.DrawLine(pen, e.CellBounds.Left, e.CellBounds.Bottom - 1, e.CellBounds.Right, e.CellBounds.Bottom - 1);
             }
             var col = e.ColumnIndex >= 0 ? Columns[e.ColumnIndex] : null;
             if (col == null || col.HeaderCell.SortGlyphDirection != SortOrder.None)
                 e.Paint(e.CellBounds, DataGridViewPaintParts.ContentForeground);   // 정렬 화살표는 기본 그리기에 맡김
             else
-                DrawHeaderText(e.Graphics, e.CellBounds, Convert.ToString(e.FormattedValue), e.CellStyle.Font);
+                DrawHeaderText(e.Graphics, text, Convert.ToString(e.FormattedValue), e.CellStyle.Font);
             e.Handled = true;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            if (_groups.Count == 0 || ApcTheme.Current == null || !ColumnHeadersVisible) return;
+            var c = ApcTheme.Current.Colors;
+            foreach (var g in _groups)
+            {
+                // 화면에 보이는 열 머리만 합친다(가로 스크롤로 일부·전부 숨을 수 있음).
+                var span = Rectangle.Empty;
+                for (int col = g.First; col <= g.Last; col++)
+                {
+                    if (!Columns[col].Visible) continue;
+                    var r = GetCellDisplayRectangle(col, -1, false);
+                    if (r.Width > 0) span = span.IsEmpty ? r : Rectangle.Union(span, r);
+                }
+                if (span.IsEmpty) continue;
+                var top = new Rectangle(span.Left, span.Top, span.Width, ColumnHeadersHeight / 2);
+                Gradients.Fill(e.Graphics, top, c.GridHeader);
+                using (var pen = new Pen(ApcTheme.C(c.Border)))
+                {
+                    e.Graphics.DrawLine(pen, top.Left, top.Bottom - 1, top.Right, top.Bottom - 1);
+                    e.Graphics.DrawLine(pen, top.Right - 1, top.Top, top.Right - 1, top.Bottom);
+                }
+                DrawHeaderText(e.Graphics, top, g.Text, ColumnHeadersDefaultCellStyle.Font);
+            }
         }
 
         /// <summary>

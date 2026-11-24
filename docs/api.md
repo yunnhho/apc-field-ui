@@ -1,4 +1,4 @@
-# APC.UI API (v1.18.0.0)
+# APC.UI API (v1.19.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -102,7 +102,9 @@
 - `ApcGrid()`
 - `bool ClearInitialSelection { get; set; }` — true(기본)면 사용자가 누르기 전엔 선택 행이 없다. 입력 표(스캔으로 칸을 채우는 dialog 등)처럼 앱이 CurrentCell을 정해 두고 바로 입력받아야 하면 false.
 - `static int HeightForRows(int rows)` — 머리줄 + 행 rows개가 빈 줄·스크롤바 없이 들어가는 표 높이(배율 적용 px). dialog의 AddContent 표 높이에 쓴다.
+- `static int HeightForRows(int rows, bool columnGroups)` — HeightForRows와 같고, 묶음 머리줄(AddColumnGroup)이 있는 표면 columnGroups = true(머리줄 2단).
 - `static void DrawHeaderText(Graphics g, Rectangle cell, string text, Font font)` — 머리줄 글자를 칸 정가운데에. 기본 그리기는 정렬 화살표 자리·안쪽 여백만큼 왼쪽으로 1~2px 치우친다. 오른쪽 구분선·아래 선 1px은 빼고 가운데를 잡는다. 묶음 머리줄 등 직접 그리는 곳도 이것을 쓴다.
+- `void AddColumnGroup(string text, int firstColumn, int lastColumn)` — 묶음 머리줄: 열 firstColumn~lastColumn(열 번호, 포함) 위에 묶음 제목 한 칸("온도 (℃)" 위, 아래 칸에 "NI"·"SN"). 처음 부르면 머리줄이 2단이 되고, 묶이지 않은 열 제목은 두 단에 걸쳐 가운데에 그린다. 열을 모두 추가한 뒤 부른다.
 
 ## ApcGroup
 
@@ -138,6 +140,16 @@
 - `ApcIconColumn()`
 - `static bool IsEnabled(DataGridViewCell cell)` — 셀이 누를 수 있는 상태(값 true)인지.
 - `string IconName { get; set; }` — 테마 이미지 이름 앞부분(예: "icon_play", "icon_reset").
+
+## ApcInfoStrip
+
+`APC.UI.Controls` · class : Control
+
+이름-값 정보판 한 줄: [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time]처럼 진한 이름 칸과 흰 값 칸이 번갈아 나온다. 화면 헤더 아래 "지금 무엇을 보는가"(공정·설비·LOT·SPEC 등)를 적는 줄. 이름 칸은 글자 폭, 값 칸은 남은 폭을 똑같이 나눈다. 값이 없으면 빈칸. 입력칸이 아니다(읽기 전용 표시).
+- `ApcInfoStrip()`
+- `string GetValue(string name)`
+- `void SetItems(params string[] names)` — 이름 칸들(왼→오). 값은 모두 빈칸으로 시작한다.
+- `void SetValue(string name, string value)` — 이름 칸 name 옆 값. 없는 이름이면 ArgumentException.
 
 ## ApcJudgePanel
 
@@ -208,6 +220,15 @@
 - `event EventHandler<ScanEventArgs> Scanned`
 - `void Attach(Form host)` — 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로 화면의 OnHandleCreated에서 FindForm()으로 부른다: var f = FindForm(); if (f != null) _scan.Attach(f);
 - `void Flash(bool success)` — 성공 = 초록 플래시 + 짧은 비프, 실패 = 빨강 플래시 + 경고음.
+
+## ApcStatusLegend
+
+`APC.UI.Controls` · class : Control
+
+상태색 범례: 램프 + 뜻을 왼→오로("● 관리선 내 ● 관리선 이탈 ● SPEC 초과"). 표·그래프 칸의 램프 색이 무엇인지 화면에서 읽히게. 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다(구획 제목 줄 오른쪽에 Dock = Right).
+- `ApcStatusLegend()`
+- `int PreferredWidth { get; }` — 항목을 모두 그리는 폭(배율 적용 px).
+- `void SetItems(params ApcLampValue[] items)` — 범례 항목(상태 + 뜻). 부르면 Width가 항목에 맞게 바뀐다.
 
 ## ApcStatusTile
 

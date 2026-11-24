@@ -11,6 +11,7 @@ namespace APC.UI.Checks
         private static void RunGridChecks()
         {
             CheckCurrentRowTint();
+            CheckColumnGroups();
             using (var g = new ApcGrid())
             {
                 var icon = new ApcIconColumn { IconName = "icon_reset" };
@@ -186,6 +187,23 @@ namespace APC.UI.Checks
                     Check(at(0, 2).ToArgb() == tint && at(slot, 2).ToArgb() == tint, "grid: current input row tints read-only cells incl. lamp/first column (" + at(0, 2) + "," + at(slot, 2) + ")");
                     Check(at(slot, 0).ToArgb() != tint, "grid: other rows stay gray");
                 }
+            }
+        }
+
+        /// <summary>묶음 머리줄: 2단 높이, HeightForRows(rows, true)와 맞음, 잘못된·겹치는 범위는 예외.</summary>
+        private static void CheckColumnGroups()
+        {
+            using (var g = new ApcGrid())
+            {
+                g.Columns.Add("unit", "호기");
+                g.Columns.Add("ni", "NI");
+                g.Columns.Add("sn", "SN");
+                int single = g.ColumnHeadersHeight;
+                g.AddColumnGroup("온도 (℃)", 1, 2);
+                Check(g.ColumnHeadersHeight == single * 2, "grid: column group doubles header height");
+                Check(ApcGrid.HeightForRows(3, true) - ApcGrid.HeightForRows(3) == single, "grid: HeightForRows(rows, true) adds one header row");
+                Check(Throws<ArgumentException>(() => g.AddColumnGroup("겹침", 2, 2)), "grid: overlapping column group rejected");
+                Check(Throws<ArgumentException>(() => g.AddColumnGroup("범위 밖", 2, 5)), "grid: out-of-range column group rejected");
             }
         }
     }

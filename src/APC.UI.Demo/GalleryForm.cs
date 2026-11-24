@@ -42,6 +42,7 @@ namespace APC.UI.Demo
             AddMenu(menu, "이력 조회", () => new HistoryView());
             AddMenu(menu, "[참조] 온습도", () => new TempHumiView());
             AddMenu(menu, "[참조] 연마기 불량방지", () => new FailureAnalysisView());
+            AddMenu(menu, "[참조] 호기×항목 추이", () => new TrendMatrixView());
 
             Controls.Add(_host);
             Controls.Add(menu);

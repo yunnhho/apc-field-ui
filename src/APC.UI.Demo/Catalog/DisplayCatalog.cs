@@ -20,7 +20,20 @@ namespace APC.UI.Demo.Catalog
             chart.SetValues(values);
             chart.XLabels = new[] { "-60분", "-30분", "현재" };
 
+            var info = new ApcInfoStrip();
+            info.SetItems("공정", "설비", "작업 LOT");
+            info.SetValue("공정", "적층 공정");
+            info.SetValue("설비", "12인치 적층기 2호기");
+            info.SetValue("작업 LOT", "LMC2611240317");
+            var legend = new ApcStatusLegend { Dock = DockStyle.Top };
+            legend.SetItems(new ApcLampValue(StatusKind.Run, "관리선 내"), new ApcLampValue(StatusKind.Warn, "관리선 이탈 (SPEC 내)"),
+                new ApcLampValue(StatusKind.Alarm, "SPEC 초과"), new ApcLampValue(StatusKind.Stop, "정지"));
+
             // Top 도킹은 나중 추가가 위 → 보여줄 순서의 역순으로 추가
+            Body.Controls.Add(legend);
+            Body.Controls.Add(Row(Caption("상태색 범례 (ApcStatusLegend): 구획 제목 줄 오른쪽에 Dock = Right")));
+            Body.Controls.Add(info);
+            Body.Controls.Add(Row(Caption("이름-값 정보판 (ApcInfoStrip): 헤더 아래 공정·설비·LOT")));
             Body.Controls.Add(chart);
             Body.Controls.Add(Row(Caption("추이 그래프 (ApcTrendChart): 설정값 회색 점선, 상한 빨간 점선")));
 
