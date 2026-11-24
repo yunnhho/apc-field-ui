@@ -59,7 +59,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 조회 | `HistoryView` |
 
 - **템플릿 가져오기**: 템플릿은 데모 프로젝트의 `internal sealed` 클래스라 참조할 수 없다. 읽고 프로젝트에 새 파일로 옮겨 쓴다 — 네임스페이스를 프로젝트 것으로, 클래스 이름을 화면에 맞게, 코드에 박힌 샘플 값(배열·`Rows.Add` 반복)은 `SampleMainViewSource`로 옮기고 화면은 `IMainViewSource`에서 받는다. `Columns()`·`Row()`·`Caption()`·`SectionTitle()`·`Button()`·`S()`는 `ApcTemplateView`에 있으니 옮기지 않는다.
-- 맞는 템플릿이 없거나 추가 요청이 있으면 `ApcTemplateView`(헤더 + Body + 알람바) 위에 **기존 Apc 컨트롤로 새 배치**를 짠다.
+- 맞는 템플릿이 없거나 추가 요청이 있으면 `ApcTemplateView`(헤더 + Body) 위에 **기존 Apc 컨트롤로 새 배치**를 짠다.
 - `new-project.sh`가 만드는 `MainView`·`IMainViewSource`는 빈 틀(TODO)이다. 여기에 채운다. `MainForm.TitleText`도 화면 이름으로 바꾸고(기본값은 영문 프로젝트명), `MainForm.FunctionText`에 지금 기능명을 넣는다.
 - **도킹 순서**: 같은 Dock끼리는 나중에 `Add`한 것이 바깥(위)에 온다. `Body`에는 Fill 컨트롤을 먼저 `Add`하고, Top 줄은 화면 아래쪽 것부터 위쪽 것 순서로 `Add`한다(또는 `Body.Controls.SetChildIndex(fill, 0)`).
 - 카드·타일·판정판을 한 줄에: `ApcTemplateView`의 `Columns(S(높이), cells)`(같은 폭) 또는 `Columns(S(높이), cells, new[] { 50f, 25f, 25f })`(퍼센트 폭). 칸 간격·줄 간격은 헬퍼가 정한다. 한 줄은 **높이 + 12**를 차지한다(줄 아래 간격 포함) — `Columns()` 여러 줄을 Panel 하나에 담으면 그 Panel 높이는 `(S(높이) + S(12)) × 줄 수`.
@@ -118,7 +118,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 입력 표(칸에 바로 입력·스캔) | `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + 열별 `ReadOnly`(읽기 전용 열은 자동 회색, `SelectionMode = CellSelect`면 입력 중인 행의 읽기 전용 칸은 연한 파랑) |
 
 - **표준 컨트롤 금지**: `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`과 `Control`을 상속해 직접 그린 카드·타일·그래프를 만들지 않는다. 위 표의 Apc 컨트롤을 쓴다. 표준으로 쓰는 것은 `Label`과 배치용 `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`뿐. 표에 없는 요소가 꼭 필요하면 만들지 말고 사용자에게 알린다(라이브러리에 추가할 후보).
-- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. **경고 메시지는 하단 알람바가 아니라 경고창**: 입력 오류·조작 경고(기간 역순, 빈 LOT, 잘못된·중복 스캔, 이미 진행 중인 작업 등)는 메인 화면에서도 `ApcDialog.Warn(FindForm(), "...")`(제목 "경고" + 노란 램프, dialog 안에서는 `this`). 스캔 화면도 같다 — 스캔 이벤트 처리 중이면 `BeginInvoke`로 처리가 끝난 뒤 띄운다(`ProductionView.WarnAfterScan`). 잘못된 것이 없는 안내(연결 결과·완료)는 `ApcDialog.Alert`(제목 "알림" + 파란 램프). 알람바 `Alarm.Push("...")`는 설비 이상·NG 판정(빨강)만.
+- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. **경고 메시지는 경고창**: 입력 오류·조작 경고(기간 역순, 빈 LOT, 잘못된·중복 스캔, 이미 진행 중인 작업 등)는 메인 화면에서도 `ApcDialog.Warn(FindForm(), "...")`(제목 "경고" + 노란 램프, dialog 안에서는 `this`). 스캔 화면도 같다 — 스캔 이벤트 처리 중이면 `BeginInvoke`로 처리가 끝난 뒤 띄운다(`ProductionView.WarnAfterScan`). 잘못된 것이 없는 안내(연결 결과·완료)는 `ApcDialog.Alert`(제목 "알림" + 파란 램프). 하단 알람바(`Alarm.Push`)는 쓰지 않는다 — 설비 이상·NG는 화면 안의 램프·타일·판정판으로 보인다.
 - 상태 표시는 `StatusKind`(Run/Warn/Alarm/Stop/Info) + `ApcLamp`/`ApcLampColumn`. 색은 테마가 정한다.
 
 ## 4-1. 디테일 기준 (사용자 확정, 요구서가 다르게 정하면 요구서)
@@ -147,7 +147,6 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 - 설정 변경·교대 같은 기록 = `Info`
 - 설비 타일·표 행의 상태 = 공정 상태와 값 판정 중 나쁜 쪽. 문구는 "공정 상태 · 사유"(예: "시험중 · 저항 한계 근접"). 사유가 여럿이면 가장 나쁜 것 하나(같으면 화면 항목 순서 앞쪽).
 - 카드 `Status`는 그 카드 값의 판정만. 판정 기준이 없는 값(진행률·수량, 기준이 주어지지 않은 측정값)은 값이 갱신 중이면 `Run`, 멈췄으면(설비 오류·대기·정지, 값 없음) `Stop` — 설비 오류를 진행률 카드에 빨강으로 칠하지 않는다(설비 상태는 타일이 보인다). 예외: 판정 화면의 NG 수 카드는 NG > 0이면 `Alarm`(`JudgeView`와 같이). 정지·대기 설비가 읽은 값은 판정하지 않는다 — 값만 보이고 카드·셀은 `Stop`(기본 글자색), 타일·행은 공정 상태(정지·대기)를 따른다(멈춘 설비가 식어 하한 아래인 것은 알람이 아니다). 정상 완료한 설비의 진행률·최종값은 `Run`.
-- **알람바(`Alarm.Push`)는 늘 빨강**이라 거기 올리는 사건은 램프도 `Alarm`이다(오류 램프는 노랑인데 알람바는 빨강이면 틀린 것).
 
 **샘플 데이터**
 - 행 수: 이력·목록 표는 표 높이만큼 채운다. 짐작하지 말고 render가 알려 주는 수로 맞춘다(참고 줄 "표 아래가 빔 … N개로", 점검 줄 "표 세로 스크롤바 … N개로"). 겹침·넘침이 같이 나오면 그것부터 고치고 다시 render해서 나온 수를 쓴다(배치가 바뀌면 표 높이도 바뀐다). 설비 목록처럼 개수가 정해진 표는 그대로.

@@ -98,12 +98,6 @@ namespace APC.UI.Demo.Templates
                         string name = prefix + (firstMachine + m).ToString("00") + " (" + col + "열 " + stage + "단)";
                         _grid.Rows.Add(SampleRow(no, name));
                     }
-
-            foreach (DataGridViewRow r in _grid.Rows)
-            {
-                var v = (ApcLampValue)r.Cells[ColStatus].Value;
-                if (v.Status == StatusKind.Alarm) Alarm.Push(r.Cells[1].Value + ": " + v.Text);
-            }
         }
 
         /// <summary>앞쪽 몇 행만 가동 데이터, 나머지는 끊김 — 원본 캡처(전부 끊김)보다 상태 표현을 보여주기 위해.</summary>

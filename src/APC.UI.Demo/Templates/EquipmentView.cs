@@ -7,7 +7,7 @@ namespace APC.UI.Demo.Templates
 {
     /// <summary>
     /// 라인 전체 모니터링: 설비 타일 한 줄(누르면 상세 dialog) → 현재값 카드 한 줄 → 최근 알람 이력.
-    /// 알람 설비는 알람바에도. 카드·타일은 TableLayoutPanel 퍼센트 열로 같은 폭.
+    /// 카드·타일은 TableLayoutPanel 퍼센트 열로 같은 폭.
     /// </summary>
     internal sealed class EquipmentView : ApcTemplateView
     {
@@ -44,7 +44,6 @@ namespace APC.UI.Demo.Templates
                 var tile = new ApcStatusTile { Text = (string)m[0], Status = (StatusKind)m[1], StatusText = (string)m[2], Dock = DockStyle.Fill };
                 tile.Click += (s, e) => OpenDetail();
                 tiles[i] = tile;
-                if ((StatusKind)m[1] == StatusKind.Alarm) Alarm.Push(m[0] + ": " + m[2]);
             }
 
             var cards = new Control[Values.Length];
