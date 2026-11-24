@@ -170,7 +170,7 @@
 
 `APC.UI.Controls` · class : DataGridViewColumn
 
-상태 램프 컬럼. 셀 값 StatusKind = 램프만(가운데), ApcLampValue = 램프 + 문구("전송됨", "대기") 한 칸, 그 외(null 등) = 빈 셀.
+상태 램프 컬럼. 셀 값 StatusKind = 램프만(가운데), ApcLampValue = 램프 + 문구("전송됨", "대기") 한 칸(램프는 왼쪽 고정, 문구는 바로 옆 — 행마다 램프 위치가 같게), 그 외(null 등) = 빈 셀.
 - `ApcLampColumn()`
 
 ## ApcLampValue

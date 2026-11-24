@@ -66,7 +66,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 - 타일을 누르면 아래 카드·그래프가 그 설비를 보여 주는 화면은 그 타일만 `Selected = true`(나머지 false). 표 행을 고르는 화면은 `ApcGrid { ClearInitialSelection = false }` + 그 행 선택. 선택 표시가 없으면 어느 설비 값인지 화면에서 모른다.
 - `Columns()` 밖의 고정 높이 표·그래프를 `Body`에 Top으로 쌓을 때는 `Columns(S(높이), new Control[] { grid })`로 감싼다(Dock·줄 아래 간격을 헬퍼가 준다). 그냥 Add하면 Dock이 없어 겹치거나 아래 간격이 없다.
 - `ApcGroup` 안에 `Columns()` 줄을 넣을 때 그룹 높이는 `group.HeightFor((S(높이) + S(12)) × 줄 수)`. 짐작한 숫자로 맞추지 않는다.
-- **설정 버튼은 화면 안에 두지 않는다.** 설정 화면이 있는 프로그램만 화면 생성자에서 `UseSettingsButton((s, e) => OpenSettings())` → 창 타이틀바 최소화 왼쪽에 톱니 버튼이 생긴다(화면 Dispose 때 꺼짐). 설정이 없으면 부르지 않는다. 열기 순서: `AdminPasswordDialog` → `SettingsDialog`(`FailureAnalysisView.OpenSettings`). 화면 없이 창만 있으면 `ApcForm.ShowSettings = true` + `SettingsClick`.
+- **설정 버튼은 화면 안에 두지 않는다.** 설정 화면이 있는 프로그램만 화면 생성자에서 `UseSettingsButton((s, e) => OpenSettings())` → 창 타이틀바 최소화 왼쪽에 톱니 버튼이 생긴다(화면 Dispose 때 꺼짐). 설정이 없으면 부르지 않는다. 타이틀바는 설정 전용 — 설정이 아닌 dialog(레시피·LOT 입력 등)를 여는 버튼은 관련 구획 제목 줄 오른쪽에 일반 `ApcButton`(`Row(제목, 버튼)`). 열기 순서: `AdminPasswordDialog` → `SettingsDialog`(`FailureAnalysisView.OpenSettings`). 화면 없이 창만 있으면 `ApcForm.ShowSettings = true` + `SettingsClick`.
 - `ApcGrid`는 사용자가 누르기 전엔 선택 행이 없다(`CurrentRow == null`). "선택한 행" 버튼은 null이면 아무것도 하지 않게 한다.
 
 ### 4b. dialog
@@ -78,7 +78,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 |---|---|
 | 보기용 상세(상태 줄 + 센서 표 + 추이 + 닫기) | `EquipmentDetailDialog` |
 | 입력 폼(이름표+입력칸 행, 검증 `Warn` → `Confirm("저장")` → 결과 속성 → OK). LOT 번호·모델·작업자처럼 몇 칸 입력도 여기 | `RecipeDialog` |
-| 관리자 비밀번호 확인(설정 진입 전 등) | `AdminPasswordDialog` |
+| 관리자 비밀번호 확인(설정 진입 전 등). 설정 화면 없이 이것만 요청되면 지키려는 동작 이름의 일반 버튼("기준값 변경")을 두고, 누르면 이 dialog → 통과 시 그 동작 | `AdminPasswordDialog` |
 | 칸·슬롯별 LOT 입력(표에 바로 스캔, 칸 수 가변, 빈 칸 Warn). 행마다 같은 항목을 넣는 설정(구역별 상하한 등)도 이 입력 표 방식 | `LotInputDialog` |
 | 통신·장비 설정(블록마다 한 행인 묶음 + 칸 제목 줄 `AddCaptionRow` + 공통 설정 + 비밀번호 변경) | `SettingsDialog` |
 
@@ -126,7 +126,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 |---|---|
 | 창 제목 | 화면 이름만(`MainForm.TitleText`, 예: "도장 라인 모니터링"). 고객사·버전 붙이지 않음. 화면 헤더 제목(`base("...")`)도 같은 이름 |
 | 날짜·시각 | 날짜 `yyyy-MM-dd`, 당일 이력 시각 `HH:mm:ss`, 여러 날에 걸친 이력 `yyyy-MM-dd HH:mm:ss` |
-| 소수 자리 | ℃·%RH·kN·bar·kPa·m/min·A·V·Pa·µA → `0.0`, mm → `0.00`, 불량률·가동률 % → `0.0`, 수량 → `#,0`(정수), 시간 설정(s·min) → 정수(측정한 사이클 타임 s는 `0.0`. 측정값과 비교하는 상·하한·경고값도 측정값 자리수 "상한 28.0 s" — 정수는 사람이 넣는 목표·설정값만). 카드 값·표·알람 문구·기준 문구 모두 같은 자리수. 여기 없는 단위(rpm·Hz·kg 등)는 요구서를 따르고, 요구서에도 없으면 사용자에게 묻는다 |
+| 소수 자리 | ℃·%RH·kN·bar·kPa·m/min·A·V·Pa·µA → `0.0`, mm → `0.00`, 불량률·가동률·수율 % → `0.0`, mΩ·nA → `0.0`, 수량·파티클(개/ft³) → `#,0`(정수), 시간 설정(s·min) → 정수(측정한 사이클 타임 s는 `0.0`. 측정값과 비교하는 상·하한·경고값도 측정값 자리수 "상한 28.0 s" — 정수는 사람이 넣는 목표·설정값만). 카드 값·표·알람 문구·기준 문구 모두 같은 자리수. 여기 없는 단위(rpm·Hz·kg 등)는 요구서를 따르고, 요구서에도 없으면 사용자에게 묻는다 |
 | 표 정렬 | `ApcGrid` 기본이 가운데(헤더 포함). 긴 글 열(알람 내용·비고·사유)만 `DefaultCellStyle.Alignment = MiddleLeft`. 숫자 열도 가운데 |
 | 표 열 폭 | 긴 글 열이 있으면 그 열 하나만 `AutoSizeMode = Fill`. 짧은 값 열(ID·시각·숫자·판정)뿐이면 램프 열 빼고 모두 Fill로 고르게 나눈다(한 열만 Fill이면 나머지가 오른쪽 끝으로 밀린다. render가 "표 폭 절반 넘게 차지"로 잡는다) |
 | 값 없음(대기·통신 전) | 빈칸(정지 설비라도 읽은 값이 있으면 그 값). `ApcValueCard.Value = ""`(값·단위 모두 안 그림), 표 셀은 `""`. `-`, `--`, `0` 쓰지 않음. 값이 없으면 판정하지 않는다 — 판정 함수에 넣지 말고 카드 `Status = Stop`, 값에서 나온 이상 사유 문구 없음(공정 상태 문구 "대기"·"통신 끊김"은 쓴다) |

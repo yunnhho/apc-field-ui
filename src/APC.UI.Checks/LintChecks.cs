@@ -77,6 +77,27 @@ namespace APC.UI.Checks
                 .Any(i => i.Contains("말줄임")), "lint: ellipsized tile status text");
             Check(!Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3", StatusText = "경고", Width = 160, Height = 80 })).Any(i => i.Contains("말줄임")), "lint: fitting tile text passes");
             CheckGridFitsMatchesScrollbar();
+            // 겹침이 있으면 표 높이가 바뀔 것이라 행 수 참고를 내지 않는다(B 시연: 겹침 고친 뒤 18행 → 17행)
+            Check(!Lint(p =>
+            {
+                var g = new ApcGrid { Width = 300, Height = 250, ReadOnly = true };
+                g.Columns.Add("a", "A");
+                g.Rows.Add("x");
+                p.Controls.Add(g);
+                p.Controls.Add(new ApcButton { Text = "A", Width = 60 });
+            }).Any(i => i.Contains("표 아래가 빔")), "lint: underfilled note withheld while layout issues remain");
+            // 램프 + 문구 칸: 좁은 램프 열의 문구 잘림(B 시연: "OK"가 "O…")
+            Func<int, List<string>> lintLamp = w => Lint(p =>
+            {
+                var g = new ApcGrid { Dock = DockStyle.Fill };
+                var lamp = new ApcLampColumn { Width = w };
+                g.Columns.Add(lamp); g.Columns.Add("id", "설비");
+                g.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                g.Rows.Add(new ApcLampValue(StatusKind.Alarm, "알람"), "A-01");
+                p.Controls.Add(g);
+            });
+            Check(lintLamp(56).Any(i => i.Contains("'알람' 말줄임")), "lint: clipped lamp value text");
+            Check(!lintLamp(120).Any(i => i.Contains("말줄임")), "lint: fitting lamp value text passes");
             // 이력 샘플: 시각만 다르고 나머지가 같은 행이 되풀이되면 참고로 알린다(C 시연: 19행 중 7쌍).
             Func<string[][], List<string>> lintHistory = rows => Lint(p =>
             {
