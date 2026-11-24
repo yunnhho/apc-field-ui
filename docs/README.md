@@ -53,4 +53,5 @@ src/APC.UI.Tools/   api·render·attach 도구     skills/       Claude Code 스
 Resources/    예전 납품 이미지(참고용, 수정하지 않음)
 references/   기존 현장 프로그램 화면 캡처(UI 레퍼런스)
 references/redesign/  위 화면을 APC.UI로 재구성한 결과(*.apcui.png)와 원본 비교(*.compare.png)
+references/legacy/    C:\TFS\APP\SW 기존 프로그램 화면을 Designer 코드로 그린 캡처(샘플 데이터, 목록은 README.md)
 ```
