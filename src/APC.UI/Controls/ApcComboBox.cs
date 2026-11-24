@@ -31,7 +31,7 @@ namespace APC.UI.Controls
         {
             var g = e.Graphics;
             var rect = ClientRectangle;
-            using (var b = new SolidBrush(FieldFrame.Fill(Enabled, false))) g.FillRectangle(b, rect);
+            using (var b = new SolidBrush(FieldFrame.Fill(Enabled, false, Focused || DroppedDown))) g.FillRectangle(b, rect);
 
             var arrow = new Rectangle(rect.Right - ArrowWidth, rect.Top, ArrowWidth, rect.Height);
             FieldFrame.DrawButtonArea(g, arrow, false);

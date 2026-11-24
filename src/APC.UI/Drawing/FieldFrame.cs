@@ -3,18 +3,20 @@ using APC.UI.Theming;
 
 namespace APC.UI.Drawing
 {
-    /// <summary>입력칸 공통 모양: 흰 바탕 + 테두리 + 안쪽 위 그림자(버튼은 볼록, 입력칸은 오목). 포커스면 파란 2px 테두리.</summary>
+    /// <summary>입력칸 공통 모양: 흰 바탕 + 테두리 + 안쪽 위 그림자(버튼은 볼록, 입력칸은 오목). 입력 중인 칸은 파란 2px 테두리 + 연한 파랑 바탕(1~2m에서 어느 칸인지 보이게).</summary>
     internal static class FieldFrame
     {
-        internal static readonly Color FocusColor = Color.FromArgb(0x5A, 0x7F, 0xB0);
+        internal static readonly Color FocusColor = Color.FromArgb(0x3F, 0x67, 0xA6);   // 확인 버튼과 같은 파랑
+        internal static readonly Color FocusFill = Color.FromArgb(0xEE, 0xF4, 0xFC);
         private static readonly Color InsetShadow = Color.FromArgb(48, 0, 0, 0);
 
-        internal static Color Fill(bool enabled, bool readOnly)
+        internal static Color Fill(bool enabled, bool readOnly, bool focused = false)
         {
             if (ApcTheme.Current == null) return SystemColors.Window;
             var c = ApcTheme.Current.Colors;
             if (!enabled) return ApcTheme.C(c.Background[0]);
-            return readOnly ? ApcTheme.C(c.GridLine) : Color.White;
+            if (readOnly) return ApcTheme.C(c.GridLine);
+            return focused ? FocusFill : Color.White;
         }
 
         internal static Color TextColor(bool enabled)
