@@ -135,15 +135,37 @@ namespace APC.UI.Checks
             using (var bmp = new Bitmap(group.Width, group.Height))
             {
                 group.DrawToBitmap(bmp, new Rectangle(Point.Empty, group.Size));
-                Check(bmp.GetPixel(ApcTheme.Px(10) + 1, group.TitleHeight / 2).ToArgb() == ApcTheme.C(c.Text).ToArgb(), "group: ink bar beside label");
+                Check(bmp.GetPixel(ApcTheme.Px(10) + 1, group.TitleHeight / 2).ToArgb() == ApcTheme.C(c.Brand).ToArgb(), "group: brand bar beside label");
             }
-            using (var bar = new ApcHeaderBar { Title = "체결기 #1", Size = new Size(400, 40) })
+            using (var bar = new ApcHeaderBar { Title = "체결기 #1", StatusText = "가동중", Size = new Size(600, 40) })
             using (var bmp = new Bitmap(bar.Width, bar.Height))
             {
                 bar.DrawToBitmap(bmp, new Rectangle(Point.Empty, bar.Size));
                 var px = bmp.GetPixel(2, bar.Height / 2);
-                Check(px.R > 200 && px.G > 200 && px.B > 200, "header bar: light with ink title");
+                Check(px.R > 200 && px.G > 200 && px.B > 200, "header bar: light background");
+                bool blank = true;
+                for (int x = 2; x < bar.Width / 2 && blank; x++)
+                    for (int y = 4; y < bar.Height - 4 && blank; y++)
+                        blank = bmp.GetPixel(x, y).ToArgb() == bmp.GetPixel(2, y).ToArgb();
+                Check(blank, "header bar: no title text on the left");
+                Check(System.Text.RegularExpressions.Regex.IsMatch(bar.ClockText, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"), "header bar: clock shows yyyy-MM-dd HH:mm:ss");
+                Check(bar.ClockBounds.Right <= bar.Width - ApcTheme.Px(12) && bar.ClockBounds.Left > bar.StatusBounds.Right, "header bar: clock at right, status left of it");
             }
+            using (var v = new SectionProbe())
+            {
+                v.Title.Size = v.Title.PreferredSize;
+                using (var bmp = new Bitmap(v.Title.Width, v.Title.Height))
+                {
+                    v.Title.DrawToBitmap(bmp, new Rectangle(Point.Empty, v.Title.Size));
+                    Check(bmp.GetPixel(1, v.Title.Height / 2).ToArgb() == ApcTheme.C(c.Brand).ToArgb(), "section title: brand bar on the left");
+                }
+            }
+        }
+
+        private sealed class SectionProbe : ApcTemplateView
+        {
+            public readonly System.Windows.Forms.Label Title = SectionTitle("최근 알람 이력");
+            public SectionProbe() : base("probe") { }
         }
 
         private static bool Near(Color a, Color b, int tol)

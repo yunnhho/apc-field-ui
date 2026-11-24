@@ -111,7 +111,7 @@
 
 `APC.UI.Controls` · class : Panel
 
-제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 먹색 막대가 붙은 굵은 제목. 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
+제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 브랜드색 막대가 붙은 굵은 제목. 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
 - `ApcGroup()`
 - `int HeightFor(int contentHeight)` — 안 내용 높이(배율 적용 px)를 담는 묶음 높이 = 제목 띠 + 위아래 여백 + 내용. 화면에서 Columns() 줄을 담으면 내용 = 줄 높이 합.
 - `string Text { get; set; }` — 제목 띠 글자.
@@ -120,11 +120,11 @@
 
 `APC.UI.Controls` · class : Panel
 
-화면 상단 띠: 왼쪽 제목(설비명 등), 오른쪽 상태 램프 + 상태 문구.
+화면 상단 띠: 오른쪽에 상태 램프 + 상태 문구, 그 오른쪽 끝에 현재 시각(1초마다 갱신). 프로그램 이름은 창 제목 줄에 있으므로 띠에는 그리지 않는다(Title은 창 제목과 같은 이름을 보관만 한다).
 - `ApcHeaderBar()`
 - `StatusKind Status { get; set; }`
 - `string StatusText { get; set; }`
-- `string Title { get; set; }`
+- `string Title { get; set; }` — 화면 이름(창 제목과 같은 값). 띠에는 그리지 않는다.
 
 ## ApcIconCell
 
@@ -421,7 +421,7 @@
 - `ThemeColors()`
 - `string Border { get; set; }`
 - `string BorderStrong { get; set; }` — 입력칸 테두리. 없으면 border.
-- `string Brand { get; set; }` — 브랜드 색. 창 제목의 기능명에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.
+- `string Brand { get; set; }` — 브랜드 색. 창 제목 기능명과 묶음·구획 제목 막대에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.
 - `string GridLine { get; set; }`
 - `string GridSelected { get; set; }`
 - `string Text { get; set; }`

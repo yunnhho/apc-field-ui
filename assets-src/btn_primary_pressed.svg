@@ -2,6 +2,6 @@
   <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#2A4058"/><stop offset="0.55" stop-color="#34506E"/><stop offset="1" stop-color="#3F5A78"/>
   </linearGradient></defs>
-  <rect x="0.5" y="0.5" width="47" height="47" rx="3" fill="url(#g)" stroke="#1A293A"/>
+  <rect x="0.5" y="0.5" width="47" height="47" rx="2" fill="url(#g)" stroke="#1A293A"/>
   <rect x="1.5" y="1.5" width="45" height="4" rx="2" fill="#000000" opacity="0.12"/>
 </svg>

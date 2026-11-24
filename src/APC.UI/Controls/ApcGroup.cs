@@ -7,7 +7,7 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 먹색 막대가 붙은 굵은 제목.
+    /// 제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 브랜드색 막대가 붙은 굵은 제목.
     /// 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
     /// </summary>
     public class ApcGroup : Panel
@@ -52,11 +52,11 @@ namespace APC.UI.Controls
             using (var pen = new Pen(ApcTheme.C(c.Border))) g.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
             using (var hi = new Pen(Color.White)) g.DrawLine(hi, 1, 1, Width - 2, 1);
 
-            // 라벨: 왼쪽 3px 먹색 막대 + 굵은 글자(Steel + Ink)
+            // 라벨: 왼쪽 3px 브랜드색 막대 + 굵은 먹색 글자
             var font = ApcTheme.GetFont(FontStyle.Bold);
             int pad = ApcTheme.Px(BasePad), bar = ApcTheme.Px(BaseBar);
             int barH = Math.Min(TitleHeight - 2, TextRenderer.MeasureText(g, "가", font).Height);
-            using (var ink = new SolidBrush(ApcTheme.C(c.Text))) g.FillRectangle(ink, pad, (TitleHeight - barH) / 2, bar, barH);
+            using (var mark = new SolidBrush(ApcTheme.C(c.Brand))) g.FillRectangle(mark, pad, (TitleHeight - barH) / 2, bar, barH);
             int textX = pad + bar + ApcTheme.Px(BaseBarGap);
             TextClip.Draw(g, this, Text, font, new Rectangle(textX, 0, Math.Max(0, Width - textX - pad), TitleHeight),
                 ApcTheme.C(c.Text), TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis);

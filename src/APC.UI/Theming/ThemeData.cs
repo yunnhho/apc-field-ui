@@ -35,7 +35,7 @@ namespace APC.UI.Theming
         [DataMember(Name = "panel")] public string[] Panel { get; set; }
         /// <summary>입력칸 테두리. 없으면 border.</summary>
         [DataMember(Name = "borderStrong")] public string BorderStrong { get; set; }
-        /// <summary>브랜드 색. 창 제목의 기능명에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.</summary>
+        /// <summary>브랜드 색. 창 제목 기능명과 묶음·구획 제목 막대에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.</summary>
         [DataMember(Name = "brand")] public string Brand { get; set; }
     }
 

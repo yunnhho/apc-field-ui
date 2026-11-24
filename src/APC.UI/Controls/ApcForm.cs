@@ -19,9 +19,10 @@ namespace APC.UI.Controls
         private const int BaseTitleHeightTwoLine = 54;
         private const int BaseTitleLinePad = 2;
         private const int BaseResizeGrip = 6;
-        private const int BaseLogoHeight = 22;
+        private const int BaseLogoHeight = 28;
         private const int BaseWinButtonW = 46;
         private const int BaseWinButtonH = 32;
+        private const int BaseWinButtonRight = 12;   // 닫기 버튼과 창 오른쪽 끝 사이 여유
 
         private const int WM_NCHITTEST = 0x84;
         private const int HTCLIENT = 1, HTCAPTION = 2;
@@ -142,7 +143,7 @@ namespace APC.UI.Controls
             float s = ApcTheme.Scale;
             int w = (int)(BaseWinButtonW * s), h = (int)(BaseWinButtonH * s), gap = (int)(4 * s);
             int y = (TitleBarHeight - h) / 2;
-            int closeX = ClientSize.Width - gap - w;
+            int closeX = ClientSize.Width - (int)(BaseWinButtonRight * s) - w;
             int minX = closeX - gap / 2 - w;
             return b == WinButton.Close ? new Rectangle(closeX, y, w, h)
                  : b == WinButton.Minimize ? new Rectangle(minX, y, w, h)
@@ -211,6 +212,7 @@ namespace APC.UI.Controls
 
         internal Rectangle SettingsButtonBounds { get { return ButtonRect(WinButton.Settings); } }
         internal Rectangle MinimizeButtonBounds { get { return ButtonRect(WinButton.Minimize); } }
+        internal Rectangle CloseButtonBounds { get { return ButtonRect(WinButton.Close); } }
 
         private Rectangle LeftmostButton()
         {

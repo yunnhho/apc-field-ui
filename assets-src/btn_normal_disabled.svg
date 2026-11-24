@@ -2,5 +2,5 @@
   <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#F1F3F5"/><stop offset="0.55" stop-color="#ECEFF2"/><stop offset="1" stop-color="#E6EAEE"/>
   </linearGradient></defs>
-  <rect x="0.5" y="0.5" width="47" height="47" rx="3" fill="url(#g)" stroke="#C4CCD5"/>
+  <rect x="0.5" y="0.5" width="47" height="47" rx="2" fill="url(#g)" stroke="#C4CCD5"/>
 </svg>

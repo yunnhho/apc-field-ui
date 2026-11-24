@@ -29,6 +29,7 @@ namespace APC.UI.Checks
                 Check(f.TitleBarHeight == one, "form: dialog ignores function text");
             }
             CheckTwoLineTitleFitsLargeFont();
+            CheckSettingsButtonDrawnInShownForm();
 
             using (var dlg = ApcDialog.Create("삭제할까요?"))
             {
@@ -91,6 +92,31 @@ namespace APC.UI.Checks
             public Control A { get { return Alarm; } }
             public Control B { get { return Body; } }
         }
+        /// <summary>갤러리처럼 창을 띄운 뒤 화면을 끼워도 타이틀바에 톱니가 그려진다(두 줄 제목 포함).</summary>
+        private static void CheckSettingsButtonDrawnInShownForm()
+        {
+            using (var f = new ApcForm { ClientSize = new Size(1200, 500), FunctionText = "컨트롤 · 화면 템플릿" })
+            {
+                var host = new Panel { Dock = DockStyle.Fill };
+                f.Controls.Add(host);
+                ShowOffscreen(f);
+                host.Controls.Add(new SettingsView(() => { }));
+                Application.DoEvents();
+                using (var bmp = new Bitmap(f.ClientSize.Width, f.ClientSize.Height))
+                {
+                    f.DrawToBitmap(bmp, new Rectangle(Point.Empty, f.ClientSize));
+                    var r = f.SettingsButtonBounds;
+                    var bg = bmp.GetPixel(r.Left - 3, r.Top + r.Height / 2);
+                    bool drawn = false;
+                    for (int x = r.Left; x < r.Right && !drawn; x++)
+                        drawn = bmp.GetPixel(x, r.Top + r.Height / 2).ToArgb() != bg.ToArgb();
+                    Check(f.ShowSettings && drawn, "form: settings button drawn after view added to shown form");
+                Check(f.CloseButtonBounds.Right <= f.ClientSize.Width - APC.UI.Theming.ApcTheme.Px(12), "form: window buttons keep 12px from right edge");
+                }
+                f.Close();
+            }
+        }
+
         /// <summary>고객사 테마 글꼴이 커도(16pt) 두 줄 제목이 타이틀바 안에 들어간다.</summary>
         private static void CheckTwoLineTitleFitsLargeFont()
         {

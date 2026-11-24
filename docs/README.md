@@ -28,7 +28,7 @@ Claude Code 스킬: `skills/apc-field-ui/SKILL.md`가 원본이다. `bash tools/
 
 | 바꿀 것 | 방법 |
 |---|---|
-| 색·폰트·스캔 설정 | `themes/<고객사>/theme.json` 수정. 상태색(run/warn/alarm/stop/info)은 **명도만** 바꿀 수 있고 색상을 바꾸면 로드가 거부된다. `panel`·`borderStrong`·`brand`(1.20 추가)는 빠지면 흰색·`border`·`text`로 채워진다. `brand`는 창 제목 기능명에만 쓰인다. |
+| 색·폰트·스캔 설정 | `themes/<고객사>/theme.json` 수정. 상태색(run/warn/alarm/stop/info)은 **명도만** 바꿀 수 있고 색상을 바꾸면 로드가 거부된다. `panel`·`borderStrong`·`brand`(1.20 추가)는 빠지면 흰색·`border`·`text`로 채워진다. `brand`는 창 제목 기능명과 묶음·구획 제목 막대에만 쓰인다. |
 | 1.12에서 추가된 아이콘 | 1.12 이전에 만든 `themes/<고객사>`에는 `icon_play_*`, `icon_reset_*` PNG가 없다. `ApcIconColumn`을 쓰려면 `themes/default/assets/icon_*.png`를 복사한다. |
 | 로고 | `themes/<고객사>/assets/logo_apcsoft@1x.png` 교체(파일명은 `theme.json`의 `logo` 값). `@1.5x`, `@2x`도 넣으면 고배율에서 선명해진다. |
 | 버튼·램프·창 버튼 이미지 | 바꿀 SVG만 `assets-src/<고객사>/`에 복사해 고친 뒤:<br>`node tools/render-assets.mjs --out themes/<고객사>/assets --override assets-src/<고객사>` |
