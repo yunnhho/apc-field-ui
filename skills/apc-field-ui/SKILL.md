@@ -1,6 +1,6 @@
 ---
 name: apc-field-ui
-description: Use when building a new APCSOFT field PC program screen in WinForms (.NET Framework 4.x) — 현장 PC 프로그램, 설비 모니터링, 라인별/센서 모니터링, 공정 설비 프로그램(Failure Analysis 등), 새 화면·새 프로젝트, 기존 APC.UI 화면 수정·dialog 추가, APC.UI, ApcForm, ApcGrid. Not for WPF, web, or .NET 6/8 projects.
+description: Use when building or modifying an APCSOFT field PC program screen in WinForms (.NET Framework 4.x) — 현장 PC 프로그램, MES·스마트팩토리 현장 화면, 설비 모니터링, 라인별/센서 모니터링, OEE·가동률, SPC, 수율·불량, LOT·바코드 스캔, 트래킹(Track-in/out), 체결, 작업 시작·실적·불량 입력, 공정 설비 프로그램(Failure Analysis 등), 새 화면·새 프로젝트, 기존 APC.UI 화면 수정·dialog 추가, APC.UI, ApcForm, ApcGrid. Not for WPF, web, or .NET 6/8 projects.
 ---
 
 # APC 현장 UI 화면 만들기
