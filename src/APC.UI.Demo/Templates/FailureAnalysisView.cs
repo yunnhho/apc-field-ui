@@ -8,56 +8,39 @@ using APC.UI.Theming;
 namespace APC.UI.Demo.Templates
 {
     /// <summary>
-    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 설비군 탭 + 시험 모드 안내 + 시계, 설정은 타이틀바 톱니(UseSettingsButton),
+    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 설비군 탭 + 시험 모드 안내를 헤더 띠에(시각·상태는 띠 오른쪽), 설정은 타이틀바 톱니(UseSettingsButton),
     /// 2단 헤더 그리드(B1/B2 묶음)가 화면 폭을 채움, 행 동작은 아이콘 열(ApcIconColumn: 할 수 없으면 회색), 상태는 램프 + 문구 한 칸(ApcLampValue).
     /// </summary>
     internal sealed class FailureAnalysisView : ApcTemplateView
     {
+        private const int HeaderHeight = 48;
         private const int ColCurrent = 9, ColSend = 11, ColReset = 12, ColStatus = 13;
         private static readonly string[] Groups = { "저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08" };
 
         private readonly ApcGrid _grid = new ApcGrid { Dock = DockStyle.Fill, ReadOnly = true };
-        private readonly Label _clock = Caption("");
-        private readonly Timer _clockTimer = new Timer { Interval = 1000 };
         private readonly ApcTabStrip _tabs = new ApcTabStrip();
 
         public FailureAnalysisView() : base("연마기 불량 방지 시스템")
         {
-            var tabRow = Row();
+            // 설비군 탭·시험 모드 안내는 헤더 띠 왼쪽에(띠 오른쪽은 상태·현재 시각). 탭 아래끝이 띠 아래선에 닿게.
+            Header.Height = S(HeaderHeight);
             _tabs.SetTabs(Groups);   // 첫 탭이 선택된다. 표 내용은 아래 SelectGroup(0)에서
             _tabs.Width = _tabs.PreferredTabsWidth;
-            _tabs.Margin = new Padding(0, S(46) - _tabs.Height, 0, 0);   // 탭 아래끝이 표 위끝에 닿게
-            tabRow.Controls.Add(_tabs);
+            _tabs.Margin = new Padding(0, Header.Height - _tabs.Height, 0, 0);
             var testMode = Caption("ⓘ 시험 모드 : 가상 장비로 동작합니다.");
             testMode.ForeColor = ApcTheme.Status(StatusKind.Info);
-            testMode.Margin = new Padding(S(12), S(8), 0, 0);
-            tabRow.Controls.Add(testMode);
+            testMode.Margin = new Padding(S(16), (Header.Height - testMode.PreferredHeight) / 2, 0, 0);
+            var left = new FlowLayoutPanel { Dock = DockStyle.Left, AutoSize = true, WrapContents = false, BackColor = Color.Transparent, Padding = new Padding(S(16), 0, 0, 0) };
+            left.Controls.Add(_tabs);
+            left.Controls.Add(testMode);
+            Header.Controls.Add(left);
 
             UseSettingsButton((s, e) => OpenSettings());   // 설정은 화면 안 버튼이 아니라 창 타이틀바(최소화 왼쪽) 톱니
-            // 시계: 어두운 상자에 굵은 흰 글자(멀리서도 읽히게). 폭은 글자 기준 고정(초가 바뀌어도 흔들리지 않게)
-            _clock.AutoSize = false;
-            _clock.Size = new Size(S(200), S(ApcLayout.FieldHeight));
-            _clock.TextAlign = ContentAlignment.MiddleCenter;
-            _clock.Font = ApcTheme.GetFont(FontStyle.Bold);
-            _clock.BackColor = ApcTheme.C(ApcTheme.Current.Colors.Header[1]);
-            _clock.ForeColor = ApcTheme.C(ApcTheme.Current.Colors.TextInverse);
-            _clock.Margin = Padding.Empty;
-            var right = new FlowLayoutPanel { Dock = DockStyle.Right, AutoSize = true, WrapContents = false, BackColor = Color.Transparent };
-            right.Controls.Add(_clock);
-            var top = new Panel { Dock = DockStyle.Top, Height = S(46), BackColor = Color.Transparent };
-            tabRow.Dock = DockStyle.Fill;
-            top.Controls.Add(tabRow);
-            top.Controls.Add(right);
 
             BuildColumns();
             _grid.CellClick += OnCellClick;
 
             Body.Controls.Add(_grid);
-            Body.Controls.Add(top);
-
-            _clockTimer.Tick += (s, e) => _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            _clockTimer.Start();
-            _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             SelectGroup(0);
             _tabs.SelectedIndexChanged += (s, e) => SelectGroup(_tabs.SelectedIndex);
         }
@@ -133,7 +116,7 @@ namespace APC.UI.Demo.Templates
                 else if (v.Text == "끊김") offline++;
             }
             Header.Status = alarms > 0 ? StatusKind.Alarm : warns > 0 ? StatusKind.Warn : offline + waiting > 0 ? StatusKind.Stop : StatusKind.Run;
-            var parts = new List<string> { Groups[index] };
+            var parts = new List<string>();   // 설비군은 바로 옆 탭에 보이므로 상태 문구에 다시 쓰지 않는다
             if (alarms > 0) parts.Add("알람 " + alarms);
             if (warns > 0) parts.Add("경고 " + warns);
             if (waiting > 0) parts.Add("대기 " + waiting);
@@ -175,12 +158,6 @@ namespace APC.UI.Demo.Templates
             {
                 row.Cells[ColCurrent].Value = "00:00:00";
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing) _clockTimer.Dispose();
-            base.Dispose(disposing);
         }
     }
 }
