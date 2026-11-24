@@ -3,12 +3,13 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using APC.UI.Drawing;
 using APC.UI.Theming;
 
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 상태 램프 컬럼. 셀 값 StatusKind = 램프만(가운데), ApcLampValue = 램프 + 문구("전송됨", "대기") 한 칸, 그 외(null 등) = 빈 셀.
+    /// 상태 램프 컬럼. 셀 값 StatusKind = 램프만(가운데), ApcLampValue = 램프 + 문구("전송됨", "대기") 한 칸(램프는 왼쪽 고정, 문구는 바로 옆 — 행마다 램프 위치가 같게), 그 외(null 등) = 빈 셀.
     /// </summary>
     public class ApcLampColumn : DataGridViewColumn
     {
@@ -24,6 +25,7 @@ namespace APC.UI.Controls
     public class ApcLampCell : DataGridViewTextBoxCell
     {
         private const int BaseLamp = 18;
+        private const int TextLeftPad = 8;
 
         public override Type ValueType { get { return typeof(object); } }
 
@@ -53,10 +55,11 @@ namespace APC.UI.Controls
             int gap = ApcTheme.Px(6);
             int textW = string.IsNullOrEmpty(text) ? 0 : TextRenderer.MeasureText(g, text, cellStyle.Font).Width;
             int total = side + (textW > 0 ? gap + textW : 0);
-            int x = cellBounds.X + Math.Max(ApcTheme.Px(4), (cellBounds.Width - total) / 2);   // 램프 + 문구 묶음을 가운데에
+            int x = textW > 0 ? cellBounds.X + ApcTheme.Px(TextLeftPad)   // 문구가 있으면 램프 왼쪽 고정
+                : cellBounds.X + Math.Max(ApcTheme.Px(4), (cellBounds.Width - total) / 2);   // 램프만이면 가운데
             var r = new Rectangle(x, cellBounds.Y + (cellBounds.Height - side) / 2, side, side);
             if (textW > 0)
-                TextRenderer.DrawText(g, text, cellStyle.Font, Rectangle.FromLTRB(r.Right + gap, cellBounds.Top, cellBounds.Right - 2, cellBounds.Bottom - 1),
+                TextClip.Draw(g, DataGridView, text, cellStyle.Font, Rectangle.FromLTRB(r.Right + gap, cellBounds.Top, cellBounds.Right - 2, cellBounds.Bottom - 1),
                     cellStyle.ForeColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis);
             var old = g.InterpolationMode;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;

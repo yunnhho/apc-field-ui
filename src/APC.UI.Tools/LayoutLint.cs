@@ -41,6 +41,8 @@ namespace APC.UI.Tools
             CheckFieldRows(root, dialog, issues);
             if (dialog && theme != null) CheckFooter((Form)root, issues, theme);
             CheckClipped(root, issues);
+            // 겹침·넘침을 고치면 표 높이가 바뀐다 → 그때 센 행 수는 틀린다. 점검이 0건일 때만 알린다.
+            if (issues.Any(i => !IsNote(i))) issues.RemoveAll(i => IsNote(i) && i.Contains(UnderfilledNote));
             return issues;
         }
 
@@ -152,12 +154,13 @@ namespace APC.UI.Tools
             int body = grid.ClientSize.Height - border - (grid.ColumnHeadersVisible ? grid.ColumnHeadersHeight : 0);
             int fits = body / grid.RowTemplate.Height;
             if (grid.RowCount < fits)
-                issues.Add(NotePrefix + path + ": 표 아래가 빔(행 " + grid.RowCount + ", " + fits + "행까지 들어감) — 이력·목록이면 샘플 행을 " + fits + "개로, 설비 수처럼 정해진 목록이면 그대로");
+                issues.Add(NotePrefix + path + ": " + UnderfilledNote + "(행 " + grid.RowCount + ", " + fits + "행까지 들어감) — 이력·목록이면 샘플 행을 " + fits + "개로, 설비 수처럼 정해진 목록이면 그대로");
             int repeats = RepeatedRows(grid);
             if (repeats >= MinRepeatedRows)
                 issues.Add(NotePrefix + path + ": 시각·ID만 다르고 나머지가 앞 행과 같은 행 " + repeats + "개(샘플이 되풀이로 보임) — 이력이면 설비·값·문구를 섞는다");
         }
 
+        private const string UnderfilledNote = "표 아래가 빔";
         private const int MinRepeatedRows = 3;   // 우연히 겹치는 한두 행은 넘긴다
 
         // 값이 모두 다른 열(시각·ID)을 빼고 나머지 칸이 앞 행과 똑같은 행 수.

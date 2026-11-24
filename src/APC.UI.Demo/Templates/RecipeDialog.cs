@@ -8,7 +8,7 @@ namespace APC.UI.Demo.Templates
 {
     /// <summary>
     /// 입력 폼 dialog 골격: 이름표 + 입력칸 행 반복, 오른쪽 아래 [저장][취소].
-    /// 저장 순서: 입력 확정(Commit) → 검증(틀리면 Alert, 닫지 않음) → Confirm("저장", Primary) → 결과를 속성에 담고 OK로 닫기.
+    /// 저장 순서: 입력 확정(Commit) → 검증(틀리면 Warn, 닫지 않음) → Confirm("저장", Primary) → 결과를 속성에 담고 OK로 닫기.
     /// 메인 화면은 ShowDialog(FindForm()) == OK일 때 결과 속성을 읽어 데이터 인터페이스에 넘긴다.
     /// </summary>
     internal sealed class RecipeDialog : ApcForm
