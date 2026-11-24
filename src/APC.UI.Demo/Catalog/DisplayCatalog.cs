@@ -44,6 +44,16 @@ namespace APC.UI.Demo.Catalog
             Body.Controls.Add(cards);
             Body.Controls.Add(Row(Caption("값 카드 (ApcValueCard)")));
 
+            var inputs = Flow();
+            inputs.Controls.Add(SlotCard("B1", "Ø32 · 0.8μm", "LOT-24112-0381", StatusKind.Run, "스캔 08:12:33"));
+            inputs.Controls.Add(SlotCard("B2", "Ø32 · 0.8μm", "", StatusKind.Stop, "스캔 대기"));
+            var range = new ApcFieldCard { Text = "하중 판정", SubTitle = "kN", Footer = "허용 0.0 ~ 50.0", Margin = new Padding(0, 0, S(12), S(12)) };
+            range.AddField("하한", new ApcNumericBox { DecimalPlaces = 1, Maximum = 50, Value = 8.0m });
+            range.AddField("상한", new ApcNumericBox { DecimalPlaces = 1, Maximum = 50, Value = 12.0m });
+            inputs.Controls.Add(range);
+            Body.Controls.Add(inputs);
+            Body.Controls.Add(Row(Caption("입력 카드 (ApcFieldCard) — 안 칸에 커서가 있으면 파란 테두리")));
+
             var tiles = Flow();
             tiles.Controls.Add(Tile("전처리", StatusKind.Run, "가동 · 정상"));
             tiles.Controls.Add(Tile("상도 부스", StatusKind.Warn, "경고 · 습도 상한 근접"));
@@ -73,6 +83,14 @@ namespace APC.UI.Demo.Catalog
         private static ApcJudgePanel Judge(string text, string sub, StatusKind status)
         {
             return new ApcJudgePanel { Text = text, SubText = sub, Status = status, Size = new Size(S(300), S(140)), Margin = new Padding(0, 0, S(12), S(12)) };
+        }
+
+        private ApcFieldCard SlotCard(string slot, string spec, string lot, StatusKind status, string footer)
+        {
+            var card = new ApcFieldCard { Text = slot, SubTitle = spec, FooterStatus = status, Footer = footer, Margin = new Padding(0, 0, S(12), S(12)) };
+            card.AddField("LOT No (스캔)", new ApcTextBox { Text = lot });
+            card.AddField("바렐번호", new ApcTextBox());
+            return card;
         }
     }
 }

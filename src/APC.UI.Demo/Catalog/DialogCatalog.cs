@@ -14,7 +14,7 @@ namespace APC.UI.Demo.Catalog
             Add("통신·장비 설정 (ApcGroup 묶음, 저장 확인)", () => new SettingsDialog());
             Add("칸별 LOT 입력 (표에 바로 스캔, 빈 칸 Alert)", () => new LotInputDialog());
             Add("관리자 비밀번호 확인", () => new AdminPasswordDialog());
-            Add("입력 폼: 레시피 편집 (검증 Alert → 저장 Confirm)", () => new RecipeDialog());
+            Add("입력 폼: 레시피 편집 (검증 Warn → 저장 Confirm)", () => new RecipeDialog());
             Add("보기용 상세: 상태 줄 + 센서 표 + 추이", () => new EquipmentDetailDialog());
         }
 
