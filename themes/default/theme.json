@@ -4,27 +4,33 @@
   "fontSize": 12,
   "colors": {
     "background": [
-      "#E6E6E6",
-      "#CFCFCF"
+      "#E9EDF1",
+      "#DDE3E9"
     ],
     "header": [
-      "#5A6A7E",
-      "#2F3B4A"
+      "#3F5A78",
+      "#2A4058"
     ],
     "gridHeader": [
-      "#FAFAFA",
-      "#D9DDE2"
+      "#F7F9FB",
+      "#E4E9EE"
     ],
-    "border": "#888888",
-    "text": "#1F2937",
-    "textMuted": "#6B7280",
+    "panel": [
+      "#FDFDFE",
+      "#F1F4F7"
+    ],
+    "border": "#B9C3CD",
+    "borderStrong": "#9AA7B4",
+    "text": "#1A1F26",
+    "textMuted": "#5D6B7A",
     "textInverse": "#FFFFFF",
-    "gridLine": "#F3F4F6",
+    "gridLine": "#E3E8ED",
     "gridSelected": "#CFE0F5",
     "titleBar": [
-      "#F4F4F4",
-      "#CFD3D8"
-    ]
+      "#FBFCFD",
+      "#E8EDF2"
+    ],
+    "brand": "#E60012"
   },
   "status": {
     "run": "#16A34A",

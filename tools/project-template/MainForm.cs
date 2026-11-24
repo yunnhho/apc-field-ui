@@ -10,7 +10,8 @@ namespace __NAME__
         public MainForm()
         {
             float s = ApcTheme.Scale;
-            TitleText = "__NAME__";   // TODO: 창 제목을 화면 이름으로(예: "도장 라인 모니터링")
+            TitleText = "__NAME__";   // TODO: 창 제목을 프로그램 이름으로(예: "도장 라인 모니터링")
+            FunctionText = "";        // TODO: 제목 아랫줄 기능명(예: "작업 시작 · LOT 스캔"). 비우면 한 줄 제목
             StartPosition = FormStartPosition.CenterScreen;
             Size = new Size((int)(1600 * s), (int)(900 * s));
             MinimumSize = new Size((int)(1024 * s), (int)(640 * s));

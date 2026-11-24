@@ -27,6 +27,23 @@ namespace APC.UI.Checks
 
             Check(ApcTheme.Px(100) == (int)System.Math.Round(100 * ApcTheme.Scale), "theme: Px scales like template S()");
 
+            using (var legend = new ApcStatusLegend())
+            {
+                legend.SetItems(new ApcLampValue(StatusKind.Run, "관리선 내"));
+                int one = legend.Width;
+                legend.SetItems(new ApcLampValue(StatusKind.Run, "관리선 내"), new ApcLampValue(StatusKind.Alarm, "SPEC 초과"));
+                Check(one > 0 && legend.Width > one && legend.Width == legend.PreferredWidth, "legend: width follows items");
+            }
+            using (var info = new ApcInfoStrip())
+            {
+                info.SetItems("공정", "설비");
+                info.SetValue("설비", "12인치 적층기");
+                Check(info.GetValue("설비") == "12인치 적층기" && info.GetValue("공정") == "", "info strip: values by name, unset = empty");
+                bool threw = false;
+                try { info.SetValue("없는 이름", "x"); } catch (System.ArgumentException) { threw = true; }
+                Check(threw, "info strip: unknown name rejected");
+            }
+
 
             var c = ApcTheme.Current.Colors;
             Check(Cards.EmphasisColor(StatusKind.Run) == ApcTheme.C(c.Text), "card: normal value uses text color (not green)");
@@ -41,6 +58,7 @@ namespace APC.UI.Checks
                 card.DrawToBitmap(bmp, new Rectangle(Point.Empty, card.Size));
                 Check(bmp.GetPixel(1, card.Height / 2).ToArgb() == ApcTheme.Status(StatusKind.Alarm).ToArgb(), "card: alarm draws thick alarm border");
             }
+            CheckSteelInkSurfaces();
             // 같은 높이 카드는 Footer 유무와 관계없이 값이 같은 높이에 그려진다(한 줄 카드의 값이 들쭉날쭉하지 않게).
             Check(ValueTop(new ApcValueCard { Value = "88" }) == ValueTop(new ApcValueCard { Value = "88", Footer = "NG / 검사 수" }), "card: value sits at same height with or without footer");
             // 값이 두 개인 카드(온도 + Footer 습도): 카드 상태는 경고여도 정상인 주 값은 보통 글자색.
@@ -62,7 +80,7 @@ namespace APC.UI.Checks
                 tile.DrawToBitmap(bmp, new Rectangle(Point.Empty, tile.Size));
                 Check(bmp.GetPixel(0, tile.Height / 2).ToArgb() == ApcTheme.C(c.Border).ToArgb(), "tile: normal border when idle");
                 Check(tile.TabStop, "tile: reachable by Tab");
-                Check(bmp.GetPixel(4, 4).ToArgb() == Color.White.ToArgb(), "tile: white background when not selected");
+                Check(Near(bmp.GetPixel(4, 4), ApcTheme.C(c.Panel[0]), 4), "tile: panel background when not selected");
                 tile.Selected = true;
                 tile.DrawToBitmap(bmp, new Rectangle(Point.Empty, tile.Size));
                 Check(bmp.GetPixel(4, 4).ToArgb() == ApcTheme.C(c.GridSelected).ToArgb(), "tile: selected uses grid selection background");
@@ -101,6 +119,58 @@ namespace APC.UI.Checks
                         if (bmp.GetPixel(x, y).ToArgb() == color.ToArgb()) return true;
             }
             return false;
+        }
+
+        /// <summary>Steel + Ink: 카드는 패널 그라데이션, 묶음 라벨 옆 먹색 막대, 헤더 띠는 밝은 금속 톤.</summary>
+        private static void CheckSteelInkSurfaces()
+        {
+            var c = ApcTheme.Current.Colors;
+            using (var card = new ApcValueCard { Status = StatusKind.Run, Title = "건조로 1", Value = "170.0", Unit = "℃" })
+            using (var bmp = new Bitmap(card.Width, card.Height))
+            {
+                card.DrawToBitmap(bmp, new Rectangle(Point.Empty, card.Size));
+                Check(Near(bmp.GetPixel(card.Width - 4, card.Height - 4), ApcTheme.C(c.Panel[1]), 4), "card: panel gradient fill");
+            }
+            using (var group = new ApcGroup { Text = "LOT 바코드", Size = new Size(300, 120) })
+            using (var bmp = new Bitmap(group.Width, group.Height))
+            {
+                group.DrawToBitmap(bmp, new Rectangle(Point.Empty, group.Size));
+                Check(bmp.GetPixel(ApcTheme.Px(10) + 1, group.TitleHeight / 2).ToArgb() == ApcTheme.C(c.Brand).ToArgb(), "group: brand bar beside label");
+            }
+            using (var bar = new ApcHeaderBar { Title = "체결기 #1", StatusText = "가동중", Size = new Size(600, 40) })
+            using (var bmp = new Bitmap(bar.Width, bar.Height))
+            {
+                bar.DrawToBitmap(bmp, new Rectangle(Point.Empty, bar.Size));
+                var px = bmp.GetPixel(2, bar.Height / 2);
+                Check(px.R > 200 && px.G > 200 && px.B > 200, "header bar: light background");
+                bool blank = true;
+                for (int x = 2; x < bar.Width / 2 && blank; x++)
+                    for (int y = 4; y < bar.Height - 4 && blank; y++)
+                        blank = bmp.GetPixel(x, y).ToArgb() == bmp.GetPixel(2, y).ToArgb();
+                Check(blank, "header bar: no title text on the left");
+                Check(System.Text.RegularExpressions.Regex.IsMatch(bar.ClockText, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"), "header bar: clock shows yyyy-MM-dd HH:mm:ss");
+                Check(bar.ClockBounds.Right <= bar.Width - ApcTheme.Px(12) && bar.ClockBounds.Left > bar.StatusBounds.Right, "header bar: clock at right, status left of it");
+            }
+            using (var v = new SectionProbe())
+            {
+                v.Title.Size = v.Title.PreferredSize;
+                using (var bmp = new Bitmap(v.Title.Width, v.Title.Height))
+                {
+                    v.Title.DrawToBitmap(bmp, new Rectangle(Point.Empty, v.Title.Size));
+                    Check(bmp.GetPixel(1, v.Title.Height / 2).ToArgb() == ApcTheme.C(c.Brand).ToArgb(), "section title: brand bar on the left");
+                }
+            }
+        }
+
+        private sealed class SectionProbe : ApcTemplateView
+        {
+            public readonly System.Windows.Forms.Label Title = SectionTitle("최근 알람 이력");
+            public SectionProbe() : base("probe") { }
+        }
+
+        private static bool Near(Color a, Color b, int tol)
+        {
+            return System.Math.Abs(a.R - b.R) <= tol && System.Math.Abs(a.G - b.G) <= tol && System.Math.Abs(a.B - b.B) <= tol;
         }
     }
 }

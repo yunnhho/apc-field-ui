@@ -1,4 +1,4 @@
-# APC.UI API (v1.18.0.0)
+# APC.UI API (v1.20.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -92,6 +92,7 @@
 - `protected void AddFieldRow(string caption, Control field, params Control[] trailing)` — 이름표 + 입력칸 한 줄. trailing이 없으면 입력칸이 남은 폭을 채우고, 있으면 모두 자기 Width로 왼→오.
 - `protected void SetFooter(ApcButton cancel, ApcButton confirm, params ApcButton[] left)` — 하단 버튼 줄: 오른쪽 [확정][취소](취소가 끝, cancel은 null 가능), 왼쪽 보조 버튼. Esc = 취소(없으면 확정).
 - `protected void SetupDialog(string title, int width, int height = 0)` — dialog 기본 속성과 크기(배율 전 px). height 0 = 내용으로 자동(AddContentFill을 쓰면 필수).
+- `string FunctionText { get; set; }` — 제목 아랫줄의 기능명(예: "작업 시작 · LOT 스캔"). 브랜드 색으로 그린다. 메인 창(ShowLogo)에서만 보이고, 비어 있으면 한 줄 제목·기본 높이.
 - `string TitleText { get; set; }`
 
 ## ApcGrid
@@ -102,13 +103,15 @@
 - `ApcGrid()`
 - `bool ClearInitialSelection { get; set; }` — true(기본)면 사용자가 누르기 전엔 선택 행이 없다. 입력 표(스캔으로 칸을 채우는 dialog 등)처럼 앱이 CurrentCell을 정해 두고 바로 입력받아야 하면 false.
 - `static int HeightForRows(int rows)` — 머리줄 + 행 rows개가 빈 줄·스크롤바 없이 들어가는 표 높이(배율 적용 px). dialog의 AddContent 표 높이에 쓴다.
+- `static int HeightForRows(int rows, bool columnGroups)` — HeightForRows와 같고, 묶음 머리줄(AddColumnGroup)이 있는 표면 columnGroups = true(머리줄 2단).
 - `static void DrawHeaderText(Graphics g, Rectangle cell, string text, Font font)` — 머리줄 글자를 칸 정가운데에. 기본 그리기는 정렬 화살표 자리·안쪽 여백만큼 왼쪽으로 1~2px 치우친다. 오른쪽 구분선·아래 선 1px은 빼고 가운데를 잡는다. 묶음 머리줄 등 직접 그리는 곳도 이것을 쓴다.
+- `void AddColumnGroup(string text, int firstColumn, int lastColumn)` — 묶음 머리줄: 열 firstColumn~lastColumn(열 번호, 포함) 위에 묶음 제목 한 칸("온도 (℃)" 위, 아래 칸에 "NI"·"SN"). 처음 부르면 머리줄이 2단이 되고, 묶이지 않은 열 제목은 두 단에 걸쳐 가운데에 그린다. 열을 모두 추가한 뒤 부른다.
 
 ## ApcGroup
 
 `APC.UI.Controls` · class : Panel
 
-제목 띠가 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 제목 띠는 값 카드와 같은 그리드 헤더 그라데이션. 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
+제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 브랜드색 막대가 붙은 굵은 제목. 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
 - `ApcGroup()`
 - `int HeightFor(int contentHeight)` — 안 내용 높이(배율 적용 px)를 담는 묶음 높이 = 제목 띠 + 위아래 여백 + 내용. 화면에서 Columns() 줄을 담으면 내용 = 줄 높이 합.
 - `string Text { get; set; }` — 제목 띠 글자.
@@ -117,11 +120,11 @@
 
 `APC.UI.Controls` · class : Panel
 
-화면 상단 띠: 왼쪽 제목(설비명 등), 오른쪽 상태 램프 + 상태 문구.
+화면 상단 띠: 오른쪽에 상태 램프 + 상태 문구, 그 오른쪽 끝에 현재 시각(1초마다 갱신). 프로그램 이름은 창 제목 줄에 있으므로 띠에는 그리지 않는다(Title은 창 제목과 같은 이름을 보관만 한다).
 - `ApcHeaderBar()`
 - `StatusKind Status { get; set; }`
 - `string StatusText { get; set; }`
-- `string Title { get; set; }`
+- `string Title { get; set; }` — 화면 이름(창 제목과 같은 값). 띠에는 그리지 않는다.
 
 ## ApcIconCell
 
@@ -138,6 +141,16 @@
 - `ApcIconColumn()`
 - `static bool IsEnabled(DataGridViewCell cell)` — 셀이 누를 수 있는 상태(값 true)인지.
 - `string IconName { get; set; }` — 테마 이미지 이름 앞부분(예: "icon_play", "icon_reset").
+
+## ApcInfoStrip
+
+`APC.UI.Controls` · class : Control
+
+이름-값 정보판 한 줄: [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time]처럼 진한 이름 칸과 흰 값 칸이 번갈아 나온다. 화면 헤더 아래 "지금 무엇을 보는가"(공정·설비·LOT·SPEC 등)를 적는 줄. 이름 칸은 글자 폭, 값 칸은 남은 폭을 똑같이 나눈다. 값이 없으면 빈칸. 입력칸이 아니다(읽기 전용 표시).
+- `ApcInfoStrip()`
+- `string GetValue(string name)`
+- `void SetItems(params string[] names)` — 이름 칸들(왼→오). 값은 모두 빈칸으로 시작한다.
+- `void SetValue(string name, string value)` — 이름 칸 name 옆 값. 없는 이름이면 ArgumentException.
 
 ## ApcJudgePanel
 
@@ -208,6 +221,15 @@
 - `event EventHandler<ScanEventArgs> Scanned`
 - `void Attach(Form host)` — 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로 화면의 OnHandleCreated에서 FindForm()으로 부른다: var f = FindForm(); if (f != null) _scan.Attach(f);
 - `void Flash(bool success)` — 성공 = 초록 플래시 + 짧은 비프, 실패 = 빨강 플래시 + 경고음.
+
+## ApcStatusLegend
+
+`APC.UI.Controls` · class : Control
+
+상태색 범례: 램프 + 뜻을 왼→오로("● 관리선 내 ● 관리선 이탈 ● SPEC 초과"). 표·그래프 칸의 램프 색이 무엇인지 화면에서 읽히게. 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다(구획 제목 줄 오른쪽에 Dock = Right).
+- `ApcStatusLegend()`
+- `int PreferredWidth { get; }` — 항목을 모두 그리는 폭(배율 적용 px).
+- `void SetItems(params ApcLampValue[] items)` — 범례 항목(상태 + 뜻). 부르면 Width가 항목에 맞게 바뀐다.
 
 ## ApcStatusTile
 
@@ -398,6 +420,8 @@
 
 - `ThemeColors()`
 - `string Border { get; set; }`
+- `string BorderStrong { get; set; }` — 입력칸 테두리. 없으면 border.
+- `string Brand { get; set; }` — 브랜드 색. 창 제목 기능명과 묶음·구획 제목 막대에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.
 - `string GridLine { get; set; }`
 - `string GridSelected { get; set; }`
 - `string Text { get; set; }`
@@ -406,6 +430,7 @@
 - `string[] Background { get; set; }` — 그라데이션 [시작, 끝]
 - `string[] GridHeader { get; set; }`
 - `string[] Header { get; set; }`
+- `string[] Panel { get; set; }` — 패널·카드 바탕 그라데이션 [시작, 끝]. 없으면 흰색.
 - `string[] TitleBar { get; set; }` — 창 타이틀바(로고가 올라가므로 밝은 톤)
 
 ## ThemeData

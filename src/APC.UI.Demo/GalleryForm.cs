@@ -18,6 +18,7 @@ namespace APC.UI.Demo
         {
             float s = ApcTheme.Scale;
             TitleText = "APC.UI 갤러리 — " + ApcTheme.Current.Name;
+            FunctionText = "컨트롤 · 화면 템플릿";
             StartPosition = FormStartPosition.CenterScreen;
             Size = new Size((int)(1600 * s), (int)(900 * s));
             MinimumSize = new Size((int)(1024 * s), (int)(640 * s));
@@ -42,6 +43,7 @@ namespace APC.UI.Demo
             AddMenu(menu, "이력 조회", () => new HistoryView());
             AddMenu(menu, "[참조] 온습도", () => new TempHumiView());
             AddMenu(menu, "[참조] 연마기 불량방지", () => new FailureAnalysisView());
+            AddMenu(menu, "[참조] 호기×항목 추이", () => new TrendMatrixView());
 
             Controls.Add(_host);
             Controls.Add(menu);

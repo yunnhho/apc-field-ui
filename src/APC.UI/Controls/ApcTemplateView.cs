@@ -83,9 +83,32 @@ namespace APC.UI.Controls
         /// <summary>구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).</summary>
         protected static Label SectionTitle(string text)
         {
-            var l = Caption(text);
-            l.Font = ApcTheme.GetFont(FontStyle.Bold);
+            var l = new SectionLabel
+            {
+                Text = text,
+                AutoSize = true,
+                Font = ApcTheme.GetFont(FontStyle.Bold),
+                ForeColor = ApcTheme.C(ApcTheme.Current.Colors.Text),
+                Margin = new Padding(0, S(8), S(6), 0),
+                Padding = new Padding(S(SectionLabel.BaseBar + SectionLabel.BaseGap), 0, 0, 0),
+                BackColor = Color.Transparent,
+            };
             return l;
+        }
+
+        /// <summary>구획 제목: 왼쪽 3px 브랜드색 막대 + 굵은 글자(ApcGroup 제목과 같은 표시).</summary>
+        private sealed class SectionLabel : Label
+        {
+            internal const int BaseBar = 3, BaseGap = 7;
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                base.OnPaint(e);
+                if (ApcTheme.Current == null) return;
+                int barH = Math.Min(Height, TextRenderer.MeasureText("가", Font).Height);
+                using (var mark = new SolidBrush(ApcTheme.C(ApcTheme.Current.Colors.Brand)))
+                    e.Graphics.FillRectangle(mark, 0, (Height - barH) / 2, S(BaseBar), barH);
+            }
         }
 
         protected static ApcButton Button(string text, ApcButtonVariant variant, int width = 110)

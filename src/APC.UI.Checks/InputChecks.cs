@@ -45,7 +45,7 @@ namespace APC.UI.Checks
                 using (var bmp = new Bitmap(box.Width, box.Height))
                 {
                     box.DrawToBitmap(bmp, new Rectangle(0, 0, box.Width, box.Height));
-                    Check(bmp.GetPixel(0, box.Height / 2).ToArgb() == ApcTheme.C(ApcTheme.Current.Colors.Border).ToArgb(),
+                    Check(bmp.GetPixel(0, box.Height / 2).ToArgb() == ApcTheme.C(ApcTheme.Current.Colors.BorderStrong).ToArgb(),
                         "textbox: render draws themed border (WM_PRINT path)");
                 }
                 box.ReadOnly = true;

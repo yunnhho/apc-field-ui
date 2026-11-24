@@ -7,7 +7,7 @@ description: Use when building or modifying an APCSOFT field PC program screen i
 
 > **소스(`.cs`)는 Write 도구로 한 파일씩 쓴다. Bash heredoc 금지** — 한글 heredoc은 따옴표 파싱 오류로 일부만 또는 아무것도 안 만들어진다(시연에서 경고를 읽고도 다섯 차례 실패). 일부만 바꿀 때는 Edit.
 
-APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. 원본 저장소: `C:\apc-field-ui` (이하 `$REPO`, Git Bash 경로 `/c/apc-field-ui`. 다른 위치에 클론했으면 `tools/install-skill.sh`가 이 문서의 경로를 실제 위치로 바꿔 설치한다).
+APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. 원본 저장소: `C:\apc-field-ui` (Git Bash 경로 `/c/apc-field-ui`. 아래 명령·경로는 이 경로를 그대로 쓴다. 다른 위치에 클론했으면 `tools/install-skill.sh`가 이 문서의 경로를 실제 위치로 바꿔 설치한다).
 결과물: 샘플 데이터가 들어간 **메인 화면 하나 + (필요하면) dialog** 껍데기와, 데이터 연결용 **인터페이스 자리**. 실제 PLC/DB/시리얼 연결 코드는 만들지 않는다.
 
 ## 1. 입력 확인
@@ -22,12 +22,13 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 ## 2. 프로젝트 판별과 준비
 
-먼저 저장소 도구가 빌드돼 있어야 한다: `$REPO/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe`가 없으면 `bash /c/apc-field-ui/build.sh`를 실행한다(`ALL PASSED` 확인).
+먼저 저장소 도구가 빌드돼 있어야 한다: `/c/apc-field-ui/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe`가 없으면 `bash /c/apc-field-ui/build.sh`를 실행한다(`ALL PASSED` 확인).
 
 | 작업 폴더 상태 | 할 일 |
 |---|---|
 | csproj 없음 | `bash /c/apc-field-ui/tools/new-project.sh <폴더> <프로젝트명> <고객사> [--framework v4.x]` (기본 v4.0, v4.0~v4.8.1. 폴더가 없으면 스크립트가 만든다) |
 | 구형 csproj, `TargetFrameworkVersion` v4.x, WinForms | 같은 명령에 `--into-existing` (dll·테마·참조만 추가, 재실행 시 dll만 교체) |
+| 이미 APC.UI 참조 있음(`lib/APC.UI.dll`, 기존 화면 수정·dialog 추가) | 스크립트를 바로 돌리지 않는다. dll 버전(`powershell -c "(Get-Item lib/APC.UI.dll).VersionInfo.FileVersion"`)을 `/c/apc-field-ui/src/APC.UI/Properties/AssemblyInfo.cs`의 `AssemblyFileVersion`과 비교한다. 같으면 그대로 진행. 다르면 `docs/api.md`(최신 기준)와 맞지 않는 API가 있을 수 있으니 사용자에게 알리고, 교체를 원하면 `--into-existing`으로 dll만 바꾼 뒤 빌드해 기존 화면이 깨지지 않는지 확인한다 |
 | SDK 형식(`<Project Sdk=`), net6/8, WPF, 웹 | **중단.** APC.UI는 .NET Framework 4.x WinForms 전용이라고 알린다 |
 
 `--into-existing`일 때 스크립트가 하지 않는 두 가지를 직접 한다:
@@ -40,7 +41,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 ## 3. API 파악
 
-`$REPO/docs/api.md`(자동 생성 API 요약)를 읽는다. 컨트롤 소스 전체를 읽지 않는다. 배치 참고용 템플릿은 아래에서 고른 1~2개만 `$REPO/src/APC.UI.Demo/Templates/`에서 읽는다.
+`/c/apc-field-ui/docs/api.md`(자동 생성 API 요약)를 읽는다. 컨트롤 소스 전체를 읽지 않는다. 배치 참고용 템플릿은 아래에서 고른 1~2개만 `/c/apc-field-ui/src/APC.UI.Demo/Templates/`에서 읽는다.
 
 ## 4. 배치
 
@@ -59,7 +60,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 - **템플릿 가져오기**: 템플릿은 데모 프로젝트의 `internal sealed` 클래스라 참조할 수 없다. 읽고 프로젝트에 새 파일로 옮겨 쓴다 — 네임스페이스를 프로젝트 것으로, 클래스 이름을 화면에 맞게, 코드에 박힌 샘플 값(배열·`Rows.Add` 반복)은 `SampleMainViewSource`로 옮기고 화면은 `IMainViewSource`에서 받는다. `Columns()`·`Row()`·`Caption()`·`SectionTitle()`·`Button()`·`S()`는 `ApcTemplateView`에 있으니 옮기지 않는다.
 - 맞는 템플릿이 없거나 추가 요청이 있으면 `ApcTemplateView`(헤더 + Body + 알람바) 위에 **기존 Apc 컨트롤로 새 배치**를 짠다.
-- `new-project.sh`가 만드는 `MainView`·`IMainViewSource`는 빈 틀(TODO)이다. 여기에 채운다. `MainForm.TitleText`도 화면 이름으로 바꾼다(기본값은 영문 프로젝트명).
+- `new-project.sh`가 만드는 `MainView`·`IMainViewSource`는 빈 틀(TODO)이다. 여기에 채운다. `MainForm.TitleText`도 화면 이름으로 바꾸고(기본값은 영문 프로젝트명), `MainForm.FunctionText`에 지금 기능명을 넣는다.
 - **도킹 순서**: 같은 Dock끼리는 나중에 `Add`한 것이 바깥(위)에 온다. `Body`에는 Fill 컨트롤을 먼저 `Add`하고, Top 줄은 화면 아래쪽 것부터 위쪽 것 순서로 `Add`한다(또는 `Body.Controls.SetChildIndex(fill, 0)`).
 - 카드·타일·판정판을 한 줄에: `ApcTemplateView`의 `Columns(S(높이), cells)`(같은 폭) 또는 `Columns(S(높이), cells, new[] { 50f, 25f, 25f })`(퍼센트 폭). 칸 간격·줄 간격은 헬퍼가 정한다. 한 줄은 **높이 + 12**를 차지한다(줄 아래 간격 포함) — `Columns()` 여러 줄을 Panel 하나에 담으면 그 Panel 높이는 `(S(높이) + S(12)) × 줄 수`.
 - `SectionTitle()`·`Caption()`은 Dock이 없는 Label이다. `Body`에 바로 넣을 때는 `Dock = DockStyle.Top`을 준다(안 주면 위 줄과 겹친다. 시연 두 차례 연속). `Row()` 안에 넣을 때는 그대로 둔다.
@@ -124,7 +125,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 | 항목 | 기준 |
 |---|---|
-| 창 제목 | 화면 이름만(`MainForm.TitleText`, 예: "도장 라인 모니터링"). 고객사·버전 붙이지 않음. 화면 헤더 제목(`base("...")`)도 같은 이름 |
+| 창 제목 | 화면 이름만(`MainForm.TitleText`, 예: "도장 라인 모니터링"). 고객사·버전 붙이지 않음. 화면 헤더 제목(`base("...")`)도 같은 이름(헤더 띠에는 그리지 않고 오른쪽에 상태·현재 시각만 나온다). 그 아래 줄 기능명은 `MainForm.FunctionText`(예: "작업 시작 · LOT 스캔", 브랜드 붉은색). dialog에는 기능명 없음. 브랜드 색(`brand`)은 기능명과 묶음·구획 제목 막대에만 라이브러리가 쓴다 — 화면 코드에서 직접 쓰지 않는다(알람 빨강과 혼동) |
 | 날짜·시각 | 날짜 `yyyy-MM-dd`, 당일 이력 시각 `HH:mm:ss`, 여러 날에 걸친 이력 `yyyy-MM-dd HH:mm:ss` |
 | 소수 자리 | ℃·%RH·kN·bar·kPa·m/min·A·V·Pa·µA → `0.0`, mm → `0.00`, 불량률·가동률·수율 % → `0.0`, mΩ·nA → `0.0`, 수량·파티클(개/ft³) → `#,0`(정수), 시간 설정(s·min) → 정수(측정한 사이클 타임 s는 `0.0`. 측정값과 비교하는 상·하한·경고값도 측정값 자리수 "상한 28.0 s" — 정수는 사람이 넣는 목표·설정값만). 카드 값·표·알람 문구·기준 문구 모두 같은 자리수. 여기 없는 단위(rpm·Hz·kg 등)는 요구서를 따르고, 요구서에도 없으면 사용자에게 묻는다 |
 | 표 정렬 | `ApcGrid` 기본이 가운데(헤더 포함). 긴 글 열(알람 내용·비고·사유)만 `DefaultCellStyle.Alignment = MiddleLeft`. 숫자 열도 가운데 |
@@ -165,8 +166,8 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 ## 5. 새 그림이 필요할 때만
 
-1. 프로젝트의 `assets-src/`에 SVG를 만든다. 이름 규칙 `{btn|lamp|win|icon|logo}_{이름}_{normal|hover|pressed|disabled}.svg`(램프·로고는 상태 없음), `<svg width="..">` 필수. 기존 SVG(`$REPO/assets-src/`)를 본떠 그린다.
-2. `$REPO/tools/node_modules`가 없으면 먼저 `cd /c/apc-field-ui/tools && npm install`(한 번만). 그다음
+1. 프로젝트의 `assets-src/`에 SVG를 만든다. 이름 규칙 `{btn|lamp|win|icon|logo}_{이름}_{normal|hover|pressed|disabled}.svg`(램프·로고는 상태 없음), `<svg width="..">` 필수. 기존 SVG(`/c/apc-field-ui/assets-src/`)를 본떠 그린다.
+2. `/c/apc-field-ui/tools/node_modules`가 없으면 먼저 `cd /c/apc-field-ui/tools && npm install`(한 번만). 그다음
    `node /c/apc-field-ui/tools/render-assets.mjs --out <프로젝트>/themes/<고객사>/assets --override <프로젝트>/assets-src`
 3. 기존 이름을 대체한 그림은 컨트롤이 자동으로 쓴다. 새 이름은 `ApcTheme.GetImage("icon_xxx_normal")`로 쓴다.
 
@@ -205,6 +206,6 @@ x86 앱: 위 도구는 64비트로 돌아서 `PlatformTarget`이 x86인 앱이�
 |---|---|
 | 표준 입력·표·폼 컨트롤, `Control` 상속 직접 그리기 | 4c 표의 Apc 컨트롤 |
 | 상태색 색상 변경(run=초록, warn=노랑, alarm=빨강, stop=회색, info=파랑) | 명도만 고객사 `theme.json`에서 |
-| `$REPO/themes/default`, `$REPO/assets-src/*.svg` 수정 | 프로젝트의 `themes/<고객사>`, `assets-src/` |
+| `/c/apc-field-ui/themes/default`, `/c/apc-field-ui/assets-src/*.svg` 수정 | 프로젝트의 `themes/<고객사>`, `assets-src/` |
 | 컨트롤 API 추측 | `docs/api.md` 확인 |
 | 앱을 실행해 띄워 두기 | 확인은 render로. 실행했다면 끝내기 전에 닫는다(떠 있는 exe가 `bin` 폴더를 잠가 다음 빌드·정리가 실패한다) |

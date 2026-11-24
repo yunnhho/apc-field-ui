@@ -22,6 +22,13 @@ namespace APC.UI.Checks
             Check(ApcTheme.GetImage("lamp_run") != null, "theme: image loads");
             Check(ReferenceEquals(ApcTheme.GetImage("lamp_run"), ApcTheme.GetImage("lamp_run")), "theme: image cached");
             Check(ApcTheme.MinHeight >= 28, "theme: min height >= 28");
+
+            // 버튼 모서리 반경 2px 이하(1.5.0.0 피드백): 크면 깎인 모서리로 뒤 바탕이 비쳐 빈 것처럼 보인다.
+            foreach (var svg in Directory.GetFiles(Path.Combine(Root, "assets-src"), "btn_*.svg"))
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(File.ReadAllText(svg), @"<rect[^>]*rx=""([\d.]+)""");
+                Check(m.Success && double.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) <= 2, "asset: button corner radius <= 2 (" + Path.GetFileName(svg) + ")");
+            }
         }
     }
 }

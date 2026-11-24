@@ -17,6 +17,20 @@ namespace APC.UI.Checks
                 Check(f.MaximizedArea.Height <= area.Height && f.MaximizedArea.Width <= area.Width, "maximize stays inside working area");
             }
 
+            using (var f = new ApcForm())
+            {
+                int one = f.TitleBarHeight;
+                f.FunctionText = "작업 시작 · LOT 스캔";
+                Check(f.TitleBarHeight > one && f.Padding.Top == f.TitleBarHeight + 1, "form: function text grows title bar");
+                f.FunctionText = null;
+                Check(f.FunctionText == "" && f.TitleBarHeight == one && f.Padding.Top == one + 1, "form: clearing function text restores height");
+                f.ShowLogo = false;
+                f.FunctionText = "x";
+                Check(f.TitleBarHeight == one, "form: dialog ignores function text");
+            }
+            CheckTwoLineTitleFitsLargeFont();
+            CheckSettingsButtonDrawnInShownForm();
+
             using (var dlg = ApcDialog.Create("삭제할까요?"))
             {
                 Check(dlg.CancelButton != null && dlg.AcceptButton == dlg.CancelButton, "confirm: Enter and Esc both cancel");
@@ -77,6 +91,62 @@ namespace APC.UI.Checks
             public Control H { get { return Header; } }
             public Control A { get { return Alarm; } }
             public Control B { get { return Body; } }
+        }
+        /// <summary>갤러리처럼 창을 띄운 뒤 화면을 끼워도 타이틀바에 톱니가 그려진다(두 줄 제목 포함).</summary>
+        private static void CheckSettingsButtonDrawnInShownForm()
+        {
+            using (var f = new ApcForm { ClientSize = new Size(1200, 500), FunctionText = "컨트롤 · 화면 템플릿" })
+            {
+                var host = new Panel { Dock = DockStyle.Fill };
+                f.Controls.Add(host);
+                ShowOffscreen(f);
+                host.Controls.Add(new SettingsView(() => { }));
+                Application.DoEvents();
+                using (var bmp = new Bitmap(f.ClientSize.Width, f.ClientSize.Height))
+                {
+                    f.DrawToBitmap(bmp, new Rectangle(Point.Empty, f.ClientSize));
+                    var r = f.SettingsButtonBounds;
+                    var bg = bmp.GetPixel(r.Left - 3, r.Top + r.Height / 2);
+                    bool drawn = false;
+                    for (int x = r.Left; x < r.Right && !drawn; x++)
+                        drawn = bmp.GetPixel(x, r.Top + r.Height / 2).ToArgb() != bg.ToArgb();
+                    Check(f.ShowSettings && drawn, "form: settings button drawn after view added to shown form");
+                Check(f.CloseButtonBounds.Right <= f.ClientSize.Width - APC.UI.Theming.ApcTheme.Px(12), "form: window buttons keep 12px from right edge");
+                }
+                f.Close();
+            }
+        }
+
+        /// <summary>고객사 테마 글꼴이 커도(16pt) 두 줄 제목이 타이틀바 안에 들어간다.</summary>
+        private static void CheckTwoLineTitleFitsLargeFont()
+        {
+            string original = APC.UI.Theming.ApcTheme.ThemeDir;
+            string tmp = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "apcui-bigfont-" + System.Guid.NewGuid().ToString("N"));
+            try
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.Combine(tmp, "assets"));
+                foreach (var f in System.IO.Directory.GetFiles(System.IO.Path.Combine(original, "assets")))
+                    System.IO.File.Copy(f, System.IO.Path.Combine(tmp, "assets", System.IO.Path.GetFileName(f)));
+                string json = System.IO.File.ReadAllText(System.IO.Path.Combine(original, "theme.json"));
+                json = System.Text.RegularExpressions.Regex.Replace(json, @"""fontSize"":\s*\d+", @"""fontSize"": 16");
+                System.IO.File.WriteAllText(System.IO.Path.Combine(tmp, "theme.json"), json);
+                APC.UI.Theming.ApcTheme.Load(tmp);
+                using (var f = new ApcForm { FunctionText = "작업 시작 · LOT 스캔" })
+                {
+                    var bold = APC.UI.Theming.ApcTheme.GetFont(FontStyle.Bold);
+                    using (var big = new Font(bold.FontFamily, bold.Size * 1.5f, FontStyle.Bold))
+                    using (var small = new Font(bold.FontFamily, bold.Size - 1f, FontStyle.Bold))
+                    {
+                        int need = TextRenderer.MeasureText("가", big).Height + TextRenderer.MeasureText("가", small).Height;
+                        Check(f.TitleBarHeight >= need, "form: two-line title fits a 16pt theme font");
+                    }
+                }
+            }
+            finally
+            {
+                APC.UI.Theming.ApcTheme.Load(original);
+                try { System.IO.Directory.Delete(tmp, true); } catch (System.IO.IOException) { }
+            }
         }
     }
 }

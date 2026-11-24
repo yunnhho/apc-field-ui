@@ -1,4 +1,4 @@
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace APC.UI.Theming
 {
@@ -31,6 +31,12 @@ namespace APC.UI.Theming
         [DataMember(Name = "textInverse")] public string TextInverse { get; set; }
         [DataMember(Name = "gridLine")] public string GridLine { get; set; }
         [DataMember(Name = "gridSelected")] public string GridSelected { get; set; }
+        /// <summary>패널·카드 바탕 그라데이션 [시작, 끝]. 없으면 흰색.</summary>
+        [DataMember(Name = "panel")] public string[] Panel { get; set; }
+        /// <summary>입력칸 테두리. 없으면 border.</summary>
+        [DataMember(Name = "borderStrong")] public string BorderStrong { get; set; }
+        /// <summary>브랜드 색. 창 제목 기능명과 묶음·구획 제목 막대에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.</summary>
+        [DataMember(Name = "brand")] public string Brand { get; set; }
     }
 
     [DataContract]
