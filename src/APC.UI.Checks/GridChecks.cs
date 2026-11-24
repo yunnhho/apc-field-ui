@@ -10,6 +10,7 @@ namespace APC.UI.Checks
     {
         private static void RunGridChecks()
         {
+            CheckCurrentRowTint();
             using (var g = new ApcGrid())
             {
                 var icon = new ApcIconColumn { IconName = "icon_reset" };
@@ -161,6 +162,30 @@ namespace APC.UI.Checks
                 var e = new DataGridViewCellFormattingEventArgs(0, 0, "61.8", typeof(string), style);
                 OnCellFormatting(e);
                 return e.CellStyle;
+            }
+        }
+            // 입력 표: 입력 중인 행의 읽기 전용 칸은 연한 파랑, 다른 행은 회색 — 램프 열·첫 열 포함
+        private static void CheckCurrentRowTint()
+        {
+            using (var f = new Form { ShowInTaskbar = false, Size = new Size(600, 300) })
+            {
+                var g = new ApcGrid { Dock = DockStyle.Fill, ClearInitialSelection = false, SelectionMode = DataGridViewSelectionMode.CellSelect, EditMode = DataGridViewEditMode.EditOnEnter };
+                g.Columns.Add(new ApcLampColumn { ReadOnly = true });
+                int slot = g.Columns.Add("slot", "칸"); g.Columns[slot].ReadOnly = true; g.Columns[slot].DefaultCellStyle.Font = ApcTheme.GetFont(FontStyle.Bold);
+                int lot = g.Columns.Add("lot", "LOT");
+                for (int i = 0; i < 3; i++) g.Rows.Add(StatusKind.Stop, "B" + i, "");
+                f.Controls.Add(g);
+                ShowOffscreen(f);
+                g.CurrentCell = g.Rows[2].Cells[lot];
+                Application.DoEvents();
+                using (var bmp = new Bitmap(g.Width, g.Height))
+                {
+                    g.DrawToBitmap(bmp, new Rectangle(Point.Empty, g.Size));
+                    Func<int, int, Color> at = (col, row) => { var r = g.GetCellDisplayRectangle(col, row, false); return bmp.GetPixel(r.Left + 3, r.Top + 3); };
+                    var tint = APC.UI.Drawing.FieldFrame.FocusFill.ToArgb();
+                    Check(at(0, 2).ToArgb() == tint && at(slot, 2).ToArgb() == tint, "grid: current input row tints read-only cells incl. lamp/first column (" + at(0, 2) + "," + at(slot, 2) + ")");
+                    Check(at(slot, 0).ToArgb() != tint, "grid: other rows stay gray");
+                }
             }
         }
     }

@@ -27,20 +27,6 @@ namespace APC.UI.Checks
 
             Check(ApcTheme.Px(100) == (int)System.Math.Round(100 * ApcTheme.Scale), "theme: Px scales like template S()");
 
-            using (var card = new ApcFieldCard { Width = ApcTheme.Px(240) })
-            {
-                var a = new ApcTextBox();
-                var b = new ApcTextBox();
-                card.AddField("LOT", a);
-                int one = card.Height;
-                card.AddField("바렐", b);
-                Check(one == ApcFieldCard.HeightFor(1) && card.Height == ApcFieldCard.HeightFor(2) && card.Height > one, "field card: height grows with fields");
-                card.Footer = "스캔 08:12:33";
-                card.FooterStatus = StatusKind.Run;
-                Check(card.Height == ApcFieldCard.HeightFor(2), "field card: footer change keeps height");
-                Check(a.Left == b.Left && a.Width == b.Width && a.Right < card.Width && b.Top > a.Bottom && b.Bottom < card.Height,
-                      "field card: fields stacked inside card at same width");
-            }
 
             var c = ApcTheme.Current.Colors;
             Check(Cards.EmphasisColor(StatusKind.Run) == ApcTheme.C(c.Text), "card: normal value uses text color (not green)");

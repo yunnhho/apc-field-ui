@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -38,6 +38,7 @@ namespace APC.UI.Controls
         protected override object GetFormattedValue(object value, int rowIndex, ref DataGridViewCellStyle cellStyle,
             TypeConverter valueTypeConverter, TypeConverter formattedValueTypeConverter, DataGridViewDataErrorContexts context)
         {
+            base.GetFormattedValue(value, rowIndex, ref cellStyle, valueTypeConverter, formattedValueTypeConverter, context);   // CellFormatting(읽기 전용·입력 중 행 바탕색)은 받는다
             return string.Empty;   // 글자는 그리지 않는다
         }
 

@@ -164,7 +164,24 @@ namespace APC.UI.Controls
             // 셀에 상태색 글자(기준 이탈 강조)를 줬으면 선택 행에서도 그 색을 유지한다 — 선택 글자색에 묻히지 않게.
             if (e.CellStyle.ForeColor != DefaultCellStyle.ForeColor) e.CellStyle.SelectionForeColor = e.CellStyle.ForeColor;
             if (ReadOnly) return;
-            if (Columns[e.ColumnIndex].ReadOnly) e.CellStyle.BackColor = ApcTheme.C(ApcTheme.Current.Colors.Background[0]);
+            if (!Columns[e.ColumnIndex].ReadOnly) return;
+            // 입력 중인 행의 읽기 전용 칸은 연한 파랑(입력칸 포커스 바탕) → 어느 행을 넣는지 멀리서도 보인다
+            bool current = CurrentCell != null && CurrentCell.RowIndex == e.RowIndex && SelectionMode == DataGridViewSelectionMode.CellSelect;
+            e.CellStyle.BackColor = current ? FieldFrame.FocusFill : ApcTheme.C(ApcTheme.Current.Colors.Background[0]);
+            e.CellStyle.SelectionBackColor = e.CellStyle.BackColor;
+        }
+
+        private int _lastCurrentRow = -1;
+
+        protected override void OnCurrentCellChanged(EventArgs e)
+        {
+            base.OnCurrentCellChanged(e);
+            if (ReadOnly) return;
+            int row = CurrentCell == null ? -1 : CurrentCell.RowIndex;
+            if (row == _lastCurrentRow) return;
+            if (_lastCurrentRow >= 0 && _lastCurrentRow < Rows.Count) InvalidateRow(_lastCurrentRow);
+            if (row >= 0) InvalidateRow(row);
+            _lastCurrentRow = row;
         }
 
         // 셀 글자(TextRenderer)는 10pt=13.33px를 14px로 올려 그리고, 입력 칸(네이티브 TextBox)은 13px로 내려 그려
