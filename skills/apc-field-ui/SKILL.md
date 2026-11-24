@@ -7,7 +7,7 @@ description: Use when building or modifying an APCSOFT field PC program screen i
 
 > **소스(`.cs`)는 Write 도구로 한 파일씩 쓴다. Bash heredoc 금지** — 한글 heredoc은 따옴표 파싱 오류로 일부만 또는 아무것도 안 만들어진다(시연에서 경고를 읽고도 다섯 차례 실패). 일부만 바꿀 때는 Edit.
 
-APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. 원본 저장소: `C:\apc-field-ui` (이하 `$REPO`, Git Bash 경로 `/c/apc-field-ui`. 다른 위치에 클론했으면 `tools/install-skill.sh`가 이 문서의 경로를 실제 위치로 바꿔 설치한다).
+APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. 원본 저장소: `C:\apc-field-ui` (Git Bash 경로 `/c/apc-field-ui`. 아래 명령·경로는 이 경로를 그대로 쓴다. 다른 위치에 클론했으면 `tools/install-skill.sh`가 이 문서의 경로를 실제 위치로 바꿔 설치한다).
 결과물: 샘플 데이터가 들어간 **메인 화면 하나 + (필요하면) dialog** 껍데기와, 데이터 연결용 **인터페이스 자리**. 실제 PLC/DB/시리얼 연결 코드는 만들지 않는다.
 
 ## 1. 입력 확인
@@ -22,12 +22,13 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 ## 2. 프로젝트 판별과 준비
 
-먼저 저장소 도구가 빌드돼 있어야 한다: `$REPO/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe`가 없으면 `bash /c/apc-field-ui/build.sh`를 실행한다(`ALL PASSED` 확인).
+먼저 저장소 도구가 빌드돼 있어야 한다: `/c/apc-field-ui/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe`가 없으면 `bash /c/apc-field-ui/build.sh`를 실행한다(`ALL PASSED` 확인).
 
 | 작업 폴더 상태 | 할 일 |
 |---|---|
 | csproj 없음 | `bash /c/apc-field-ui/tools/new-project.sh <폴더> <프로젝트명> <고객사> [--framework v4.x]` (기본 v4.0, v4.0~v4.8.1. 폴더가 없으면 스크립트가 만든다) |
 | 구형 csproj, `TargetFrameworkVersion` v4.x, WinForms | 같은 명령에 `--into-existing` (dll·테마·참조만 추가, 재실행 시 dll만 교체) |
+| 이미 APC.UI 참조 있음(`lib/APC.UI.dll`, 기존 화면 수정·dialog 추가) | 스크립트를 바로 돌리지 않는다. dll 버전(`powershell -c "(Get-Item lib/APC.UI.dll).VersionInfo.FileVersion"`)을 `/c/apc-field-ui/src/APC.UI/Properties/AssemblyInfo.cs`의 `AssemblyFileVersion`과 비교한다. 같으면 그대로 진행. 다르면 `docs/api.md`(최신 기준)와 맞지 않는 API가 있을 수 있으니 사용자에게 알리고, 교체를 원하면 `--into-existing`으로 dll만 바꾼 뒤 빌드해 기존 화면이 깨지지 않는지 확인한다 |
 | SDK 형식(`<Project Sdk=`), net6/8, WPF, 웹 | **중단.** APC.UI는 .NET Framework 4.x WinForms 전용이라고 알린다 |
 
 `--into-existing`일 때 스크립트가 하지 않는 두 가지를 직접 한다:
@@ -40,7 +41,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 ## 3. API 파악
 
-`$REPO/docs/api.md`(자동 생성 API 요약)를 읽는다. 컨트롤 소스 전체를 읽지 않는다. 배치 참고용 템플릿은 아래에서 고른 1~2개만 `$REPO/src/APC.UI.Demo/Templates/`에서 읽는다.
+`/c/apc-field-ui/docs/api.md`(자동 생성 API 요약)를 읽는다. 컨트롤 소스 전체를 읽지 않는다. 배치 참고용 템플릿은 아래에서 고른 1~2개만 `/c/apc-field-ui/src/APC.UI.Demo/Templates/`에서 읽는다.
 
 ## 4. 배치
 
@@ -165,8 +166,8 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 ## 5. 새 그림이 필요할 때만
 
-1. 프로젝트의 `assets-src/`에 SVG를 만든다. 이름 규칙 `{btn|lamp|win|icon|logo}_{이름}_{normal|hover|pressed|disabled}.svg`(램프·로고는 상태 없음), `<svg width="..">` 필수. 기존 SVG(`$REPO/assets-src/`)를 본떠 그린다.
-2. `$REPO/tools/node_modules`가 없으면 먼저 `cd /c/apc-field-ui/tools && npm install`(한 번만). 그다음
+1. 프로젝트의 `assets-src/`에 SVG를 만든다. 이름 규칙 `{btn|lamp|win|icon|logo}_{이름}_{normal|hover|pressed|disabled}.svg`(램프·로고는 상태 없음), `<svg width="..">` 필수. 기존 SVG(`/c/apc-field-ui/assets-src/`)를 본떠 그린다.
+2. `/c/apc-field-ui/tools/node_modules`가 없으면 먼저 `cd /c/apc-field-ui/tools && npm install`(한 번만). 그다음
    `node /c/apc-field-ui/tools/render-assets.mjs --out <프로젝트>/themes/<고객사>/assets --override <프로젝트>/assets-src`
 3. 기존 이름을 대체한 그림은 컨트롤이 자동으로 쓴다. 새 이름은 `ApcTheme.GetImage("icon_xxx_normal")`로 쓴다.
 
@@ -205,6 +206,6 @@ x86 앱: 위 도구는 64비트로 돌아서 `PlatformTarget`이 x86인 앱이�
 |---|---|
 | 표준 입력·표·폼 컨트롤, `Control` 상속 직접 그리기 | 4c 표의 Apc 컨트롤 |
 | 상태색 색상 변경(run=초록, warn=노랑, alarm=빨강, stop=회색, info=파랑) | 명도만 고객사 `theme.json`에서 |
-| `$REPO/themes/default`, `$REPO/assets-src/*.svg` 수정 | 프로젝트의 `themes/<고객사>`, `assets-src/` |
+| `/c/apc-field-ui/themes/default`, `/c/apc-field-ui/assets-src/*.svg` 수정 | 프로젝트의 `themes/<고객사>`, `assets-src/` |
 | 컨트롤 API 추측 | `docs/api.md` 확인 |
 | 앱을 실행해 띄워 두기 | 확인은 render로. 실행했다면 끝내기 전에 닫는다(떠 있는 exe가 `bin` 폴더를 잠가 다음 빌드·정리가 실패한다) |
