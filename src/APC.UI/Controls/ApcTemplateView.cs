@@ -22,8 +22,6 @@ namespace APC.UI.Controls
             BackColor = ApcTheme.C(ApcTheme.Current.Colors.Background[0]);
             Font = ApcTheme.GetFont();   // 자식(헤더·카드·입력칸·이름표)이 어떤 창에 올라가도 테마 글꼴을 물려받게
             Header.Title = title;
-            Header.Status = StatusKind.Run;
-            Header.StatusText = "가동중";
             Body.Padding = new Padding(S(ApcLayout.Pad));
             Controls.Add(Body);     // Fill은 마지막에 도킹되도록 먼저 추가
             Controls.Add(Alarm);
@@ -78,6 +76,26 @@ namespace APC.UI.Controls
                 Margin = new Padding(0, S(8), S(6), 0),
                 BackColor = Color.Transparent,
             };
+        }
+
+        private const int BaseHeaderToolsHeight = 48;
+
+        /// <summary>
+        /// 탭(ApcTabStrip)·안내 문구 등을 헤더 띠 왼쪽에 둔다(띠 오른쪽은 현재 시각). 탭이 있는 화면은 본문이 아니라 여기에 탭을 넣는다.
+        /// 띠 높이를 48px로 늘리고, 탭은 아래끝을 띠 아래선에 붙이고 나머지는 세로 가운데. 생성자에서 한 번 부른다.
+        /// </summary>
+        protected void HeaderTools(params Control[] controls)
+        {
+            Header.Height = S(BaseHeaderToolsHeight);
+            var left = new FlowLayoutPanel { Dock = DockStyle.Left, AutoSize = true, WrapContents = false, BackColor = Color.Transparent, Padding = new Padding(S(16), 0, 0, 0) };
+            for (int i = 0; i < controls.Length; i++)
+            {
+                var c = controls[i];
+                int top = c is ApcTabStrip ? Header.Height - c.Height : Math.Max(0, (Header.Height - c.PreferredSize.Height) / 2);
+                c.Margin = new Padding(i == 0 ? 0 : S(16), top, 0, 0);
+                left.Controls.Add(c);
+            }
+            Header.Controls.Add(left);
         }
 
         /// <summary>구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).</summary>

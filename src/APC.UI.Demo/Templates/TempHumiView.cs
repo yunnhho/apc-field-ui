@@ -25,8 +25,6 @@ namespace APC.UI.Demo.Templates
 
         public TempHumiView() : base("온습도 모니터링")
         {
-            Header.Status = StatusKind.Alarm;
-            Header.StatusText = "알람 1 · 경고 1 · 끊김 2";
 
             var prev = Button("◀ 이전", ApcButtonVariant.Normal, 80);
             var next = Button("다음 ▶", ApcButtonVariant.Normal, 80);

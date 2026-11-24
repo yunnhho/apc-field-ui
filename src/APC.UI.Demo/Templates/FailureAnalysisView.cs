@@ -13,7 +13,6 @@ namespace APC.UI.Demo.Templates
     /// </summary>
     internal sealed class FailureAnalysisView : ApcTemplateView
     {
-        private const int HeaderHeight = 48;
         private const int ColCurrent = 9, ColSend = 11, ColReset = 12, ColStatus = 13;
         private static readonly string[] Groups = { "저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08" };
 
@@ -22,18 +21,12 @@ namespace APC.UI.Demo.Templates
 
         public FailureAnalysisView() : base("연마기 불량 방지 시스템")
         {
-            // 설비군 탭·시험 모드 안내는 헤더 띠 왼쪽에(띠 오른쪽은 상태·현재 시각). 탭 아래끝이 띠 아래선에 닿게.
-            Header.Height = S(HeaderHeight);
+            // 설비군 탭·시험 모드 안내는 헤더 띠 왼쪽에(띠 오른쪽은 현재 시각)
             _tabs.SetTabs(Groups);   // 첫 탭이 선택된다. 표 내용은 아래 SelectGroup(0)에서
             _tabs.Width = _tabs.PreferredTabsWidth;
-            _tabs.Margin = new Padding(0, Header.Height - _tabs.Height, 0, 0);
             var testMode = Caption("ⓘ 시험 모드 : 가상 장비로 동작합니다.");
             testMode.ForeColor = ApcTheme.Status(StatusKind.Info);
-            testMode.Margin = new Padding(S(16), (Header.Height - testMode.PreferredHeight) / 2, 0, 0);
-            var left = new FlowLayoutPanel { Dock = DockStyle.Left, AutoSize = true, WrapContents = false, BackColor = Color.Transparent, Padding = new Padding(S(16), 0, 0, 0) };
-            left.Controls.Add(_tabs);
-            left.Controls.Add(testMode);
-            Header.Controls.Add(left);
+            HeaderTools(_tabs, testMode);
 
             UseSettingsButton((s, e) => OpenSettings());   // 설정은 화면 안 버튼이 아니라 창 타이틀바(최소화 왼쪽) 톱니
 
@@ -106,22 +99,11 @@ namespace APC.UI.Demo.Templates
                         _grid.Rows.Add(SampleRow(no, name));
                     }
 
-            int alarms = 0, warns = 0, waiting = 0, offline = 0;
             foreach (DataGridViewRow r in _grid.Rows)
             {
                 var v = (ApcLampValue)r.Cells[ColStatus].Value;
-                if (v.Status == StatusKind.Alarm) { alarms++; Alarm.Push(r.Cells[1].Value + ": " + v.Text); }
-                else if (v.Status == StatusKind.Warn) warns++;
-                else if (v.Text == "대기") waiting++;
-                else if (v.Text == "끊김") offline++;
+                if (v.Status == StatusKind.Alarm) Alarm.Push(r.Cells[1].Value + ": " + v.Text);
             }
-            Header.Status = alarms > 0 ? StatusKind.Alarm : warns > 0 ? StatusKind.Warn : offline + waiting > 0 ? StatusKind.Stop : StatusKind.Run;
-            var parts = new List<string>();   // 설비군은 바로 옆 탭에 보이므로 상태 문구에 다시 쓰지 않는다
-            if (alarms > 0) parts.Add("알람 " + alarms);
-            if (warns > 0) parts.Add("경고 " + warns);
-            if (waiting > 0) parts.Add("대기 " + waiting);
-            if (offline > 0) parts.Add("끊김 " + offline);
-            Header.StatusText = string.Join(" · ", parts);
         }
 
         /// <summary>앞쪽 몇 행만 가동 데이터, 나머지는 끊김 — 원본 캡처(전부 끊김)보다 상태 표현을 보여주기 위해.</summary>

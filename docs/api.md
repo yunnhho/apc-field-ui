@@ -1,4 +1,4 @@
-# APC.UI API (v1.20.0.0)
+# APC.UI API (v1.21.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -120,10 +120,10 @@
 
 `APC.UI.Controls` · class : Panel
 
-화면 상단 띠: 오른쪽에 상태 램프 + 상태 문구, 그 오른쪽 끝에 현재 시각(1초마다 갱신). 프로그램 이름은 창 제목 줄에 있으므로 띠에는 그리지 않는다(Title은 창 제목과 같은 이름을 보관만 한다).
+화면 상단 띠: 오른쪽 끝에 현재 시각(1초마다 갱신)만 그린다. 왼쪽은 화면이 탭 등을 넣는 자리(ApcTemplateView.HeaderTools). 프로그램 이름은 창 제목 줄에, 상태는 화면 본문(타일·램프·알람 띠)에 있으므로 띠에는 그리지 않는다. Title·Status·StatusText는 기존 화면 호환을 위해 값만 보관한다.
 - `ApcHeaderBar()`
-- `StatusKind Status { get; set; }`
-- `string StatusText { get; set; }`
+- `StatusKind Status { get; set; }` — 상태(보관만, 그리지 않음).
+- `string StatusText { get; set; }` — 상태 문구(보관만, 그리지 않음).
 - `string Title { get; set; }` — 화면 이름(창 제목과 같은 값). 띠에는 그리지 않는다.
 
 ## ApcIconCell
@@ -270,6 +270,7 @@
 - `protected static Label SectionTitle(string text)` — 구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).
 - `protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)` — 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px. height는 칸 높이(배율 적용한 값, 예: S(150)).
 - `protected static int S(int px)` — 배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.
+- `protected void HeaderTools(params Control[] controls)` — 탭(ApcTabStrip)·안내 문구 등을 헤더 띠 왼쪽에 둔다(띠 오른쪽은 현재 시각). 탭이 있는 화면은 본문이 아니라 여기에 탭을 넣는다. 띠 높이를 48px로 늘리고, 탭은 아래끝을 띠 아래선에 붙이고 나머지는 세로 가운데. 생성자에서 한 번 부른다.
 - `protected void UseSettingsButton(EventHandler onClick)` — 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다. 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
 
 ## ApcTextBox

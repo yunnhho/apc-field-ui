@@ -30,8 +30,6 @@ namespace APC.UI.Demo.Templates
 
         public JudgeView() : base("베어링 압입 판정 · 압입기 01")
         {
-            Header.Status = StatusKind.Stop;
-            Header.StatusText = "대기";
             _model.Items.AddRange(new object[] { "6205-2RS", "6204-ZZ", "6306-2RS" });
             _model.SelectedIndex = 0;
             _model.Width = S(180);
@@ -107,8 +105,6 @@ namespace APC.UI.Demo.Templates
             _disp.Status = disp > DispMax || disp < DispMin ? StatusKind.Alarm : StatusKind.Run;
             _grid.Rows.Insert(0, ok ? StatusKind.Run : StatusKind.Alarm, serial, DateTime.Now.ToString("HH:mm:ss"),
                 _load.Value, _disp.Value, ok ? "OK" : "NG");
-            Header.Status = ok ? StatusKind.Run : StatusKind.Alarm;
-            Header.StatusText = ok ? "가동중" : "NG 발생";
             if (!ok) Alarm.Push(serial + ": " + reason);
             ShowCounts();
             return true;   // 판정 결과와 무관하게 스캔 자체는 정상 수신
