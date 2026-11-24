@@ -145,13 +145,19 @@ namespace APC.UI.Controls
 
         private readonly HashSet<Control> _sectionTitles = new HashSet<Control>();
 
-        /// <summary>구획 제목(굵게). AddContent로 넣으면 아래 요소와의 간격이 좁다.</summary>
+        /// <summary>구획 제목(굵게 + 아래 폭 전체 구분선). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.</summary>
         protected Label SectionTitle(string text)
         {
             var l = new Label
             {
-                Text = text, AutoSize = false, Height = ApcTheme.Px(28), TextAlign = ContentAlignment.BottomLeft, BackColor = Color.Transparent,
+                Text = text, AutoSize = false, Height = ApcTheme.Px(32), TextAlign = ContentAlignment.MiddleLeft, BackColor = Color.Transparent,
                 Font = ApcTheme.GetFont(FontStyle.Bold), ForeColor = ApcTheme.C(ApcTheme.Current.Colors.Text),
+            };
+            l.Paint += (s, e) =>
+            {
+                // 진한 선 + 아래 흰 선 = 파인 홈(입체 구분선)
+                using (var pen = new Pen(ApcTheme.C(ApcTheme.Current.Colors.Border))) e.Graphics.DrawLine(pen, 0, l.Height - 2, l.Width, l.Height - 2);
+                e.Graphics.DrawLine(Pens.White, 0, l.Height - 1, l.Width, l.Height - 1);
             };
             _sectionTitles.Add(l);
             return l;

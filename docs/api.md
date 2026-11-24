@@ -1,4 +1,4 @@
-# APC.UI API (v1.17.0.0)
+# APC.UI API (v1.18.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -67,19 +67,6 @@
 - `static void Alert(IWin32Window owner, string message)` — 안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 .
 - `static void Warn(IWin32Window owner, string message)` — 경고창(입력 오류·조작 경고: 기간 역순, 빈 LOT, 잘못된·중복 스캔 등). 제목 "경고" + 노란 램프. 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
 
-## ApcFieldCard
-
-`APC.UI.Controls` · class : Panel
-
-입력 카드: 제목 띠(왼쪽 Title 굵게, 오른쪽 SubTitle 흐리게 — 규격·단위) + 이름표가 위에 붙은 입력칸을 위→아래로 + 맨 아래 상태 줄(램프 + Footer). 칸·슬롯마다 같은 항목을 넣는 dialog(LOT 스캔)나 짝 입력(하한·상한)을 카드 여러 장으로 나란히 둘 때 쓴다 — dialog에서는 AddContentRow로. 높이는 AddField로 넣은 칸 수로 정해진다(상태 줄 자리는 늘 있음 → 실행 중 Footer가 바뀌어도 높이 그대로). 카드 안 입력칸에 커서가 있으면 카드 테두리가 입력 중 칸과 같은 파란 2px → 지금 어느 칸(슬롯)을 넣는지 멀리서도 보인다.
-- `ApcFieldCard()`
-- `StatusKind? FooterStatus { get; set; }` — 상태 줄 왼쪽 램프. null이면 램프 없이 흐린 글자만(안내 문구용).
-- `static int HeightFor(int fieldCount)` — 입력칸 n개를 담는 카드 높이(배율 적용 px).
-- `string Footer { get; set; }` — 맨 아래 상태 줄 글자(스캔 시각, 허용 범위 안내).
-- `string SubTitle { get; set; }` — 제목 띠 오른쪽 흐린 글자(규격 Ø32 · 0.8μm, 단위 kN).
-- `string Text { get; set; }` — 제목 띠 왼쪽(칸 이름 B1, 항목 이름 하중).
-- `void AddField(string caption, Control field)` — 이름표 + 입력칸 한 칸을 아래에 붙인다(입력칸은 카드 폭을 채움). 카드 높이가 늘어난다.
-
 ## ApcForm
 
 `APC.UI.Controls` · class : Form
@@ -95,7 +82,7 @@
 - `int TitleBarHeight { get; }`
 - `protected ApcGroup AddGroup(string title)` — 제목 있는 묶음(ApcGroup). 행은 AddFieldRow(group, ...)로 넣는다.
 - `protected CreateParams CreateParams { get; }`
-- `protected Label SectionTitle(string text)` — 구획 제목(굵게). AddContent로 넣으면 아래 요소와의 간격이 좁다.
+- `protected Label SectionTitle(string text)` — 구획 제목(굵게 + 아래 폭 전체 구분선). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.
 - `protected static Label FieldCaption(string text)` — 행 안 trailing 이름표(보통 굵기, 글자 폭).
 - `protected void AddCaptionRow(ApcGroup group, params string[] captions)` — 묶음 안 열 제목 줄. 바로 다음 AddFieldRow(group, ...) 행의 [이름표, 입력칸, trailing...] 위에 순서대로 맞춰 놓인다("" = 그 칸 제목 없음). 여러 행이 같은 칸(포트·신호·로직…)을 가질 때 행마다 FieldCaption을 되풀이하지 않고 위에 한 번만 쓴다.
 - `protected void AddContent(Control c)` — 표·판정판 등 자유 요소. 높이는 c.Height(ApcTheme.Px로 지정), 폭은 내용 폭.

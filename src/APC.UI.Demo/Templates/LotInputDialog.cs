@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using APC.UI.Controls;
@@ -8,92 +9,105 @@ namespace APC.UI.Demo.Templates
 {
     /// <summary>
     /// 칸(슬롯)별 LOT 입력 dialog 골격(참고: Failure Analysis LOT 입력 — 설비마다 칸 수가 다르다).
-    /// 위: 설비 띠(ApcHeaderBar) — 왼쪽 설비 이름, 오른쪽 진행 "스캔 n / 전체"(다 차면 초록 "입력 완료").
-    /// 가운데: 칸마다 카드 한 장(ApcFieldCard, 한 줄에 최대 4장) — 제목 띠에 칸 이름·SPEC, 안에 LOT(스캔)·바렐번호, 아래 상태 줄 "스캔 대기" → 램프 + 스캔 시각.
-    /// 바코드 스캐너는 키보드처럼 들어오므로 첫 칸 LOT에 커서를 두고 받는다. 스캔의 Enter → 다음 칸 LOT로(마지막 칸이면 확인 버튼).
-    /// 입력 중인 카드는 파란 테두리라 지금 어느 칸을 스캔하는지 보인다. 확인 시 빈 LOT이 있으면 Warn 후 그 칸으로, 닫지 않음.
-    /// 결과는 Lots / Barrels 속성(칸 순서).
+    /// 위: 설비 이름 줄(어느 설비에 넣는지 → 값 굵게).
+    /// 가운데: 칸마다 한 행인 입력 표 — 칸·SPEC·시간은 읽기 전용(회색), LOT·바렐번호만 입력(흰색). 넣은 칸은 시간이 찍힌다.
+    /// 입력 중인 행은 읽기 전용 칸까지 연한 파랑(ApcGrid가 그린다)이라 지금 어느 칸을 스캔하는지 보인다.
+    /// 바코드 스캐너는 키보드처럼 들어오므로 LOT 칸을 현재 셀로 두고 바로 받는다(스캔의 Enter → 다음 칸 아래로).
+    /// 확인 시 빈 LOT이 있으면 Warn 후 그 칸으로, 닫지 않음. 결과는 Lots / Barrels 속성(칸 순서).
     /// </summary>
     internal sealed class LotInputDialog : ApcForm
     {
-        private const int CardsPerRow = 4;
-
+        private const int ColLot = 2, ColBarrel = 3, ColTime = 4;
+        private readonly ApcGrid _grid = new ApcGrid { ClearInitialSelection = false, EditMode = DataGridViewEditMode.EditOnEnter,
+            SelectionMode = DataGridViewSelectionMode.CellSelect, MultiSelect = false, ScrollBars = ScrollBars.None };   // 입력 표: 칸 수만큼 높이를 잡으므로 스크롤 없음
         private readonly string[] _slots;
-        private readonly ApcFieldCard[] _cards;
-        private readonly ApcTextBox[] _lots, _barrels;
-        private readonly ApcHeaderBar _header = new ApcHeaderBar();
-        private readonly ApcButton _ok = new ApcButton { Text = "확인", Variant = ApcButtonVariant.Primary };
 
-        public LotInputDialog() : this("고속 연마기 ST-GB-02", new[] { "B1", "B2", "B3", "B4" }, new[] { "Ø32 · 0.8μm", "Ø32 · 0.8μm", "Ø40 · 0.4μm", "Ø40 · 0.4μm" }) { }
+        // 샘플: 두 칸을 넣다가 다시 연 상태
+        public LotInputDialog() : this("고속 연마기 ST-GB-02", new[] { "B1", "B2", "B3", "B4" }, new[] { "Ø32 · 0.8μm", "Ø32 · 0.8μm", "Ø40 · 0.4μm", "Ø40 · 0.4μm" },
+            new[] { "LOT-24112-0381", "LOT-24112-0394" }, new[] { "12", "07" }, new[] { "08:12:33", "08:13:05" }) { }
 
-        public LotInputDialog(string equipment, string[] slots, string[] specs)
+        /// <param name="lots">이미 넣은 LOT(앞 칸부터, 없으면 null) — 다시 열었을 때 이어서 스캔. barrels·times도 같은 순서.</param>
+        public LotInputDialog(string equipment, string[] slots, string[] specs, string[] lots = null, string[] barrels = null, string[] times = null)
         {
             _slots = slots;
-            _cards = new ApcFieldCard[slots.Length];
-            _lots = new ApcTextBox[slots.Length];
-            _barrels = new ApcTextBox[slots.Length];
-            SetupDialog("LOT 입력", 1000);
+            SetupDialog("LOT 입력", 900);
 
-            _header.Title = equipment;
-            AddContent(_header);
+            AddFieldRow("설비", new Label { Text = equipment, AutoSize = false, TextAlign = ContentAlignment.MiddleLeft, BackColor = Color.Transparent,
+                Font = ApcTheme.GetFont(FontStyle.Bold), ForeColor = ApcTheme.C(ApcTheme.Current.Colors.Text) });
 
-            for (int i = 0; i < slots.Length; i++)
+            int rowH = ApcTheme.Px(52), headH = ApcTheme.Px(40);
+            _grid.RowTemplate.Height = rowH;
+            _grid.ColumnHeadersHeight = headH;
+            _grid.AllowUserToResizeColumns = false;
+            AddColumn("slot", "칸", 70, true).DefaultCellStyle.Font = ApcTheme.GetFont(FontStyle.Bold);
+            AddColumn("spec", "SPEC", 220, true);
+            AddColumn("lot", "LOT No (스캔)", 280, false).AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            AddColumn("barrel", "바렐번호", 130, false);
+            AddColumn("time", "시간", 110, true);
+            foreach (DataGridViewColumn c in _grid.Columns)
             {
-                int slot = i;
-                _lots[i] = new ApcTextBox { ImeMode = ImeMode.Disable };   // 한글 IME 상태에서도 바코드가 자모로 조합되지 않게
-                _barrels[i] = new ApcTextBox();
-                _lots[i].KeyDown += (s, e) =>
-                {
-                    if (e.KeyCode != Keys.Enter) return;
-                    e.SuppressKeyPress = true;   // 띵 소리 없이
-                    MarkScanned(slot);
-                    if (slot + 1 < _slots.Length) _lots[slot + 1].Focus(); else _ok.Focus();
-                };
-                _lots[i].Leave += (s, e) => MarkScanned(slot);   // 손으로 넣고 다른 칸을 눌러도 반영
-
-                _cards[i] = new ApcFieldCard { Text = slots[i], SubTitle = i < specs.Length ? specs[i] : "" };
-                _cards[i].AddField("LOT No (스캔)", _lots[i]);
-                _cards[i].AddField("바렐번호", _barrels[i]);
-                MarkScanned(i);
+                c.SortMode = DataGridViewColumnSortMode.NotSortable;
+                c.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
-            for (int i = 0; i < _cards.Length; i += CardsPerRow)
-                AddContentRow(_cards.Skip(i).Take(CardsPerRow).Cast<Control>().ToArray());
+            for (int i = 0; i < slots.Length; i++)
+                _grid.Rows.Add(slots[i], At(specs, i), At(lots, i), At(barrels, i), At(times, i));
+            _grid.CellEndEdit += (s, e) => { if (e.ColumnIndex == ColLot) Refresh(e.RowIndex); };
 
-            _ok.Click += (s, e) => Confirm();
-            SetFooter(new ApcButton { Text = "취소", DialogResult = DialogResult.Cancel }, _ok);   // Enter는 스캔이 쓴다 → AcceptButton 없음
-            Shown += (s, e) => _lots[0].Focus();
+            _grid.Height = headH + rowH * slots.Length + 2;   // 칸 수만큼(빈 줄·스크롤 없이)
+            AddContent(_grid);
+
+            var ok = new ApcButton { Text = "확인", Variant = ApcButtonVariant.Primary };
+            ok.Click += (s, e) => Confirm();
+            SetFooter(new ApcButton { Text = "취소", DialogResult = DialogResult.Cancel }, ok);   // Enter는 스캔이 쓴다 → AcceptButton 없음
+            Shown += (s, e) => { _grid.CurrentCell = _grid.Rows[FirstEmpty()].Cells[ColLot]; _grid.Focus(); };
         }
 
         public string[] Lots { get; private set; }
         public string[] Barrels { get; private set; }
 
-        // 카드 상태 줄과 설비 띠 진행 표시를 LOT 칸 내용에 맞춘다. 시각은 처음 들어온 때 한 번만(같은 값으로 다시 Enter해도 유지).
-        private void MarkScanned(int slot)
-        {
-            var card = _cards[slot];
-            bool filled = _lots[slot].Text.Trim().Length > 0;
-            if (!filled) { card.FooterStatus = StatusKind.Stop; card.Footer = "스캔 대기"; }
-            else if (card.FooterStatus != StatusKind.Run) { card.FooterStatus = StatusKind.Run; card.Footer = "스캔 " + DateTime.Now.ToString("HH:mm:ss"); }
+        private string Lot(int row) { return Convert.ToString(_grid.Rows[row].Cells[ColLot].Value).Trim(); }
 
-            int done = _lots.Count(t => t != null && t.Text.Trim().Length > 0);
-            bool all = done == _slots.Length;
-            _header.Status = all ? StatusKind.Run : StatusKind.Stop;
-            _header.StatusText = (all ? "입력 완료 " : "스캔 ") + done + " / " + _slots.Length;
+        private static string At(string[] values, int i) { return values != null && i < values.Length ? values[i] ?? "" : ""; }
+
+        // 이어서 넣을 칸: 첫 빈 LOT(다 찼으면 첫 칸)
+        private int FirstEmpty()
+        {
+            for (int i = 0; i < _slots.Length; i++) if (Lot(i).Length == 0) return i;
+            return 0;
+        }
+
+        // LOT가 처음 들어온 때 시각을 한 번만 적는다(같은 값으로 다시 Enter해도 유지), 지우면 시각도 지운다
+        private void Refresh(int row)
+        {
+            var time = _grid.Rows[row].Cells[ColTime];
+            if (Lot(row).Length == 0) time.Value = "";
+            else if (Convert.ToString(time.Value).Length == 0) time.Value = DateTime.Now.ToString("HH:mm:ss");
         }
 
         private void Confirm()
         {
-            var lots = _lots.Select(t => t.Text.Trim()).ToArray();
+            _grid.EndEdit();
+            var lots = Enumerable.Range(0, _slots.Length).Select(Lot).ToArray();
             int empty = Array.FindIndex(lots, l => l.Length == 0);
             if (empty >= 0)
             {
                 ApcDialog.Warn(this, _slots[empty] + " 칸의 LOT를 스캔하세요.");
-                _lots[empty].Focus();
+                _grid.CurrentCell = _grid.Rows[empty].Cells[ColLot];
                 return;
             }
             Lots = lots;
-            Barrels = _barrels.Select(t => t.Text.Trim()).ToArray();
+            Barrels = Enumerable.Range(0, _slots.Length).Select(i => Convert.ToString(_grid.Rows[i].Cells[ColBarrel].Value).Trim()).ToArray();
             DialogResult = DialogResult.OK;
+        }
+
+        private DataGridViewColumn AddColumn(string name, string header, int width, bool readOnly)
+        {
+            int i = _grid.Columns.Add(name, header);
+            var c = _grid.Columns[i];
+            c.Width = ApcTheme.Px(width);
+            c.ReadOnly = readOnly;
+            return c;
         }
     }
 }
