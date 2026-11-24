@@ -36,8 +36,6 @@ namespace APC.UI.Demo.Templates
 
         public EquipmentView() : base("도장 라인 모니터링")
         {
-            Header.Status = StatusKind.Alarm;
-            Header.StatusText = "알람 1 · 경고 1";
 
             var tiles = new Control[Machines.Length];
             for (int i = 0; i < Machines.Length; i++)

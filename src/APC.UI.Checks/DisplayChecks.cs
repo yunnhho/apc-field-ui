@@ -59,6 +59,7 @@ namespace APC.UI.Checks
                 Check(bmp.GetPixel(1, card.Height / 2).ToArgb() == ApcTheme.Status(StatusKind.Alarm).ToArgb(), "card: alarm draws thick alarm border");
             }
             CheckSteelInkSurfaces();
+            CheckHeaderTools();
             // 같은 높이 카드는 Footer 유무와 관계없이 값이 같은 높이에 그려진다(한 줄 카드의 값이 들쭉날쭉하지 않게).
             Check(ValueTop(new ApcValueCard { Value = "88" }) == ValueTop(new ApcValueCard { Value = "88", Footer = "NG / 검사 수" }), "card: value sits at same height with or without footer");
             // 값이 두 개인 카드(온도 + Footer 습도): 카드 상태는 경고여도 정상인 주 값은 보통 글자색.
@@ -144,12 +145,12 @@ namespace APC.UI.Checks
                 var px = bmp.GetPixel(2, bar.Height / 2);
                 Check(px.R > 200 && px.G > 200 && px.B > 200, "header bar: light background");
                 bool blank = true;
-                for (int x = 2; x < bar.Width / 2 && blank; x++)
+                for (int x = 2; x < bar.ClockBounds.Left - 2 && blank; x++)
                     for (int y = 4; y < bar.Height - 4 && blank; y++)
                         blank = bmp.GetPixel(x, y).ToArgb() == bmp.GetPixel(2, y).ToArgb();
-                Check(blank, "header bar: no title text on the left");
+                Check(blank, "header bar: nothing but the clock (no title, no status)");
                 Check(System.Text.RegularExpressions.Regex.IsMatch(bar.ClockText, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"), "header bar: clock shows yyyy-MM-dd HH:mm:ss");
-                Check(bar.ClockBounds.Right <= bar.Width - ApcTheme.Px(12) && bar.ClockBounds.Left > bar.StatusBounds.Right, "header bar: clock at right, status left of it");
+                Check(bar.ClockBounds.Right <= bar.Width - ApcTheme.Px(12), "header bar: clock at right");
             }
             using (var v = new SectionProbe())
             {
@@ -159,6 +160,29 @@ namespace APC.UI.Checks
                     v.Title.DrawToBitmap(bmp, new Rectangle(Point.Empty, v.Title.Size));
                     Check(bmp.GetPixel(1, v.Title.Height / 2).ToArgb() == ApcTheme.C(c.Brand).ToArgb(), "section title: brand bar on the left");
                 }
+            }
+        }
+
+        private static void CheckHeaderTools()
+        {
+            using (var v = new TabProbe())
+            {
+                Check(v.Tabs.Parent != null && v.Tabs.Parent.Parent == v.Bar, "header tools: tabs go into the header strip");
+                Check(v.Tabs.Bottom == v.Bar.Height, "header tools: tab bottom touches header bottom line");
+                Check(v.Note.Parent == v.Tabs.Parent && v.Note.Left > v.Tabs.Right, "header tools: extra controls follow the tabs");
+            }
+        }
+
+        private sealed class TabProbe : ApcTemplateView
+        {
+            public readonly ApcTabStrip Tabs = new ApcTabStrip();
+            public readonly System.Windows.Forms.Label Note = Caption("ⓘ 안내");
+            public ApcHeaderBar Bar { get { return Header; } }
+            public TabProbe() : base("probe")
+            {
+                Tabs.SetTabs(new[] { "1라인", "2라인" });
+                Tabs.Width = Tabs.PreferredTabsWidth;
+                HeaderTools(Tabs, Note);
             }
         }
 

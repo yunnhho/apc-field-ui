@@ -192,24 +192,11 @@ namespace APC.UI.Demo.Templates
             return l;
         }
 
-        /// <summary>헤더 요약·알람바: 호기 하나를 상태 하나로 센다.</summary>
+        /// <summary>알람바: 알람인 호기를 올린다.</summary>
         private void Summarize()
         {
-            int alarm = 0, warn = 0, stop = 0;
             for (int u = 0; u < Units.Length; u++)
-            {
-                var s = UnitState(u);
-                if (s.Status == StatusKind.Alarm) { alarm++; Alarm.Push(Units[u][0] + ": " + AlarmText(u)); }
-                else if (s.Status == StatusKind.Warn) warn++;
-                else if (s.Status == StatusKind.Stop) stop++;
-            }
-            var parts = new List<string> { "1~4호기" };
-            if (alarm > 0) parts.Add("알람 " + alarm);
-            if (warn > 0) parts.Add("경고 " + warn);
-            if (stop > 0) parts.Add("정지 " + stop);
-            if (parts.Count == 1) parts.Add("정상");
-            Header.StatusText = string.Join(" · ", parts);
-            Header.Status = alarm > 0 ? StatusKind.Alarm : warn > 0 ? StatusKind.Warn : stop > 0 ? StatusKind.Stop : StatusKind.Run;
+                if (UnitState(u).Status == StatusKind.Alarm) Alarm.Push(Units[u][0] + ": " + AlarmText(u));
         }
 
         private static string AlarmText(int unit)

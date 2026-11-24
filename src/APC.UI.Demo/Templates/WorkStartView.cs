@@ -61,8 +61,6 @@ namespace APC.UI.Demo.Templates
             var cell = _grid.CurrentRow.Cells[0];
             if ((StatusKind)cell.Value == StatusKind.Run) { ApcDialog.Warn(FindForm(), "이미 진행 중인 작업입니다: " + _grid.CurrentRow.Cells[1].Value); return; }
             cell.Value = StatusKind.Run;
-            Header.Status = StatusKind.Run;
-            Header.StatusText = "가동중 · " + _grid.CurrentRow.Cells[1].Value;
         }
     }
 }

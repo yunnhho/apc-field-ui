@@ -96,7 +96,6 @@ namespace APC.UI.Demo.Templates
         private void Save()
         {
             foreach (DataGridViewRow row in _grid.Rows) row.Cells[0].Value = StatusKind.Run;
-            Header.StatusText = "저장됨 " + DateTime.Now.ToString("HH:mm:ss") + " · " + _grid.Rows.Count + "건";
         }
     }
 }
