@@ -17,6 +17,7 @@ namespace APC.UI.Controls
     {
         private const int BaseTitleHeight = 40;
         private const int BaseTitleHeightTwoLine = 54;
+        private const int BaseTitleLinePad = 2;
         private const int BaseResizeGrip = 6;
         private const int BaseLogoHeight = 22;
         private const int BaseWinButtonW = 46;
@@ -98,7 +99,16 @@ namespace APC.UI.Controls
         /// <summary>타이틀바 설정 버튼을 눌렀다(<see cref="ShowSettings"/>가 true일 때만).</summary>
         public event EventHandler SettingsClick;
 
-        public int TitleBarHeight { get { return (int)Math.Round((TwoLineTitle ? BaseTitleHeightTwoLine : BaseTitleHeight) * ApcTheme.Scale); } }
+        public int TitleBarHeight
+        {
+            get
+            {
+                if (!TwoLineTitle || ApcTheme.Current == null) return (int)Math.Round(BaseTitleHeight * ApcTheme.Scale);
+                // 두 줄 제목: 기본 54px, 고객사 테마 글꼴이 크면 두 줄 높이 + 위아래 여백만큼 늘린다.
+                int lines = TextRenderer.MeasureText("가", TitleFont()).Height + TextRenderer.MeasureText("가", FunctionFont()).Height;
+                return Math.Max((int)Math.Round(BaseTitleHeightTwoLine * ApcTheme.Scale), lines + ApcTheme.Px(BaseTitleLinePad));
+            }
+        }
 
         /// <summary>가장자리 리사이즈 감지 폭(px).</summary>
         public int ResizeGrip { get { return (int)(BaseResizeGrip * ApcTheme.Scale); } }

@@ -28,6 +28,7 @@ namespace APC.UI.Checks
                 f.FunctionText = "x";
                 Check(f.TitleBarHeight == one, "form: dialog ignores function text");
             }
+            CheckTwoLineTitleFitsLargeFont();
 
             using (var dlg = ApcDialog.Create("삭제할까요?"))
             {
@@ -89,6 +90,37 @@ namespace APC.UI.Checks
             public Control H { get { return Header; } }
             public Control A { get { return Alarm; } }
             public Control B { get { return Body; } }
+        }
+        /// <summary>고객사 테마 글꼴이 커도(16pt) 두 줄 제목이 타이틀바 안에 들어간다.</summary>
+        private static void CheckTwoLineTitleFitsLargeFont()
+        {
+            string original = APC.UI.Theming.ApcTheme.ThemeDir;
+            string tmp = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "apcui-bigfont-" + System.Guid.NewGuid().ToString("N"));
+            try
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.Combine(tmp, "assets"));
+                foreach (var f in System.IO.Directory.GetFiles(System.IO.Path.Combine(original, "assets")))
+                    System.IO.File.Copy(f, System.IO.Path.Combine(tmp, "assets", System.IO.Path.GetFileName(f)));
+                string json = System.IO.File.ReadAllText(System.IO.Path.Combine(original, "theme.json"));
+                json = System.Text.RegularExpressions.Regex.Replace(json, @"""fontSize"":\s*\d+", @"""fontSize"": 16");
+                System.IO.File.WriteAllText(System.IO.Path.Combine(tmp, "theme.json"), json);
+                APC.UI.Theming.ApcTheme.Load(tmp);
+                using (var f = new ApcForm { FunctionText = "작업 시작 · LOT 스캔" })
+                {
+                    var bold = APC.UI.Theming.ApcTheme.GetFont(FontStyle.Bold);
+                    using (var big = new Font(bold.FontFamily, bold.Size * 1.5f, FontStyle.Bold))
+                    using (var small = new Font(bold.FontFamily, bold.Size - 1f, FontStyle.Bold))
+                    {
+                        int need = TextRenderer.MeasureText("가", big).Height + TextRenderer.MeasureText("가", small).Height;
+                        Check(f.TitleBarHeight >= need, "form: two-line title fits a 16pt theme font");
+                    }
+                }
+            }
+            finally
+            {
+                APC.UI.Theming.ApcTheme.Load(original);
+                try { System.IO.Directory.Delete(tmp, true); } catch (System.IO.IOException) { }
+            }
         }
     }
 }
