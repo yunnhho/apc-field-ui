@@ -111,7 +111,7 @@
 
 `APC.UI.Controls` · class : Panel
 
-제목 띠가 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 제목 띠는 값 카드와 같은 그리드 헤더 그라데이션. 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
+제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 먹색 막대가 붙은 굵은 제목. 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
 - `ApcGroup()`
 - `int HeightFor(int contentHeight)` — 안 내용 높이(배율 적용 px)를 담는 묶음 높이 = 제목 띠 + 위아래 여백 + 내용. 화면에서 Columns() 줄을 담으면 내용 = 줄 높이 합.
 - `string Text { get; set; }` — 제목 띠 글자.

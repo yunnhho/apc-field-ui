@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -43,10 +43,11 @@ namespace APC.UI.Controls
             if (ApcTheme.Current == null) { g.Clear(Color.SlateGray); return; }
 
             var c = ApcTheme.Current.Colors;
-            Gradients.Fill(g, ClientRectangle, c.Header);
+            Gradients.Fill(g, ClientRectangle, c.TitleBar);
+            using (var pen = new Pen(ApcTheme.C(c.Border))) g.DrawLine(pen, 0, Height - 1, Width, Height - 1);
             float s = ApcTheme.Scale;
             int pad = (int)(BasePadding * s);
-            var fore = ApcTheme.C(c.TextInverse);
+            var fore = ApcTheme.C(c.Text);
             var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis;
 
             // 오른쪽부터: 상태 문구 → 램프

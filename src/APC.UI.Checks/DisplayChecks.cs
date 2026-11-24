@@ -58,6 +58,7 @@ namespace APC.UI.Checks
                 card.DrawToBitmap(bmp, new Rectangle(Point.Empty, card.Size));
                 Check(bmp.GetPixel(1, card.Height / 2).ToArgb() == ApcTheme.Status(StatusKind.Alarm).ToArgb(), "card: alarm draws thick alarm border");
             }
+            CheckSteelInkSurfaces();
             // 같은 높이 카드는 Footer 유무와 관계없이 값이 같은 높이에 그려진다(한 줄 카드의 값이 들쭉날쭉하지 않게).
             Check(ValueTop(new ApcValueCard { Value = "88" }) == ValueTop(new ApcValueCard { Value = "88", Footer = "NG / 검사 수" }), "card: value sits at same height with or without footer");
             // 값이 두 개인 카드(온도 + Footer 습도): 카드 상태는 경고여도 정상인 주 값은 보통 글자색.
@@ -79,7 +80,7 @@ namespace APC.UI.Checks
                 tile.DrawToBitmap(bmp, new Rectangle(Point.Empty, tile.Size));
                 Check(bmp.GetPixel(0, tile.Height / 2).ToArgb() == ApcTheme.C(c.Border).ToArgb(), "tile: normal border when idle");
                 Check(tile.TabStop, "tile: reachable by Tab");
-                Check(bmp.GetPixel(4, 4).ToArgb() == Color.White.ToArgb(), "tile: white background when not selected");
+                Check(Near(bmp.GetPixel(4, 4), ApcTheme.C(c.Panel[0]), 4), "tile: panel background when not selected");
                 tile.Selected = true;
                 tile.DrawToBitmap(bmp, new Rectangle(Point.Empty, tile.Size));
                 Check(bmp.GetPixel(4, 4).ToArgb() == ApcTheme.C(c.GridSelected).ToArgb(), "tile: selected uses grid selection background");
@@ -118,6 +119,36 @@ namespace APC.UI.Checks
                         if (bmp.GetPixel(x, y).ToArgb() == color.ToArgb()) return true;
             }
             return false;
+        }
+
+        /// <summary>Steel + Ink: 카드는 패널 그라데이션, 묶음 라벨 옆 먹색 막대, 헤더 띠는 밝은 금속 톤.</summary>
+        private static void CheckSteelInkSurfaces()
+        {
+            var c = ApcTheme.Current.Colors;
+            using (var card = new ApcValueCard { Status = StatusKind.Run, Title = "건조로 1", Value = "170.0", Unit = "℃" })
+            using (var bmp = new Bitmap(card.Width, card.Height))
+            {
+                card.DrawToBitmap(bmp, new Rectangle(Point.Empty, card.Size));
+                Check(Near(bmp.GetPixel(card.Width - 4, card.Height - 4), ApcTheme.C(c.Panel[1]), 4), "card: panel gradient fill");
+            }
+            using (var group = new ApcGroup { Text = "LOT 바코드", Size = new Size(300, 120) })
+            using (var bmp = new Bitmap(group.Width, group.Height))
+            {
+                group.DrawToBitmap(bmp, new Rectangle(Point.Empty, group.Size));
+                Check(bmp.GetPixel(ApcTheme.Px(10) + 1, group.TitleHeight / 2).ToArgb() == ApcTheme.C(c.Text).ToArgb(), "group: ink bar beside label");
+            }
+            using (var bar = new ApcHeaderBar { Title = "체결기 #1", Size = new Size(400, 40) })
+            using (var bmp = new Bitmap(bar.Width, bar.Height))
+            {
+                bar.DrawToBitmap(bmp, new Rectangle(Point.Empty, bar.Size));
+                var px = bmp.GetPixel(2, bar.Height / 2);
+                Check(px.R > 200 && px.G > 200 && px.B > 200, "header bar: light with ink title");
+            }
+        }
+
+        private static bool Near(Color a, Color b, int tol)
+        {
+            return System.Math.Abs(a.R - b.R) <= tol && System.Math.Abs(a.G - b.G) <= tol && System.Math.Abs(a.B - b.B) <= tol;
         }
     }
 }

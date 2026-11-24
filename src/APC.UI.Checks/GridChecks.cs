@@ -12,6 +12,7 @@ namespace APC.UI.Checks
         {
             CheckCurrentRowTint();
             CheckColumnGroups();
+            CheckHeaderInkUnderline();
             using (var g = new ApcGrid())
             {
                 var icon = new ApcIconColumn { IconName = "icon_reset" };
@@ -204,6 +205,23 @@ namespace APC.UI.Checks
                 Check(ApcGrid.HeightForRows(3, true) - ApcGrid.HeightForRows(3) == single, "grid: HeightForRows(rows, true) adds one header row");
                 Check(Throws<ArgumentException>(() => g.AddColumnGroup("겹침", 2, 2)), "grid: overlapping column group rejected");
                 Check(Throws<ArgumentException>(() => g.AddColumnGroup("범위 밖", 2, 5)), "grid: out-of-range column group rejected");
+            }
+        }
+
+        /// <summary>표 머리 아래 2px 먹색 선(Steel + Ink).</summary>
+        private static void CheckHeaderInkUnderline()
+        {
+            using (var g = new ApcGrid { Size = new Size(200, 120) })
+            {
+                g.Columns.Add("a", "시각");
+                g.CreateControl();
+                using (var bmp = new Bitmap(g.Width, g.Height))
+                {
+                    g.DrawToBitmap(bmp, new Rectangle(Point.Empty, g.Size));
+                    int ink = ApcTheme.C(ApcTheme.Current.Colors.Text).ToArgb();
+                    int h = 1 + g.ColumnHeadersHeight;   // FixedSingle 테두리 1px 아래부터 머리줄
+                    Check(bmp.GetPixel(20, h - 1).ToArgb() == ink && bmp.GetPixel(20, h - 2).ToArgb() == ink, "grid: header has 2px ink underline");
+                }
             }
         }
     }

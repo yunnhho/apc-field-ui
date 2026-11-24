@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using APC.UI.Theming;
 
 namespace APC.UI.Drawing
@@ -8,7 +8,7 @@ namespace APC.UI.Drawing
     {
         internal static readonly Color FocusColor = Color.FromArgb(0x3F, 0x67, 0xA6);   // 확인 버튼과 같은 파랑
         internal static readonly Color FocusFill = Color.FromArgb(0xEE, 0xF4, 0xFC);
-        private static readonly Color InsetShadow = Color.FromArgb(48, 0, 0, 0);
+        private static readonly Color InsetShadow = Color.FromArgb(64, 0, 0, 0);
 
         internal static Color Fill(bool enabled, bool readOnly, bool focused = false)
         {
@@ -29,7 +29,7 @@ namespace APC.UI.Drawing
         internal static void DrawBorder(Graphics g, Rectangle r, bool focused)
         {
             if (r.Width < 3 || r.Height < 3) return;
-            var border = ApcTheme.Current == null ? SystemColors.ControlDark : ApcTheme.C(ApcTheme.Current.Colors.Border);
+            var border = ApcTheme.Current == null ? SystemColors.ControlDark : ApcTheme.C(ApcTheme.Current.Colors.BorderStrong);
             if (focused)
             {
                 using (var pen = new Pen(FocusColor))

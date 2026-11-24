@@ -119,6 +119,8 @@ namespace APC.UI.Controls
             }
         }
 
+        private static int InkLine { get { return Math.Max(2, ApcTheme.Px(2)); } }
+
         protected override void OnCellPainting(DataGridViewCellPaintingEventArgs e)
         {
             base.OnCellPainting(e);
@@ -137,8 +139,10 @@ namespace APC.UI.Controls
             {
                 // 표 머리줄 구분선은 위아래 끝까지 닿게. 끝이 떨어진 구분선은 설정창 같은 곳의 칸 제목 줄 전용이다.
                 e.Graphics.DrawLine(pen, text.Right - 1, text.Top, text.Right - 1, text.Bottom - 1);
-                e.Graphics.DrawLine(pen, e.CellBounds.Left, e.CellBounds.Bottom - 1, e.CellBounds.Right, e.CellBounds.Bottom - 1);
             }
+            // 표 머리 아래 2px 먹색 선(Steel + Ink): 머리와 본문을 분명히 가른다.
+            using (var ink = new SolidBrush(ApcTheme.C(c.Text)))
+                e.Graphics.FillRectangle(ink, e.CellBounds.Left, e.CellBounds.Bottom - InkLine, e.CellBounds.Width, InkLine);
             var col = e.ColumnIndex >= 0 ? Columns[e.ColumnIndex] : null;
             if (col == null || col.HeaderCell.SortGlyphDirection != SortOrder.None)
                 e.Paint(e.CellBounds, DataGridViewPaintParts.ContentForeground);   // 정렬 화살표는 기본 그리기에 맡김
