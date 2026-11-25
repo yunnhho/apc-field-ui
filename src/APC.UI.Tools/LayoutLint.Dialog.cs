@@ -15,6 +15,7 @@ namespace APC.UI.Tools
     {
         private const int Pad = 16, GroupGap = 16, FooterButtonWidth = 110, FooterButtonHeight = 40;
         private const int Tol = 1;   // 배율 반올림 오차
+        private const int CaptionGapMax = 12;   // 열 제목 줄과 그 아래 입력칸 사이(배율 2배까지)
 
         private static void CheckFont(Control c, string path, List<string> issues, Theme theme)
         {
@@ -69,7 +70,7 @@ namespace APC.UI.Tools
             return rows.OrderBy(r => r.Value.Top).ToList();
         }
 
-        // 입력칸 왼쪽 끝(부모마다, dialog는 전체)과 행 간격(부모마다)
+        // 입력칸 왼쪽 끝(부모마다, dialog는 전체 — 열 제목 줄이 있는 표 묶음은 그 묶음 안에서만)과 행 간격(부모마다)
         private static void CheckFieldRows(Control root, bool dialog, List<string> issues)
         {
             var all = new List<KeyValuePair<Control, int>>();
@@ -78,7 +79,8 @@ namespace APC.UI.Tools
                 var rows = FieldRows(parent);
                 if (rows.Count == 0) continue;
                 var lefts = rows.Select(r => r.Value.Left).ToList();
-                if (!dialog && lefts.Max() - lefts.Min() > Tol)
+                bool table = HasCaptionRow(parent, rows);
+                if ((!dialog || table) && lefts.Max() - lefts.Min() > Tol)
                     issues.Add(Describe(parent) + ": 입력칸 왼쪽 끝 어긋남(" + string.Join(", ", lefts) + ") — 이름표 열 폭을 하나로");
                 // 사이에 다른 요소(묶음·표·구획 제목)가 낀 간격은 행 간격이 아니다
                 var gaps = Enumerable.Range(1, rows.Count - 1)
@@ -86,12 +88,22 @@ namespace APC.UI.Tools
                     .Select(i => rows[i].Value.Top - rows[i - 1].Value.Bottom).ToList();
                 if (gaps.Count >= 2 && gaps.Max() - gaps.Min() > Tol)
                     issues.Add(Describe(parent) + ": 입력 행 간격 다름(" + string.Join(", ", gaps) + "px) — 행 간격 하나로(ApcLayout.RowGap)");
-                foreach (var r in rows)
-                    all.Add(new KeyValuePair<Control, int>(r.Value, root.PointToClient(parent.PointToScreen(r.Value.Location)).X));
+                if (!table)
+                    foreach (var r in rows)
+                        all.Add(new KeyValuePair<Control, int>(r.Value, root.PointToClient(parent.PointToScreen(r.Value.Location)).X));
             }
             if (dialog && all.Count > 1 && all.Max(a => a.Value) - all.Min(a => a.Value) > Tol)
                 issues.Add(Describe(root) + ": 입력칸 왼쪽 끝 어긋남(" + string.Join(", ", all.Select(a => Describe(a.Key) + " " + a.Value))
                            + ") — dialog 전체 이름표 열 하나(AddFieldRow)");
+        }
+
+        // 열 제목 줄(AddCaptionRow): 행에 속하지 않은 이름표가 입력칸 바로 위에 같은 왼쪽 끝으로 놓였다
+        private static bool HasCaptionRow(Control parent, List<KeyValuePair<Label, Control>> rows)
+        {
+            var fields = rows.Select(r => r.Value).ToList();
+            return parent.Controls.OfType<Label>().Any(l => l.Visible && rows.All(r => r.Key != l)
+                && parent.Controls.Cast<Control>().Any(f => IsInput(f) && Math.Abs(f.Left - l.Left) <= Tol && f.Top >= l.Bottom && f.Top - l.Bottom <= CaptionGapMax)
+                && fields.Count > 0);
         }
 
         private static bool Between(Control parent, List<KeyValuePair<Label, Control>> rows, int top, int bottom)
