@@ -1,4 +1,4 @@
-# APC.UI API (v1.23.0.0)
+# APC.UI API (v1.24.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -173,6 +173,16 @@
 - `int CompareTo(object obj)`
 - `string Text { get; }`
 
+## ApcNoticeBar
+
+`APC.UI.Controls` · class : Control
+
+지속 상태 알림 띠(한 줄): 인터락 우회 중·시험 모드·수동 운전처럼 판정은 아니지만 계속 보여야 하는 상태. 연한 상태색 바탕 + 왼쪽 상태색 막대 + 램프 + 굵은 글자(Text) + 보통 글자(Detail). 높이는 입력칸 정도로 낮다 — 화면의 큰 면(ApcJudgePanel)은 하나만 두고, 이런 상태는 이 띠로 둬서 판정판과 크기를 다투지 않게 한다.
+- `ApcNoticeBar()`
+- `StatusKind Status { get; set; }`
+- `string Detail { get; set; }` — 굵은 글자 뒤 보통 글자(예: "15:52까지 · 생산분은 추가 검사").
+- `string Text { get; set; }` — 굵은 글자(예: "인터락 E05 우회 중").
+
 ## ApcNumericBox
 
 `APC.UI.Controls` · class : ApcButtonField
@@ -242,6 +252,7 @@
 - `protected static FlowLayoutPanel Row(params Control[] controls)` — 왼쪽→오른쪽으로 쌓는 한 줄(필터·버튼 줄).
 - `protected static Label Caption(string text)`
 - `protected static Label SectionTitle(string text)` — 구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).
+- `protected static Panel Titled(string title, Control content)` — 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()의 칸이나 Body의 Fill에 그대로 넣는다 (제목 Dock=Top, 내용 Dock=Fill — 도킹 순서를 화면 코드가 맞추지 않아도 된다).
 - `protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)` — 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px. height는 칸 높이(배율 적용한 값, 예: S(150)).
 - `protected static int S(int px)` — 배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.
 - `protected void UseSettingsButton(EventHandler onClick)` — 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다. 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).

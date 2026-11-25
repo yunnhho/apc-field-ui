@@ -66,6 +66,30 @@ namespace APC.UI.Demo.Catalog
             tiles.Controls.Add(Tile("검사기", StatusKind.Info));
             Body.Controls.Add(tiles);
             Body.Controls.Add(Row(Caption("설비 타일 (ApcStatusTile): 마우스를 올리면 파란 테두리, 누르면 Click → 선택(Selected) 바탕")));
+
+            var lowTiles = Flow();
+            lowTiles.Controls.Add(new ApcStatusTile { Text = "축 지름 A", Status = StatusKind.Alarm, Size = new Size(S(200), S(ApcLayout.FieldHeight)), TabStop = false });
+            lowTiles.Controls.Add(new ApcStatusTile { Text = "축 지름 B", Status = StatusKind.Run, Size = new Size(S(200), S(ApcLayout.FieldHeight)), TabStop = false });
+            Body.Controls.Add(lowTiles);
+            Body.Controls.Add(Row(Caption("낮은 타일 (입력칸 높이): 램프는 20px 아래로 줄지 않는다")));
+
+            var events = new ApcGrid { ReadOnly = true };
+            events.Columns.Add("t", "시각");
+            events.Columns.Add("m", "내용");
+            events.Columns["m"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            events.Rows.Add("13:41:07", "Process Start · L2611-0471");
+            events.Rows.Add("13:38:25", "Process End · L2611-0466");
+            var waits = new ApcGrid { ReadOnly = true };
+            waits.Columns.Add("lot", "Lot ID");
+            waits.Columns.Add("q", "Q-time 남음");
+            foreach (DataGridViewColumn col in waits.Columns) col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            waits.Rows.Add("L2611-0482", "1:35");
+            waits.Rows.Add("L2611-0485", "2:10");
+            Body.Controls.Add(Columns(S(170), new Control[] { Titled("대기 Lot", waits), Titled("최근 이벤트", events) }));
+            Body.Controls.Add(Row(Caption("제목 + 표 구획 (Titled): Columns() 칸·Body Fill에 그대로")));
+
+            Body.Controls.Add(new ApcNoticeBar { Text = "인터락 E05 우회 중", Detail = "15:52까지 · 생산분은 추가 검사 대상" });
+            Body.Controls.Add(Row(Caption("지속 상태 알림 띠 (ApcNoticeBar): 우회·시험 모드 — 판정판과 크기를 다투지 않는다")));
         }
 
         private static FlowLayoutPanel Flow()
