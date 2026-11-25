@@ -40,7 +40,7 @@ namespace APC.UI.Demo.Templates
         {
             if (_from.Value.Date > _to.Value.Date)
             {
-                ApcDialog.Warn(FindForm(), "시작일이 종료일보다 늦습니다.");   // 조작·입력 경고는 경고창(Warn), 알람바는 설비 이상만
+                ApcDialog.Warn(FindForm(), "시작일이 종료일보다 늦습니다.");   // 조작·입력 경고는 경고창(Warn)
                 return;
             }
             _grid.Rows.Clear();

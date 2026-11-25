@@ -10,12 +10,13 @@ namespace APC.UI.Demo.Templates
     /// <summary>
     /// 호기 × 관리 항목 모니터링(references/legacy 적층·도금·프레스 모니터링 재구성):
     /// 정보판(공정·설비·관리 항목) → 호기별 현재값 표(묶음 머리줄, 칸마다 램프 + 값) → 구획 제목 + 상태색 범례 → 호기 줄 × 항목 칸 추이 그래프.
-    /// 판정은 Judge 하나(표 램프·호기 상태·헤더 요약·알람바가 같은 판정). 정지 호기의 값은 판정하지 않는다(Stop).
+    /// 판정은 Judge 하나(표 램프·호기 상태가 같은 판정). 정지 호기의 값은 판정하지 않는다(Stop).
     /// </summary>
     internal sealed class TrendMatrixView : ApcTemplateView
     {
         private const int TrendPoints = 30;
-        private static readonly float[] TrendPercents = { 10f, 30f, 30f, 30f };
+        private static readonly float[] TrendPercents = { 0f, 100f / 3, 100f / 3, 100f / 3 };   // 0번(호기 타일)은 TileWidth 고정폭
+        private const int TileWidth = 190;   // "관리선 이탈" + 램프가 1280 폭에서도 안 잘리게
 
         /// <summary>관리 항목: 이름, 단위, 설정값, 관리선(±), SPEC(±). 정한 기준값 — 요구서가 있으면 그 값으로.</summary>
         private sealed class Item
@@ -73,13 +74,18 @@ namespace APC.UI.Demo.Templates
             for (int i = 1; i < heads.Length; i++) heads[i] = ChartHead(Items[i - 1].Name + " 온도 (" + Items[i - 1].Unit + ")");
 
             // Top 도킹은 나중에 Add한 것이 위 → 아래 줄(마지막 호기)부터
-            for (int u = Units.Length - 1; u >= 0; u--) Body.Controls.Add(Columns(S(150), TrendRow(u), TrendPercents));
-            Body.Controls.Add(Columns(S(28), heads, TrendPercents));
+            for (int u = Units.Length - 1; u >= 0; u--) Body.Controls.Add(FixTile(Columns(S(130), TrendRow(u), TrendPercents)));   // 130: 1280x1024에서 4줄이 들어가는 높이
+            Body.Controls.Add(FixTile(Columns(S(28), heads, TrendPercents)));
             Body.Controls.Add(titleRow);
             Body.Controls.Add(Columns(ApcGrid.HeightForRows(Units.Length, true), new Control[] { grid }));
             Body.Controls.Add(Columns(info.Height, new Control[] { info }));
+        }
 
-            Summarize();
+        /// <summary>첫 칸(호기 타일)을 고정폭으로: 비율이면 좁은 화면에서 호기 이름이 잘린다.</summary>
+        private static TableLayoutPanel FixTile(TableLayoutPanel t)
+        {
+            t.ColumnStyles[0] = new ColumnStyle(SizeType.Absolute, S(TileWidth));
+            return t;
         }
 
         /// <summary>관리 항목 판정 하나: SPEC 밖 = Alarm, 관리선 밖 = Warn, 그 안 = Run. 선과 같은 값은 안쪽(초과부터 이탈).</summary>
@@ -190,27 +196,6 @@ namespace APC.UI.Demo.Templates
             l.TextAlign = ContentAlignment.MiddleCenter;
             l.Margin = Padding.Empty;
             return l;
-        }
-
-        /// <summary>알람바: 알람인 호기를 올린다.</summary>
-        private void Summarize()
-        {
-            for (int u = 0; u < Units.Length; u++)
-                if (UnitState(u).Status == StatusKind.Alarm) Alarm.Push(Units[u][0] + ": " + AlarmText(u));
-        }
-
-        private static string AlarmText(int unit)
-        {
-            for (int i = 0; i < Items.Length; i++)
-            {
-                var item = Items[i];
-                double v = Values(unit)[i];
-                if (Judge(item, v) != StatusKind.Alarm) continue;
-                bool high = v > item.Set;
-                double limit = high ? item.Set + item.Spec : item.Set - item.Spec;
-                return item.Name + (high ? " SPEC 상한 초과 " : " SPEC 하한 미만 ") + v.ToString("0.0") + " " + item.Unit + " (" + (high ? "상한 " : "하한 ") + limit.ToString("0.0") + ")";
-            }
-            return "";
         }
     }
 }

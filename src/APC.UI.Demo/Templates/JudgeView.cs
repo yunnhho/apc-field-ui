@@ -8,7 +8,7 @@ namespace APC.UI.Demo.Templates
 {
     /// <summary>
     /// 설비 한 대 판정 화면: 모델 선택 + 스캔 → 판정판(OK/NG) + 측정값 카드 2 → 금일 집계 카드 4 → 판정 이력.
-    /// 스캔 한 건마다 측정·판정해 위에서부터 갱신한다. NG는 알람바에도.
+    /// 스캔 한 건마다 측정·판정해 위에서부터 갱신한다.
     /// </summary>
     internal sealed class JudgeView : ApcTemplateView
     {
@@ -105,7 +105,6 @@ namespace APC.UI.Demo.Templates
             _disp.Status = disp > DispMax || disp < DispMin ? StatusKind.Alarm : StatusKind.Run;
             _grid.Rows.Insert(0, ok ? StatusKind.Run : StatusKind.Alarm, serial, DateTime.Now.ToString("HH:mm:ss"),
                 _load.Value, _disp.Value, ok ? "OK" : "NG");
-            if (!ok) Alarm.Push(serial + ": " + reason);
             ShowCounts();
             return true;   // 판정 결과와 무관하게 스캔 자체는 정상 수신
         }

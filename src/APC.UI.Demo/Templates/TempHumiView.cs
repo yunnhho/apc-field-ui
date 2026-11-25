@@ -48,7 +48,6 @@ namespace APC.UI.Demo.Templates
 
             Body.Controls.Add(cards);
             Body.Controls.Add(infoBar);
-            foreach (var s in Sensors) if ((StatusKind)s[3] == StatusKind.Alarm) Alarm.Push(s[0] + ": " + s[4]);
         }
 
         private static Label Info(string text)

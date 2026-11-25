@@ -1,19 +1,6 @@
-# APC.UI API (v1.21.0.0)
+# APC.UI API (v1.22.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
-
-## ApcAlarmBar
-
-`APC.UI.Controls` · class : Panel
-
-하단 알람 띠. 들어온 순서대로 쌓고, 여러 개면 3초마다 순환 표시. '확인'은 현재 보이는 알람 하나를 지운다. 비면 숨는다.
-- `ApcAlarmBar()`
-- `const int CycleIntervalMs`
-- `event EventHandler Acknowledged`
-- `int Count { get; }`
-- `string CurrentMessage { get; }`
-- `void AcknowledgeCurrent()`
-- `void Push(string message)`
 
 ## ApcButton
 
@@ -259,9 +246,8 @@
 
 `APC.UI.Controls` · class : UserControl
 
-모든 기능 화면의 공통 틀: 상단 ApcHeaderBar, 하단 ApcAlarmBar, 가운데 Body.
+모든 기능 화면의 공통 틀: 상단 ApcHeaderBar, 가운데 Body.
 - `protected ApcTemplateView(string title)`
-- `protected readonly ApcAlarmBar Alarm`
 - `protected readonly ApcHeaderBar Header`
 - `protected readonly Panel Body` — 내용 영역(Padding 16px). 도킹 순서: 같은 Dock(Top 등)끼리는 나중에 Add한 것이 바깥(위)에 온다. Fill을 먼저 Add하고, Top 줄들은 화면 아래쪽 것부터 위쪽 것 순서로 Add한다(또는 SetChildIndex(fill, 0)).
 - `protected static ApcButton Button(string text, ApcButtonVariant variant, int width = 110)`

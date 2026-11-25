@@ -79,7 +79,6 @@ namespace APC.UI.Demo.Catalog
             t.Click += (s, e) =>
             {
                 foreach (var other in t.Parent.Controls.OfType<ApcStatusTile>()) other.Selected = other == t;
-                Alarm.Push(name + " 상세 열기");
             };
             return t;
         }
