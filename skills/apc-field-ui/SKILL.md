@@ -88,7 +88,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 헬퍼 | 하는 일 |
 |---|---|
 | `SetupDialog(title, width[, height])` | 제목·크기 고정·작업표시줄 숨김·부모 가운데. 폭은 배율 전 px. height 생략 = 내용으로 자동 |
-| `AddFieldRow(caption, field[, trailing...])` | 이름표 + 입력칸 한 줄. 이름표 열은 dialog 전체에 하나(가장 긴 이름표 폭) → 입력칸 왼쪽 끝이 모두 같다. trailing이 없으면 입력칸이 남은 폭을 채우고, 있으면(`FieldCaption("신호")`, 입력칸, 버튼…) 각자 `Width`로 왼→오 |
+| `AddFieldRow(caption, field[, trailing...])` | 이름표 + 입력칸 한 줄. 이름표 열은 dialog 전체에 하나(가장 긴 이름표 폭) → 입력칸 왼쪽 끝이 모두 같다. 단 `AddCaptionRow`를 쓴 표 묶음은 제 이름표 열만 써서 다른 묶음과 맞추지 않는다(긴 블럭명이 아래 묶음 입력칸을 밀지 않게). trailing이 없으면 입력칸이 남은 폭을 채우고, 있으면(`FieldCaption("신호")`, 입력칸, 버튼…) 각자 `Width`로 왼→오 |
 | `AddGroup(title)` → `AddFieldRow(group, ...)` | 관련 행 묶음(`ApcGroup`). 묶음 사이 16 > 행 사이 12로 구분된다 |
 | `AddCaptionRow(group, "블럭", "COM", "신호", ...)` | 묶음 안 칸 제목 줄. 바로 다음 `AddFieldRow(group, ...)` 행의 [이름표, 입력칸, trailing...] 위에 순서대로 놓인다(`""` = 제목 없음). 여러 행이 같은 칸을 가지면(블록별 포트·신호·로직) 행마다 `FieldCaption`을 되풀이하지 말고 이것으로 한 번만 |
 | `AddContent(c)` / `AddContentFill(c)` | 표·상태 줄·그래프. `AddContent`는 `c.Height`(`ApcTheme.Px`) 그대로, `AddContentFill`은 남은 높이(`SetupDialog`에 height 필수, 하나만). 표 높이는 `ApcGrid.HeightForRows(행 수)` |

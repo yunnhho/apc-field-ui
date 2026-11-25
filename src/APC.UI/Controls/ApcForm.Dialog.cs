@@ -9,7 +9,7 @@ namespace APC.UI.Controls
 {
     /// <summary>
     /// dialog 배치 헬퍼. 생성자에서 SetupDialog → AddFieldRow/AddGroup/AddContent/AddContentFill(위에서 아래 순서) → SetFooter.
-    /// 치수는 ApcLayout이 정하고, 표시 직전(OnLoad) 한 번에 배치한다: 이름표 열 하나(가장 긴 이름표 폭), 입력칸 왼쪽 끝 통일,
+    /// 치수는 ApcLayout이 정하고, 표시 직전(OnLoad) 한 번에 배치한다: 이름표 열 하나(가장 긴 이름표 폭), 입력칸 왼쪽 끝 통일(AddCaptionRow 표 묶음은 따로),
     /// 하단 [확정][취소] 오른쪽(취소가 끝), 높이는 내용으로 계산(Fill 내용이 있으면 SetupDialog 높이).
     /// </summary>
     public partial class ApcForm
@@ -215,12 +215,13 @@ namespace APC.UI.Controls
             int btnW = ApcTheme.Px(ApcLayout.FooterButtonWidth), btnH = ApcTheme.Px(ApcLayout.FooterButtonHeight);
             bool hasFooter = _footerConfirm != null;
 
-            // 이름표 열: 묶음 안 이름표는 묶음 안쪽 여백만큼 좁게 → 입력칸 왼쪽 끝이 dialog 전체에서 같다
+            // 이름표 열: 묶음 안 이름표는 묶음 안쪽 여백만큼 좁게 → 입력칸 왼쪽 끝이 dialog 전체에서 같다.
+            // 열 제목 줄이 있는 묶음(표처럼 쓰는 묶음)은 제 이름표 열만 쓴다 — 긴 행 이름(블럭명 등)이 다른 묶음의 이름표·입력칸을 벌리지 않게.
             int labelW = 0;
             foreach (var b in _blocks)
             {
                 if (b.Kind == BlockKind.Row) labelW = Math.Max(labelW, TextW(b.Caption));
-                if (b.Kind == BlockKind.Group) foreach (var r in b.Rows.Where(r => r.Kind == BlockKind.Row)) labelW = Math.Max(labelW, TextW(r.Caption) + b.Group.Padding.Left);
+                if (b.Kind == BlockKind.Group && !IsTableGroup(b)) labelW = Math.Max(labelW, GroupLabelW(b));
             }
 
             int fixedH = 0;
@@ -245,6 +246,7 @@ namespace APC.UI.Controls
                     case BlockKind.Group:
                         b.Group.SetBounds(x, y, w, h);
                         var gp = b.Group.Padding;
+                        int gLabelW = IsTableGroup(b) ? GroupLabelW(b) : labelW;
                         int ry = gp.Top;
                         for (int k = 0; k < b.Rows.Count; k++)
                         {
@@ -253,11 +255,11 @@ namespace APC.UI.Controls
                             {
                                 if (k + 1 >= b.Rows.Count || b.Rows[k + 1].Kind != BlockKind.Row)
                                     throw new InvalidOperationException("AddCaptionRow 다음에는 같은 묶음의 AddFieldRow가 와야 합니다.");
-                                PlaceCaptions(r, b.Rows[k + 1], gp.Left, w - gp.Right, labelW - gp.Left, fieldH, ry);
+                                PlaceCaptions(r, b.Rows[k + 1], gp.Left, w - gp.Right, gLabelW - gp.Left, fieldH, ry);
                                 ry += CaptionRowHeight + CaptionRowGap;
                                 continue;
                             }
-                            PlaceRow(r, gp.Left, ry, w - gp.Right, labelW - gp.Left, fieldH);
+                            PlaceRow(r, gp.Left, ry, w - gp.Right, gLabelW - gp.Left, fieldH);
                             ry += fieldH + ApcTheme.Px(ApcLayout.RowGap);
                         }
                         break;
@@ -351,6 +353,13 @@ namespace APC.UI.Controls
                 if (i >= targets.Length) throw new InvalidOperationException("열 제목이 다음 행의 칸 수보다 많습니다.");
                 captions.Cells[i].SetBounds(targets[i].Left, y, targets[i].Width, CaptionRowHeight);
             }
+        }
+
+        private static bool IsTableGroup(Block g) { return g.Rows.Any(r => r.Kind == BlockKind.Captions); }
+
+        private static int GroupLabelW(Block g)
+        {
+            return g.Rows.Where(r => r.Kind == BlockKind.Row).Select(r => TextW(r.Caption) + g.Group.Padding.Left).DefaultIfEmpty(0).Max();
         }
 
         private static int TextW(Label l) { return TextRenderer.MeasureText(l.Text, l.Font).Width + ApcTheme.Px(4); }

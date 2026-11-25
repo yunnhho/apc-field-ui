@@ -39,6 +39,7 @@ namespace APC.UI.Checks
                 Check(caps.Length == 2 && caps[0].Bottom + ApcTheme.Px(4) == d.Com1.Top && d.Com2.Top - d.Com1.Bottom == ApcTheme.Px(ApcLayout.RowGap),
                       "dialog: caption row above first row, row gap unchanged");
                 Check(d.Group.Height - d.Com2.Bottom == d.Group.Padding.Bottom, "dialog: group height includes caption row (" + d.Group.Bottom + "," + d.Com2.Bottom + "," + d.Group.Padding.Bottom + ")");
+                Check(d.Common.Left < d.Com1.Left, "dialog: long row name in caption-row group does not widen other groups' label column (" + d.Common.Left + "," + d.Com1.Left + ")");
                 var issues = LayoutLint.Inspect(d);
                 foreach (var i in issues) Console.WriteLine("      " + i);
                 Check(issues.Count == 0, "dialog: caption row dialog lint clean");
@@ -49,6 +50,7 @@ namespace APC.UI.Checks
         {
             public readonly ApcComboBox Com1 = new ApcComboBox { Width = ApcTheme.Px(100) }, Com2 = new ApcComboBox { Width = ApcTheme.Px(100) };
             public readonly ApcTextBox Port1 = new ApcTextBox { Width = ApcTheme.Px(80) };
+            public readonly ApcTextBox Common = new ApcTextBox { Width = ApcTheme.Px(80) };
             public readonly ApcGroup Group;
 
             public CaptionDialog()
@@ -56,8 +58,9 @@ namespace APC.UI.Checks
                 SetupDialog("t", 500);
                 Group = AddGroup("g");
                 AddCaptionRow(Group, "", "COM", "포트");
-                AddFieldRow(Group, "#1", Com1, Port1);
+                AddFieldRow(Group, "#1  저속 연마기 ST-GR-01~03", Com1, Port1);
                 AddFieldRow(Group, "#2", Com2, new ApcTextBox { Width = ApcTheme.Px(80) });
+                AddFieldRow(AddGroup("공통"), "응답", Common, new ApcTextBox { Width = ApcTheme.Px(80) });
                 SetFooter(new ApcButton { Text = "취소", DialogResult = DialogResult.Cancel }, new ApcButton { Text = "저장" });
             }
         }
