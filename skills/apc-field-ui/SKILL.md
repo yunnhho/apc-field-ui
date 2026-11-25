@@ -118,7 +118,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 입력 표(칸에 바로 입력·스캔) | `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + 열별 `ReadOnly`(읽기 전용 열은 자동 회색, `SelectionMode = CellSelect`면 입력 중인 행의 읽기 전용 칸은 연한 파랑) |
 
 - **표준 컨트롤 금지**: `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`과 `Control`을 상속해 직접 그린 카드·타일·그래프를 만들지 않는다. 위 표의 Apc 컨트롤을 쓴다. 표준으로 쓰는 것은 `Label`과 배치용 `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`뿐. 표에 없는 요소가 꼭 필요하면 만들지 말고 사용자에게 알린다(라이브러리에 추가할 후보).
-- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. **경고 메시지는 경고창**: 입력 오류·조작 경고(기간 역순, 빈 LOT, 잘못된·중복 스캔, 이미 진행 중인 작업 등)는 메인 화면에서도 `ApcDialog.Warn(FindForm(), "...")`(제목 "경고" + 노란 램프, dialog 안에서는 `this`). 스캔 화면도 같다 — 스캔 이벤트 처리 중이면 `BeginInvoke`로 처리가 끝난 뒤 띄운다(`ProductionView.WarnAfterScan`). 잘못된 것이 없는 안내(연결 결과·완료)는 `ApcDialog.Alert`(제목 "알림" + 파란 램프). 하단 알람바(`Alarm.Push`)는 쓰지 않는다 — 설비 이상·NG는 화면 안의 램프·타일·판정판으로 보인다.
+- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. **경고 메시지는 경고창**: 입력 오류·조작 경고(기간 역순, 빈 LOT, 잘못된·중복 스캔, 이미 진행 중인 작업 등)는 메인 화면에서도 `ApcDialog.Warn(FindForm(), "...")`(제목 "경고" + 노란 램프, dialog 안에서는 `this`). 스캔 화면도 같다 — 스캔 이벤트 처리 중이면 `BeginInvoke`로 처리가 끝난 뒤 띄운다(`ProductionView.WarnAfterScan`). 잘못된 것이 없는 안내(연결 결과·완료)는 `ApcDialog.Alert`(제목 "알림" + 파란 램프). 설비 이상·NG는 화면 안의 램프·타일·판정판으로 보인다(하단 알람 띠는 없다).
 - 상태 표시는 `StatusKind`(Run/Warn/Alarm/Stop/Info) + `ApcLamp`/`ApcLampColumn`. 색은 테마가 정한다.
 
 ## 4-1. 디테일 기준 (사용자 확정, 요구서가 다르게 정하면 요구서)

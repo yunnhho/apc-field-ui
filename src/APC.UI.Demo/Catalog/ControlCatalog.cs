@@ -15,9 +15,6 @@ namespace APC.UI.Demo.Catalog
             Body.AutoScroll = true;
 
             // 아래에서 위로 쌓인다(Top 도킹은 나중 추가가 위) → 보여줄 순서의 역순으로 추가
-            var alarmDemo = Button("알람 추가", ApcButtonVariant.Danger);
-            int n = 0;
-            alarmDemo.Click += (s, e) => Alarm.Push("테스트 알람 #" + (++n));
             var confirm = Button("확인창 열기", ApcButtonVariant.Normal, 130);
             confirm.Click += (s, e) => MessageBox.Show(ApcDialog.Confirm(FindForm(), "정말 삭제할까요? 되돌릴 수 없습니다.") ? "확인" : "취소");
             var save = Button("저장 확인창", ApcButtonVariant.Normal, 130);
@@ -26,7 +23,7 @@ namespace APC.UI.Demo.Catalog
             warn.Click += (s, e) => ApcDialog.Warn(FindForm(), "하중 하한이 상한보다 큽니다.");
             var info = Button("알림창", ApcButtonVariant.Normal, 110);
             info.Click += (s, e) => ApcDialog.Alert(FindForm(), "COM3 연결되었습니다.");
-            Body.Controls.Add(Row(Caption("알람 띠 / 확인창"), alarmDemo, confirm, save, warn, info));
+            Body.Controls.Add(Row(Caption("확인창"), confirm, save, warn, info));
 
             var grid = new ApcGrid { Height = S(150), Dock = DockStyle.Top, ReadOnly = true };
             grid.Columns.Add(new ApcLampColumn());

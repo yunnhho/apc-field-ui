@@ -19,7 +19,7 @@ namespace APC.UI.Checks
             Run("theme", RunThemeChecks);
             Run("asset", RunAssetChecks);
             Run("button", RunButtonChecks);
-            Run("alarm", RunAlarmChecks);
+            Run("lamp", RunLampChecks);
             Run("scan", RunScanChecks);
             Run("form", RunFormChecks);
             Run("grid", RunGridChecks);

@@ -46,7 +46,7 @@ namespace APC.UI.Checks
 
             using (var v = new ProbeView())
             {
-                Check(v.H.Dock == DockStyle.Top && v.A.Dock == DockStyle.Bottom && v.B.Dock == DockStyle.Fill, "template view: header top, alarm bottom, body fill");
+                Check(v.H.Dock == DockStyle.Top && v.B.Dock == DockStyle.Fill && v.Controls.Count == 2, "template view: header top, body fill, no alarm bar");
                 Check(((ApcHeaderBar)v.H).Title == "probe", "template view: title goes to header");
             }
             Check(typeof(ApcTemplateView).IsPublic, "template view is public in APC.UI");
@@ -89,7 +89,6 @@ namespace APC.UI.Checks
         {
             public ProbeView() : base("probe") { }
             public Control H { get { return Header; } }
-            public Control A { get { return Alarm; } }
             public Control B { get { return Body; } }
         }
         /// <summary>갤러리처럼 창을 띄운 뒤 화면을 끼워도 타이틀바에 톱니가 그려진다(두 줄 제목 포함).</summary>

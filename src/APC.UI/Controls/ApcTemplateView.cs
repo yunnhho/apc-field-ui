@@ -5,11 +5,10 @@ using APC.UI.Theming;
 
 namespace APC.UI.Controls
 {
-    /// <summary>모든 기능 화면의 공통 틀: 상단 ApcHeaderBar, 하단 ApcAlarmBar, 가운데 Body.</summary>
+    /// <summary>모든 기능 화면의 공통 틀: 상단 ApcHeaderBar, 가운데 Body.</summary>
     public class ApcTemplateView : UserControl
     {
         protected readonly ApcHeaderBar Header = new ApcHeaderBar();
-        protected readonly ApcAlarmBar Alarm = new ApcAlarmBar();
         /// <summary>
         /// 내용 영역(Padding 16px). 도킹 순서: 같은 Dock(Top 등)끼리는 나중에 Add한 것이 바깥(위)에 온다.
         /// Fill을 먼저 Add하고, Top 줄들은 화면 아래쪽 것부터 위쪽 것 순서로 Add한다(또는 SetChildIndex(fill, 0)).
@@ -24,7 +23,6 @@ namespace APC.UI.Controls
             Header.Title = title;
             Body.Padding = new Padding(S(ApcLayout.Pad));
             Controls.Add(Body);     // Fill은 마지막에 도킹되도록 먼저 추가
-            Controls.Add(Alarm);
             Controls.Add(Header);
         }
 
