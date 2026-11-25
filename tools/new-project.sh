@@ -7,11 +7,28 @@
 #       <대상>/themes/<고객사>가 없을 때만 저장소 themes/<고객사>(없으면 default)를 복사.
 # 새로:  tools/project-template/을 복사해 이름·고객사·프레임워크를 채운다. 대상에 csproj가 있으면 중단.
 # --into-existing: 대상 폴더의 csproj(1개)에 APC.UI 참조와 테마 출력 복사를 추가(APC.UI.Tools attach).
+#                  끝에 손으로 할 일(테마 로드 누락, Compile 항목 나열)을 "할 일:" 줄로 알린다.
+#
+#   tools/new-project.sh <대상폴더> --check-version
+#     이미 APC.UI가 들어간 프로젝트의 lib/APC.UI.dll 버전을 저장소 버전과 비교만 한다(아무것도 바꾸지 않음).
 . "$(dirname "$0")/env.sh"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 
 die() { echo "오류: $1" >&2; exit 1; }
 win() { cygpath -w "$1"; }
+
+if [ "$2" = --check-version ]; then
+  DLL="$1/lib/APC.UI.dll"
+  [ -f "$DLL" ] || die "$DLL 이 없습니다. APC.UI가 없는 프로젝트면 --into-existing으로 넣는다."
+  HAVE=$(powershell -NoProfile -Command "(Get-Item '$(win "$DLL")').VersionInfo.FileVersion" | tr -d '\r')
+  REPO_VER=$(sed -n 's/.*AssemblyFileVersion("\([0-9.]*\)").*/\1/p' "$REPO/src/APC.UI/Properties/AssemblyInfo.cs" | tr -d '\r')
+  if [ "$HAVE" = "$REPO_VER" ]; then
+    echo "같음: APC.UI $HAVE — 그대로 진행"
+  else
+    echo "다름: 프로젝트 $HAVE / 저장소 $REPO_VER — docs/api.md(저장소 기준)와 맞지 않는 API가 있을 수 있다. 사용자에게 알리고, 교체를 원하면 --into-existing으로 dll만 바꾼 뒤 빌드해 기존 화면이 깨지지 않는지 확인한다."
+  fi
+  exit 0
+fi
 
 [ $# -ge 3 ] || die "사용법: tools/new-project.sh <대상폴더> <프로젝트명> <고객사> [--framework v4.0] [--into-existing]"
 DEST="$1"; NAME="$2"; CUSTOMER="$3"; shift 3
@@ -72,6 +89,12 @@ fi
 if [ "$MODE" = existing ]; then
   "$REPO/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe" attach "$(win "$CSPROJ")" \
     || die "csproj 연결 실패(위 메시지 참고)."
+  # attach가 하지 않는 것 — 에이전트가 직접 한다.
+  grep -rlq --include='*.cs' 'ApcTheme.Load' "$DEST" 2>/dev/null \
+    || echo "할 일: Main에서 첫 폼을 띄우기 전에 ApcTheme.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @\"themes\\$CUSTOMER\")) 호출, ThemeException이면 메시지를 보여 주고 끝낸다(없으면 앱이 시작하자마자 죽는다. render는 이 누락을 못 잡는다)."
+  if grep -q '<Compile Include="[^"*]*\.cs"' "$CSPROJ" && ! grep -q '<Compile Include="[^"]*\*' "$CSPROJ"; then
+    echo "할 일: 이 csproj는 .cs를 하나씩 나열한다 — 새로 만든 .cs마다 <Compile Include=\"경로.cs\" /> 항목을 추가한다."
+  fi
 else
   GUID=$(powershell -NoProfile -Command "[guid]::NewGuid().ToString().ToUpper()" | tr -d '\r')
   TPL="$REPO/tools/project-template"
