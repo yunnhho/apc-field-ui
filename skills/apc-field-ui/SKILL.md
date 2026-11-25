@@ -1,217 +1,179 @@
 ---
 name: apc-field-ui
-description: Use when building or modifying an APCSOFT field PC program screen in WinForms (.NET Framework 4.x) — 현장 PC 프로그램, MES·스마트팩토리 현장 화면, 설비 모니터링, 라인별/센서 모니터링, OEE·가동률, SPC, 수율·불량, LOT·바코드 스캔, 트래킹(Track-in/out), 체결, 작업 시작·실적·불량 입력, 공정 설비 프로그램(Failure Analysis 등), 새 화면·새 프로젝트, 기존 APC.UI 화면 수정·dialog 추가, APC.UI, ApcForm, ApcGrid. Not for WPF, web, or .NET 6/8 projects.
+description: Builds and modifies APCSOFT field-PC program screens and dialogs in WinForms (.NET Framework 4.x) with the APC.UI library, then verifies them with an MSBuild build and render layout checks. Use when building or modifying an APCSOFT field PC program screen — 현장 PC 프로그램, MES·스마트팩토리 현장 화면, 설비 모니터링, 라인별/센서 모니터링, OEE·가동률, SPC, 수율·불량, LOT·바코드 스캔, 트래킹(Track-in/out), 체결, 작업 시작·실적·불량 입력, 공정 설비 프로그램(Failure Analysis 등), 새 화면·새 프로젝트, 기존 APC.UI 화면 수정·dialog 추가, APC.UI, ApcForm, ApcGrid. Not for WPF, web, or .NET 6/8 projects.
+compatibility: Windows + Git Bash, .NET Framework 4.x WinForms, Visual Studio or Build Tools MSBuild, APC.UI repository cloned and built locally; Node.js only when new SVG assets are needed.
 ---
 
-# APC 현장 UI 화면 만들기
+# APC field UI screens
 
-> **소스(`.cs`)는 Write 도구로 한 파일씩 쓴다. Bash heredoc 금지** — 한글 heredoc은 따옴표 파싱 오류로 일부만 또는 아무것도 안 만들어진다(시연에서 경고를 읽고도 다섯 차례 실패). 일부만 바꿀 때는 Edit.
+> **Write `.cs` sources with the Write tool, one file each. Never use a Bash heredoc** — Korean text in a heredoc breaks quote parsing and leaves partial or missing files. If you already used a heredoc, rewrite every file with Write. Use Edit for partial changes.
 
-APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. 원본 저장소: `C:\apc-field-ui` (Git Bash 경로 `/c/apc-field-ui`. 아래 명령·경로는 이 경로를 그대로 쓴다. 다른 위치에 클론했으면 `tools/install-skill.sh`가 이 문서의 경로를 실제 위치로 바꿔 설치한다).
-결과물: 샘플 데이터가 들어간 **메인 화면 하나 + (필요하면) dialog** 껍데기와, 데이터 연결용 **인터페이스 자리**. 실제 PLC/DB/시리얼 연결 코드는 만들지 않는다.
+Screens are built with the **APC.UI library**. Repository: `C:\apc-field-ui` (Git Bash `/c/apc-field-ui`; use the paths below as written).
+Deliverable: **one main screen + dialogs if requested**, filled with sample data, plus a **data interface** for later wiring. Do not write real PLC/DB/serial code.
+All on-screen text is Korean. Write your final report to the user in Korean.
 
-## 1. 입력 확인
+Reference files (read only when the case applies):
+- [references/setup.md](references/setup.md) — the work folder already has a csproj
+- [references/dialog.md](references/dialog.md) — creating or changing a dialog
+- [references/assets.md](references/assets.md) — a new SVG image is needed
+- [references/troubleshooting.md](references/troubleshooting.md) — build, render or run fails
 
-| 필수 | 선택 |
+## 1. Inputs
+
+| Required | Optional |
 |---|---|
-| **목적**: 모니터링(라인 전체 / 설비 부착 센서 등) 또는 공정 설비 프로그램(Failure Analysis 등) | 예전 프로그램 캡처 |
-| **메인 기능** | 고객사 요구서 파일 |
-| **상세 dialog 유무** | 추가 상세 요청 |
+| **Purpose**: monitoring (whole line / sensors on equipment) or process equipment program (Failure Analysis etc.) | Capture of the old program |
+| **Main functions** | Customer requirement file |
+| **Detail dialogs or not** | Extra details |
 
-필수 중 빠진 것만 한 번에 묻는다. 셋 다 있으면 바로 진행한다. 요구서가 있으면 메인 기능 목록을 거기서 보완한다. 고객사명이 없으면 `default`로 하고 그렇게 했다고 말한다. 고객사명이 있어도 저장소에 그 테마가 없으면 `new-project.sh`가 `알림: ... themes/default 를 복사했습니다`를 출력한다 — 이것도 사용자에게 전한다.
+Ask for missing required items once, all together. If all three are given, proceed. Fill out the function list from the requirement file if there is one. No customer name → use `default` and say so.
 
-## 2. 프로젝트 판별과 준비
+## 2. Setup
 
-먼저 저장소 도구가 빌드돼 있어야 한다: `/c/apc-field-ui/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe`가 없으면 `bash /c/apc-field-ui/build.sh`를 실행한다(`ALL PASSED` 확인).
+- Tools: if `/c/apc-field-ui/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe` is missing, run `bash /c/apc-field-ui/build.sh` (expect `ALL PASSED`).
+- No csproj in the work folder → `bash /c/apc-field-ui/tools/new-project.sh <folder> <ProjectName> <customer> [--framework v4.x]` (default v4.0). Relay any `알림:` line to the user.
+- A csproj already exists (existing project, editing an APC.UI screen) → follow [references/setup.md](references/setup.md).
+- C# 7.3 at most (no `record`, `init`, `string?`, switch expressions, target-typed `new()`).
 
-| 작업 폴더 상태 | 할 일 |
+## 3. API
+
+Read only the needed sections of `/c/apc-field-ui/docs/api.md` (generated): see the `목차:` line at the top, then find a section with `grep -n "^## ApcGrid" /c/apc-field-ui/docs/api.md`. **api.md is the source for usage (properties, methods, arguments)**; this file only decides what to use when. Do not read control sources. Read only the 1–2 templates chosen below from `/c/apc-field-ui/src/APC.UI.Demo/Templates/`.
+
+## 4. Layout
+
+Layout is constructor code only (no designer files). Scale sizes: `S(px)` in a screen (`ApcTemplateView`), `ApcTheme.Px(px)` elsewhere (dialogs). With a capture, keep the original information layout (what goes where) and change only the look.
+
+### 4a. Main screen
+
+| Purpose | Start from template |
 |---|---|
-| csproj 없음 | `bash /c/apc-field-ui/tools/new-project.sh <폴더> <프로젝트명> <고객사> [--framework v4.x]` (기본 v4.0, v4.0~v4.8.1. 폴더가 없으면 스크립트가 만든다) |
-| 구형 csproj, `TargetFrameworkVersion` v4.x, WinForms | 같은 명령에 `--into-existing` (dll·테마·참조만 추가, 재실행 시 dll만 교체) |
-| 이미 APC.UI 참조 있음(`lib/APC.UI.dll`, 기존 화면 수정·dialog 추가) | 스크립트를 바로 돌리지 않는다. dll 버전(`powershell -c "(Get-Item lib/APC.UI.dll).VersionInfo.FileVersion"`)을 `/c/apc-field-ui/src/APC.UI/Properties/AssemblyInfo.cs`의 `AssemblyFileVersion`과 비교한다. 같으면 그대로 진행. 다르면 `docs/api.md`(최신 기준)와 맞지 않는 API가 있을 수 있으니 사용자에게 알리고, 교체를 원하면 `--into-existing`으로 dll만 바꾼 뒤 빌드해 기존 화면이 깨지지 않는지 확인한다 |
-| SDK 형식(`<Project Sdk=`), net6/8, WPF, 웹 | **중단.** APC.UI는 .NET Framework 4.x WinForms 전용이라고 알린다 |
+| Monitoring: whole line (equipment tiles + value cards + alarm history, tile opens detail) | `EquipmentView` |
+| Monitoring: sensor value cards and trends | `TempHumiView` |
+| Process equipment: judge one unit (scan → OK/NG, measurements, today's totals, history) | `JudgeView` |
+| Process equipment: analysis table for several units | `FailureAnalysisView` |
+| Work input: start, output, defects | `WorkStartView`, `ProductionView`, `DefectView` |
+| Lookup | `HistoryView` |
 
-`--into-existing`일 때 스크립트가 하지 않는 두 가지를 직접 한다:
-- `Main`에서 첫 폼을 띄우기 전에 `ApcTheme.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"themes\<고객사>"))`를 호출하고 `ThemeException`이면 메시지를 보여 주고 끝낸다. 없으면 앱이 시작하자마자 죽는다(render는 테마를 직접 로드하므로 이 누락을 잡지 못한다).
-- csproj가 `<Compile Include="파일.cs" />`를 하나씩 나열하면, 새로 만든 `.cs`마다 항목을 추가한다(`**\*.cs` 와일드카드면 불필요).
+- **Copying a template**: templates are `internal sealed` demo classes and cannot be referenced. Copy into a new project file: change namespace and class name, move hard-coded sample values (arrays, repeated `Rows.Add`) into `SampleMainViewSource`, and let the screen read `IMainViewSource`. Do not copy `ApcTemplateView` helpers (`Columns`, `Row`, `Titled`, `S` …).
+- No matching template → build a **new layout from existing Apc controls** on `ApcTemplateView`.
+- Fill the empty `MainView` / `IMainViewSource` made by `new-project.sh`. Set `MainForm.TitleText` to the screen name and `MainForm.FunctionText` to the current function.
+- **Docking**: add the Fill control to `Body` first, then Top rows from the bottom of the screen upward.
+- One row of cards/tiles/judge panel: `Columns(S(height), cells[, percents])`. A row takes height + 12 — a Panel or `ApcGroup` holding several rows is `(S(height) + S(12)) × rows` (group: `group.HeightFor(...)`). Never guess heights.
+- `SectionTitle()` / `Caption()` added directly to `Body` need `Dock = DockStyle.Top` (otherwise they overlap the row above). Inside `Row()`, leave them.
+- **Section title + table/chart** = one `Titled(title, content[, buttons…])` cell placed in a `Columns()` cell or as the `Body` Fill. Title-row buttons go here too — never put `SectionTitle` and a button together in `Row()`. Two list tables side by side filling the remaining height: `FillColumns(...)`. Do not hand-build a TableLayoutPanel.
+- **Several tables**: fixed-count tables (checklist, 12 cart slots, Bin top 5) get a fixed height via `ApcGrid.HeightForRows(n)`; only one list table fills the remaining height. Do not put a fixed table beside the Fill list table (the shorter one leaves a gap) — put it in a `Columns()` row above. Other cells in that row match its height.
+- A fixed-height table/chart stacked in `Body` outside `Columns()` is still wrapped: `Columns(S(height), new Control[] { grid })` (a bare Add overlaps or loses the bottom gap).
+- **Selection**: when tapping a tile makes the cards/chart below show that unit, set `Selected = true` on that tile only. When a table row is chosen, `ClearInitialSelection = false` + select the row. A "selected row" button does nothing when `CurrentRow == null`.
+- **No settings button inside the screen.** Only a program with a settings screen calls `UseSettingsButton(...)` (title-bar gear). Open order: `AdminPasswordDialog` → `SettingsDialog` (`FailureAnalysisView.OpenSettings`). Buttons opening non-settings dialogs go in the related section's `Titled(..., Button(...))`.
 
-코드는 **그 프로젝트의** `LangVersion`/`TargetFrameworkVersion`을 따른다(v4.x면 C# 7.3까지: `record`, `init`, `string?`, switch 식, `new()` 금지).
+### 4b. Dialogs
 
-맨 위 경고대로 `.cs`는 Write로 쓴다. heredoc을 이미 시도해 실패했으면 남은 파일을 믿지 말고 전부 Write로 다시 쓴다.
+Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, constructor starts with `SetupDialog`, lay out with `ApcForm` helpers only (never set margins/sizes by number), provide a parameterless constructor with sample values (for render).
 
-## 3. API 파악
+### 4c. Controls
 
-`/c/apc-field-ui/docs/api.md`(자동 생성 API 요약)를 읽는다. 컨트롤 소스 전체를 읽지 않는다. 배치 참고용 템플릿은 아래에서 고른 1~2개만 `/c/apc-field-ui/src/APC.UI.Demo/Templates/`에서 읽는다.
-
-## 4. 배치
-
-배치는 생성자 코드로만 한다(디자이너 파일 없음). 크기는 배율 적용: 화면(`ApcTemplateView`)에서는 `S(px)`, dialog(`ApcForm`) 등 그 밖에서는 `ApcTheme.Px(px)`. 캡처가 있으면 원본의 정보 배치(무엇이 어디)는 유지하고 모양만 APC.UI로 바꾼다.
-
-### 4a. 메인 화면
-
-| 목적 | 출발 템플릿 |
+| Element | Control |
 |---|---|
-| 모니터링: 라인 전체(설비 타일 + 현재값 카드 + 알람 이력, 타일 누르면 상세) | `EquipmentView` |
-| 모니터링: 센서 값 카드·추이 | `TempHumiView` |
-| 공정 설비 프로그램: 설비 한 대 판정(스캔 → OK/NG, 측정값, 금일 집계, 이력) | `JudgeView` |
-| 공정 설비 프로그램: 여러 설비 분석표 | `FailureAnalysisView` |
-| 작업 입력: 시작·실적·불량 | `WorkStartView`, `ProductionView`, `DefectView` |
-| 조회 | `HistoryView` |
+| Text input / barcode | `ApcTextBox` / `ApcScanBox` |
+| Choice / number / date | `ApcComboBox` / `ApcNumericBox` / `ApcDateBox` |
+| Button | `ApcButton` (Normal, Primary, Danger) |
+| Table / input table (type or scan into cells) | `ApcGrid` / `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + per-column `ReadOnly` |
+| Read-only single value (current barcode, LOT, operator) | `ApcTextBox { ReadOnly = true }` or `ApcValueCard` |
+| Large current value (sensor, count, defect rate) | `ApcValueCard` |
+| Equipment state cell, tap for detail | `ApcStatusTile` (no subtitle — the reason lives in one place: judge panel or table) |
+| Large OK/NG verdict | `ApcJudgePanel` (OK=Run, NG=Alarm, waiting=Stop). Monitoring screens also put the one "act now" item here |
+| Persistent state (interlock bypassed, test mode, manual run) | `ApcNoticeBar` (not a judge panel). In `Body`: `Columns(bar.Height, new Control[] { bar })` |
+| Name-value of the current target (process, unit, Lot ID, product, recipe) | `ApcInfoStrip`. Inside `Row()`: `Dock = None` + `Width` |
+| Trend chart / status lamp | `ApcTrendChart` / `ApcLamp` |
+| Settings group (instead of GroupBox) | `ApcGroup` |
+| Tabs (unit group / line switch, instead of TabControl) | `ApcTabStrip` — never fake it with several `ApcButton`s. Top row of body `Row(tabs, ...)` (`FailureAnalysisView`) |
 
-- **템플릿 가져오기**: 템플릿은 데모 프로젝트의 `internal sealed` 클래스라 참조할 수 없다. 읽고 프로젝트에 새 파일로 옮겨 쓴다 — 네임스페이스를 프로젝트 것으로, 클래스 이름을 화면에 맞게, 코드에 박힌 샘플 값(배열·`Rows.Add` 반복)은 `SampleMainViewSource`로 옮기고 화면은 `IMainViewSource`에서 받는다. `Columns()`·`Row()`·`Caption()`·`SectionTitle()`·`Button()`·`S()`는 `ApcTemplateView`에 있으니 옮기지 않는다.
-- 맞는 템플릿이 없거나 추가 요청이 있으면 `ApcTemplateView`(헤더 + Body) 위에 **기존 Apc 컨트롤로 새 배치**를 짠다.
-- `new-project.sh`가 만드는 `MainView`·`IMainViewSource`는 빈 틀(TODO)이다. 여기에 채운다. `MainForm.TitleText`도 화면 이름으로 바꾸고(기본값은 영문 프로젝트명), `MainForm.FunctionText`에 지금 기능명을 넣는다.
-- **도킹 순서**: 같은 Dock끼리는 나중에 `Add`한 것이 바깥(위)에 온다. `Body`에는 Fill 컨트롤을 먼저 `Add`하고, Top 줄은 화면 아래쪽 것부터 위쪽 것 순서로 `Add`한다(또는 `Body.Controls.SetChildIndex(fill, 0)`).
-- 카드·타일·판정판을 한 줄에: `ApcTemplateView`의 `Columns(S(높이), cells)`(같은 폭) 또는 `Columns(S(높이), cells, new[] { 50f, 25f, 25f })`(퍼센트 폭). 칸 간격·줄 간격은 헬퍼가 정한다. 한 줄은 **높이 + 12**를 차지한다(줄 아래 간격 포함) — `Columns()` 여러 줄을 Panel 하나에 담으면 그 Panel 높이는 `(S(높이) + S(12)) × 줄 수`.
-- `SectionTitle()`·`Caption()`은 Dock이 없는 Label이다. `Body`에 바로 넣을 때는 `Dock = DockStyle.Top`을 준다(안 주면 위 줄과 겹친다. 시연 두 차례 연속). `Row()` 안에 넣을 때는 그대로 둔다.
-- 타일을 누르면 아래 카드·그래프가 그 설비를 보여 주는 화면은 그 타일만 `Selected = true`(나머지 false). 표 행을 고르는 화면은 `ApcGrid { ClearInitialSelection = false }` + 그 행 선택. 선택 표시가 없으면 어느 설비 값인지 화면에서 모른다.
-- 구획 제목 + 그 아래를 채우는 표·그래프는 `Titled("대기 Lot", grid)` 한 칸으로 — `Columns()` 칸이나 `Body`의 Fill에 그대로 넣는다(제목 Dock·도킹 순서를 직접 맞추지 않는다). 제목 줄 오른쪽 버튼은 `Titled("이력", grid, Button("전체 보기", ApcButtonVariant.Normal))`, 실행 중 제목 바꾸기는 `panel.Text = "대기 Lot (3)"`. `SectionTitle`과 버튼을 `Row()`에 같이 넣지 않는다.
-- 남은 높이를 채우는 목록 표 두 개를 나란히: `Body.Controls.Add(FillColumns(new Control[] { Titled(...), Titled(...) }))`(Fill이므로 Top 줄들보다 먼저 Add). TableLayoutPanel을 직접 짜지 않는다.
-- 한 화면에 표가 여럿이면 개수가 정해진 표(체크리스트·대차 12칸·Bin 상위 5)는 `ApcGrid.HeightForRows(n)`로 높이를 고정하고, 목록 표 하나만 남은 높이를 채운다. 정해진 표를 Fill 목록 표와 **나란히 두지 않는다**(짧은 쪽 아래가 빈다) — `Columns(제목 + 표 높이, ...)` 줄로 위에 두고 목록 표는 그 아래 Fill. 같은 줄의 다른 칸(그래프·다른 정해진 표)도 그 높이에 맞춘다.
-- `Columns()` 밖의 고정 높이 표·그래프를 `Body`에 Top으로 쌓을 때는 `Columns(S(높이), new Control[] { grid })`로 감싼다(Dock·줄 아래 간격을 헬퍼가 준다). 그냥 Add하면 Dock이 없어 겹치거나 아래 간격이 없다.
-- `ApcGroup` 안에 `Columns()` 줄을 넣을 때 그룹 높이는 `group.HeightFor((S(높이) + S(12)) × 줄 수)`. 짐작한 숫자로 맞추지 않는다.
-- **설정 버튼은 화면 안에 두지 않는다.** 설정 화면이 있는 프로그램만 화면 생성자에서 `UseSettingsButton((s, e) => OpenSettings())` → 창 타이틀바 최소화 왼쪽에 톱니 버튼이 생긴다(화면 Dispose 때 꺼짐). 설정이 없으면 부르지 않는다. 타이틀바는 설정 전용 — 설정이 아닌 dialog(레시피·LOT 입력 등)를 여는 버튼은 관련 구획 제목 줄 오른쪽에 일반 `ApcButton`(`Row(제목, 버튼)`). 열기 순서: `AdminPasswordDialog` → `SettingsDialog`(`FailureAnalysisView.OpenSettings`). 화면 없이 창만 있으면 `ApcForm.ShowSettings = true` + `SettingsClick`.
-- `ApcGrid`는 사용자가 누르기 전엔 선택 행이 없다(`CurrentRow == null`). "선택한 행" 버튼은 null이면 아무것도 하지 않게 한다.
+- **Table status column**: `ApcLampColumn` (header "상태"). For short status words (가동·대기·전송됨) use `ApcLampValue` (lamp + word in one cell) and no separate text column. Otherwise the lamp must also be readable from a text column in the same row, headed "판정" or "내용".
+- **Row actions** (send, reset): no drawn buttons — `ApcIconColumn`. In `CellClick`, ignore when `ApcIconColumn.IsEnabled(cell)` is false.
+- **Out-of-spec cell**: `cell.Style.ForeColor = ApcTheme.StatusText(kind)` + bold.
+- **Two-value card** (temperature + humidity): main value `Value`, second value `Footer`. `Status` = the worse one; per-item colors `ValueStatus` / `FooterStatus` (omit them and a normal value shows in warning color). Two or more footer values → `SetFooterParts`. Side-by-side cards share one height.
+- Text values without a verdict (Lot ID, recipe) go in `ApcInfoStrip`, not `ApcValueCard` (the card bottom stays empty).
+- **No standard controls**: no `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`, and no `Control` subclasses drawing their own cards/tiles/charts. Standard ones allowed: `Label` and layout `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`. If an element is missing from the table, do not build it — tell the user.
+- **Confirm**: irreversible actions `ApcDialog.Confirm(this, "...")` (red); safe ones like save `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`.
+- **Warnings use the warning box**: input errors and operation warnings (reversed period, empty LOT, wrong/duplicate scan, job already running …) use `ApcDialog.Warn(FindForm(), "...")` even on the main screen (`this` inside a dialog). During a scan event, show it via `BeginInvoke` after handling (`ProductionView.WarnAfterScan`). Notices with nothing wrong (connection result, done) use `ApcDialog.Alert`. Equipment faults and NG show through on-screen lamps/tiles/judge panel (no bottom alarm strip).
+- State = `StatusKind` (Run/Warn/Alarm/Stop/Info). The theme owns the colors.
 
-### 4b. dialog
+## 4-1. Detail standards (confirmed by the user; a requirement file overrides)
 
-- **dialog는 `ApcForm`을 상속한 별도 폼**이다(`ApcDialog`는 확인창만 띄우는 static 클래스라 상속할 수 없다). 생성자는 아래 헬퍼 표대로 `SetupDialog`부터 부른다(폼 속성·크기를 따로 설정하지 않는다). 메인에서 `dlg.ShowDialog(FindForm())`.
-- 템플릿에서 출발한다(모두 `src/APC.UI.Demo/Templates/`, 갤러리 "dialog 템플릿"에서 열어 볼 수 있다). 메인 화면과 같은 방법으로 옮겨 쓴다:
+- **Window title**: screen name only (`MainForm.TitleText`, e.g. "도장 라인 모니터링"; same for the screen `base("...")`). No customer or version. The library draws the clock in the title row — no clock or header strip in the screen. Function name goes in `MainForm.FunctionText` (e.g. "작업 시작 · LOT 스캔"); dialogs have none. Never use the brand color in screen code (confused with alarm red).
+- **Date/time**: date `yyyy-MM-dd`, same-day history `HH:mm:ss`, multi-day history `yyyy-MM-dd HH:mm:ss`.
+- **Decimals** (same in cards, tables, alarm text and limit text)
+  - `0.0`: ℃·%RH·kN·bar·kPa·m/min·A·V·Pa·µA, defect/availability/yield %, mΩ·nA, measured cycle time s
+  - `0.00`: mm / `#,0`: counts, particles (개/ft³)
+  - Integer: targets and settings a person enters (time settings s·min). Limits compared with a measurement use the measurement's decimals ("상한 28.0 s").
+  - Units not listed (rpm, Hz, kg …): requirement file; if absent, ask the user.
+- **Table alignment**: center by default (numbers too). Only long text columns (alarm text, remarks, reason) `MiddleLeft`.
+- **Column width**: with a long text column, only that column `AutoSizeMode = Fill`. With only short value columns, every column except the lamp column is Fill.
+- **No value (waiting, before communication)**: empty (`ApcValueCard.Value = ""`, cell `""`). Never `-`, `--`, `0`. A stopped unit that has a reading shows it. No value → no verdict: card `Status = Stop`, no fault reason text (process words "대기", "통신 끊김" are fine).
+- **Previous value while waiting**: if a judging screen in waiting state keeps the last inspection value on a card, its `Footer` names the source ("직전 검사 CELL0260418 · 10:15:00"). Never keep it without a source.
+- **Limits** — upper/lower limits are allowed bounds.
+  - A value equal to the upper limit is not alarm/NG — **above** it is (below the lower limit likewise). Lower-only specs (yield ≥ 95.0 %, Cpk ≥ 1.33): equal passes.
+  - Warning starts at its start value inclusive (`>=`/`<=`). With a warning band, a value equal to the upper limit is a warning ("상한 근접 60.0 %RH (상한 60.0)"); without one, OK.
+  - Text: limits "5.0 이하 OK", "기준 50.0 이하 · 경고 45.0 이상"; alarms "상한 초과 65.4 ℃ (상한 65.0)". Never "초과" or "도달 알람" for an equal value. Never show rule explanations like "같으면 OK".
+  - One judge function per measured item, used by status text, lamp, card color, main tile/card, alarm history and detail dialog table alike.
+- **Font**: theme font and size as is. No `new Font(...)` or size multipliers — only `ApcTheme.GetFont()` (bold `GetFont(FontStyle.Bold)`). Bold only for section/group titles and value emphasis — field labels (`Caption`, `AddFieldRow`) are regular.
+- **Units**: input labels `하중 상한 (kN)`; display via `ApcValueCard.Unit` or column header `최대 하중(kN)`. Never put the unit inside a value cell.
+- **Spacing**: never by number. Screens use `Columns()`/`Row()`, dialogs the `ApcForm` helpers.
 
-| dialog 유형 | 템플릿 |
+**Screen hierarchy** (render cannot check these — verify yourself)
+- One fact, one place:
+  - The most important verdict is one big `ApcJudgePanel` (one per screen; persistent states use `ApcNoticeBar`). If the requirement names "the most important information" (e.g. delivery deadline), put it in the panel's big text or `SubText` — not in a small card beside it.
+  - Do not repeat its reason sentence in tiles, card footers or tables (tiles/cards follow by color only). Do not restate the limit sentence on the card of a value the panel already speaks about.
+  - Red border (`Alarm`) only on the faulty target itself. Daily totals (NG 7 EA) get no card `Status`; at most text color `StatusText(Alarm)`.
+- Status color on text = `ApcTheme.StatusText(kind)`. `ApcTheme.Status(kind)` is for fills/lines (yellow/green text is unreadable).
+- Buttons: one `Primary` main action per screen, same height as inputs (`Button(...)`). `Danger` only for irreversible or safety-bypassing actions (normal flow is `Primary`). A disabled button gets `Enabled = false` + its reason right beside it as `Caption` (default color; `StatusText(Alarm)` only if the reason is an alarm; `""` when there is none).
+- Text: judge `SubText` and card `Footer` have at most two parts (one " · "). No formulas or statistical constants (σ̂, d2). Guidance sentences only if they fit one line. No particle placeholders ("이(가)") — write "품번 불일치 · AB222 ≠ AB212".
+- Tiles show the name only. If the requirement wants a value, put it in `Text`: "T04  94.1 %".
+- Titles above tables/charts/input groups: `SectionTitle()`, `Titled()` or `ApcGroup` — never a bolded `Caption`.
+- Side-by-side tables keep the default row height. Never paint row backgrounds with status colors — use lamp + bold `StatusText` in the relevant cell.
+- No screen methods/helpers named like `Control` members (`Refresh`, `Text` → e.g. `Reload`). No `ShowLamp` on indicator cards without a verdict (counts, OEE).
+
+**Status colors** (process state → `StatusKind`)
+- 대기·정지·통신 끊김 = `Stop` / running, in progress, normal finish (PASS·OK) = `Run` / near limit, needs check = `Warn` / NG·FAIL, equipment errors that stop work = `Alarm` / records like setting change or shift change = `Info`
+- Tile and table row = the worse of process state and value verdict. Row text "공정 상태 · 사유" (e.g. "시험중 · 저항 한계 근접"); tiles use color only. Several reasons → the worst one (tie: first in screen order).
+- Card `Status` = verdict of that card's value only:
+  - Values without a spec (progress, counts): `Run` while updating, `Stop` when stopped — never paint a progress card red for an equipment error. Exception: on a judging screen the NG count card is `Alarm` when NG > 0.
+  - Readings of a stopped/waiting unit are not judged — card/cell `Stop`, tile/row follow the process state (a cooled unit below its lower limit is not an alarm). Values of a normally finished unit are `Run`.
+
+**Sample data**
+- Row count: history/list tables fill their height. Use the number render reports ("표 아래가 빔 … N개로", "표 세로 스크롤바 … N개로"); fix overlap/overflow first and re-render. Fixed-count tables stay as is.
+- Time order: fault → recovery rows of the same unit in correct order.
+- Variety: no repeated text or intervals (mix units, texts, values, time gaps).
+- States: mostly normal with meaningful faults. Monitoring: at least one each of Warn, Alarm, Stop (no Warn if the requirement has no warning stage). Judging: a few NG (no unfounded Warn).
+- Limits: at least one row **equal** to a limit (upper 5.0 Pa → a 5.0 Pa OK row; with a warning band, a row at the warning start).
+- Totals: today's output/OK/NG/defect rate agree with each other and are ≥ history rows.
+
+## 5. Data interface
+
+The main screen depends only on `Data/IMainViewSource`; `Data/SampleMainViewSource` supplies samples. Adapt its methods and row models to the screen. Keep a **parameterless constructor** on the screen (uses samples) — render needs it. Dialogs receive values from the main screen and have no interface of their own. Sample values agree (alarm limit = settings table = chart reference line, last trend point = current value).
+
+## 6. Done check
+
+Copy this list into your response and tick each item. On failure, fix and redo from that step.
+
+```
+- [ ] verify.sh: build warnings 0, errors 0, every type 점검 0건
+- [ ] PNG review: all of 4-1, step 5 sample consistency, status readable as text, no big gaps or lopsided layout
+- [ ] Report: PNG paths, 점검 0건, build warnings 0, list of chosen limits
+```
+
+1. **Build + render + checks** in one command:
+   `bash /c/apc-field-ui/tools/verify.sh <sln> bin/Debug/<App>.exe <customer> <PNG folder> MainForm <Dialog1> <Dialog2>…`
+   - Type names are class names only. With a capture, append `--compare <capture.png>` (shown beside the first type).
+   - Fix every `점검:` line and build warning, rerun until the `== 완료` line. `참고:` lines do not count but are judged by 4-1 "Sample data". Render owns the check list.
+2. **Open the PNGs** and check what the tool cannot: all of 4-1 (hierarchy, status colors, sample data), step 5 consistency, status readable as text not just color, no big gaps or lopsided layout. Fix and go back to 1.
+3. **Report** (in Korean): PNG paths, last `점검 0건`, build warnings 0. Limits you chose because the requirement lacked them (limits, warning start, decimals) go in a "정한 기준값" list — keep them as constants next to the judge function.
+
+## Never
+
+| Never | Instead |
 |---|---|
-| 보기용 상세(상태 줄 + 센서 표 + 추이 + 닫기) | `EquipmentDetailDialog` |
-| 입력 폼(구획 폼: `AddContent(SectionTitle("판정 기준"))`로 나누고 그 아래 `AddFieldRow`. 상·하한 짝은 한 행 `AddFieldRow("하중 (kN)", 하한, FieldCaption("~"), 상한)`, 숫자칸 고정 폭, 짝 없는 숫자 행은 trailing에 흐린 허용 범위. 검증 `Warn`(틀린 칸으로 커서) → `Confirm("저장")` → 결과 속성 → OK). LOT 번호·모델·작업자처럼 몇 칸 입력도 여기 | `RecipeDialog` |
-| 관리자 비밀번호 확인(설정 진입 전 등). 설정 화면 없이 이것만 요청되면 지키려는 동작 이름의 일반 버튼("기준값 변경")을 두고, 누르면 이 dialog → 통과 시 그 동작 | `AdminPasswordDialog` |
-| 칸·슬롯별 LOT 입력(위 설비 이름 줄, 아래 입력 표에 바로 스캔 — 입력 중인 행은 연한 파랑, 스캔 Enter → 다음 칸, 넣은 칸 시간, 칸 수 가변, 빈 칸 Warn). 행마다 같은 항목을 넣는 설정(구역별 상하한 등)도 이 입력 표 방식 | `LotInputDialog` |
-| 통신·장비 설정(블록마다 한 행인 묶음 + 칸 제목 줄 `AddCaptionRow` + 공통 설정 + 비밀번호 변경) | `SettingsDialog` |
-
-- **dialog 배치는 `ApcForm` 헬퍼로만 한다.** 숫자(여백·행 높이·버튼 크기·`ClientSize`)를 직접 정하지 않는다 — 치수는 `ApcLayout`이 정하고 표시 직전에 한 번에 배치된다. 생성자에서 위→아래 순서로 부른다:
-
-| 헬퍼 | 하는 일 |
-|---|---|
-| `SetupDialog(title, width[, height])` | 제목·크기 고정·작업표시줄 숨김·부모 가운데. 폭은 배율 전 px. height 생략 = 내용으로 자동 |
-| `AddFieldRow(caption, field[, trailing...])` | 이름표 + 입력칸 한 줄. 이름표 열은 dialog 전체에 하나(가장 긴 이름표 폭) → 입력칸 왼쪽 끝이 모두 같다. 단 `AddCaptionRow`를 쓴 표 묶음은 제 이름표 열만 써서 다른 묶음과 맞추지 않는다(긴 블럭명이 아래 묶음 입력칸을 밀지 않게). trailing이 없으면 입력칸이 남은 폭을 채우고, 있으면(`FieldCaption("신호")`, 입력칸, 버튼…) 각자 `Width`로 왼→오 |
-| `AddGroup(title)` → `AddFieldRow(group, ...)` | 관련 행 묶음(`ApcGroup`). 묶음 사이 16 > 행 사이 12로 구분된다 |
-| `AddCaptionRow(group, "블럭", "COM", "신호", ...)` | 묶음 안 칸 제목 줄. 바로 다음 `AddFieldRow(group, ...)` 행의 [이름표, 입력칸, trailing...] 위에 순서대로 놓인다(`""` = 제목 없음). 여러 행이 같은 칸을 가지면(블록별 포트·신호·로직) 행마다 `FieldCaption`을 되풀이하지 말고 이것으로 한 번만 |
-| `AddContent(c)` / `AddContentFill(c)` | 표·상태 줄·그래프. `AddContent`는 `c.Height`(`ApcTheme.Px`) 그대로, `AddContentFill`은 남은 높이(`SetupDialog`에 height 필수, 하나만). 표 높이는 `ApcGrid.HeightForRows(행 수)` |
-| `AddContentRow(c1, c2, ...)` | 카드 여러 개를 한 줄에 같은 폭·같은 높이(가장 큰 `c.Height`)로. 2×2는 두 번 부른다. 카드 격자를 `TableLayoutPanel`로 직접 짜지 않는다(자식 기본 `Margin` 3px 때문에 render "빈 공간" 점검이 나온다) |
-| `SectionTitle(text)` | 구획 제목(왼쪽 붉은 막대 + 굵게 + 아래 폭 전체 구분선). `AddContent(SectionTitle("..."))`. 상자(`AddGroup`) 없이 입력 행을 나눌 때 |
-| `SetFooter(cancel, confirm[, left...])` | 오른쪽 아래 **[확정][취소]**(취소가 오른쪽 끝, 110×40), 왼쪽 보조 버튼(`비밀번호 변경` 등). Esc = 취소. 보기용은 `SetFooter(null, 닫기)` + 닫기에 `DialogResult = OK`(그래야 Esc도 닫기). 확정 버튼 하나뿐인 입력 dialog는 Esc가 없다 — 취소 버튼을 둔다. Enter(`AcceptButton`)는 스캔이 없는 dialog에서만 직접 지정 |
-
-- 헬퍼는 **생성자에서만** 부른다(표시 직전 한 번 배치, 그 뒤 호출은 예외). 이름표는 `AddFieldRow`가 만든다. `Label`·`Font`·`Panel` 버튼 줄을 직접 만들지 않는다. 한 dialog가 폭에 안 들어가면(render "부모 밖으로 넘침") `SetupDialog` 폭을 늘린다.
-- `Columns()`·`Row()`·`S()`는 `ApcTemplateView` 것이라 dialog에서는 쓸 수 없다(dialog 크기는 `ApcTheme.Px`).
-
-### 4c. 컨트롤
-
-| 화면 요소 | 컨트롤 |
-|---|---|
-| 글자 입력 / 바코드 | `ApcTextBox` / `ApcScanBox`: 화면의 `OnHandleCreated`에서 `var f = FindForm(); if (f != null) _scan.Attach(f);`(생성자엔 폼이 없다) |
-| 선택 목록 / 숫자 / 날짜 | `ApcComboBox` / `ApcNumericBox`(Minimum·Maximum·DecimalPlaces·Increment, ▲/▼는 칸 안 오른쪽에 위아래로) / `ApcDateBox` |
-| 버튼 | `ApcButton`(Normal·Primary·Danger) |
-| 표 | `ApcGrid` + 상태 열 `ApcLampColumn`(셀 값 = `StatusKind`, 열 제목 "상태"). 상태 문구가 짧으면(가동·대기·전송됨) 셀 값 `new ApcLampValue(kind, "문구")`로 램프 + 문구를 한 칸에 — 이때는 따로 글 열을 두지 않는다. 행마다 누르는 동작(전송·초기화)은 버튼을 그리지 말고 `ApcIconColumn { IconName = "icon_play" | "icon_reset" }`(셀 값 true = 파란 아이콘, false = 회색 = 지금 못 함), `CellClick`에서 `ApcIconColumn.IsEnabled(cell)`이 false면 아무것도 하지 않는다. 램프 색이 무엇인지 같은 행의 글 열로도 읽혀야 한다 — 그 열 제목은 "판정"·"내용"("상태"는 램프 열과 겹친다). 기준 이탈 값 셀은 `cell.Style.ForeColor = ApcTheme.StatusText(kind)` + 굵게(선택 행에서도 색이 유지된다) |
-| 읽기 전용 값 한 줄(현재 바코드·LOT·작업자) | `ApcTextBox { ReadOnly = true }`(회색 바탕) 또는 `ApcValueCard` |
-| 큰 현재값(센서·수량·불량률) | `ApcValueCard`(Title·Value·Unit·Footer·Status). 값 글자 크기는 카드 높이를 따른다 — 나란한 카드는 같은 높이로(`Columns()`·`AddContentRow`가 맞춘다). 값이 두 개(온도 + 습도)면 주 값은 `Value`, 보조 값은 `Footer`("습도 57.0 %RH · 경고"). `Status`(램프·테두리)는 둘 중 나쁜 쪽, `ValueStatus`·`FooterStatus`는 각 항목의 판정 — 안 주면 정상인 온도가 노란 글자로 나온다. Footer에 보조 값이 둘 이상(습도 · 파티클)이면 `FooterStatus` 대신 `SetFooterParts(new[]{"습도 43.8 %RH","파티클 4,210 개/m³"}, new[]{StatusKind.Run, StatusKind.Alarm})` — 항목마다 제 색으로 그린다 |
-| 설비 상태 한 칸, 누르면 상세 | `ApcStatusTile`(Text=설비명·Status, `Click`). 부제 없음 — 사유는 판정판·표 한 곳에 |
-| OK/NG 판정 크게 | `ApcJudgePanel`(Text=큰 글자·SubText·Status: OK=Run, NG=Alarm, 대기=Stop). 판정 화면이 아닌 모니터링 화면도 "지금 조치할 것" 하나를 여기에 |
-| 계속 보여야 하는 상태(인터락 우회 중·시험 모드·수동 운전) | `ApcNoticeBar`(Status·Text 굵게·Detail, 높이 44 한 줄). 판정판으로 만들지 않는다. `Body`에는 `Columns(bar.Height, new Control[] { bar })`로(아래 간격) |
-| 지금 보는 대상의 이름-값(공정·설비·Lot ID·제품·레시피) | `ApcInfoStrip`(`SetItems(...)`, `SetValue(이름, 값)`). 기본 `Dock = Top` — `Row()` 안에 넣으면 `Dock = None` + `Width`. 값 칸 폭은 값 글자 길이를 따라 나뉜다(긴 제품명·프로그램명이 먼저 잘리지 않는다). 판정 없는 글 값(Lot ID·레시피)을 `ApcValueCard`로 만들지 않는다(값이 작고 카드 아래가 빈다) |
-| 추이 그래프 | `ApcTrendChart`(`SetValues`, XLabels, Reference, UpperLimit/LowerLimit) |
-| 상태 램프 | `ApcLamp` |
-| 설정 묶음(제목 있는 상자, GroupBox 대신) | `ApcGroup`(Text=제목, 안은 Dock/FlowLayoutPanel) |
-| 탭(설비군·라인 전환, TabControl 대신) | `ApcTabStrip`(`SetTabs(...)`, `Width = PreferredTabsWidth`, `SelectedIndexChanged`에서 내용 전환). 버튼 모양(선택 = 눌린 버튼 + 아래 남색 막대)이라 `ApcButton`을 여러 개 놓아 흉내 내지 않는다. 본문 맨 위 줄 `Body.Controls.Add(Row(tabs, 안내문구...))`(Fill을 먼저 Add) — `FailureAnalysisView` |
-| 입력 표(칸에 바로 입력·스캔) | `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + 열별 `ReadOnly`(읽기 전용 열은 자동 회색, `SelectionMode = CellSelect`면 입력 중인 행의 읽기 전용 칸은 연한 파랑) |
-
-- **표준 컨트롤 금지**: `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`과 `Control`을 상속해 직접 그린 카드·타일·그래프를 만들지 않는다. 위 표의 Apc 컨트롤을 쓴다. 표준으로 쓰는 것은 `Label`과 배치용 `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`뿐. 표에 없는 요소가 꼭 필요하면 만들지 말고 사용자에게 알린다(라이브러리에 추가할 후보).
-- 확인: 되돌릴 수 없는 동작은 `ApcDialog.Confirm(this, "...")`(빨간 확인), 저장처럼 위험하지 않은 것은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`. **경고 메시지는 경고창**: 입력 오류·조작 경고(기간 역순, 빈 LOT, 잘못된·중복 스캔, 이미 진행 중인 작업 등)는 메인 화면에서도 `ApcDialog.Warn(FindForm(), "...")`(제목 "경고" + 노란 램프, dialog 안에서는 `this`). 스캔 화면도 같다 — 스캔 이벤트 처리 중이면 `BeginInvoke`로 처리가 끝난 뒤 띄운다(`ProductionView.WarnAfterScan`). 잘못된 것이 없는 안내(연결 결과·완료)는 `ApcDialog.Alert`(제목 "알림" + 파란 램프). 설비 이상·NG는 화면 안의 램프·타일·판정판으로 보인다(하단 알람 띠는 없다).
-- 상태 표시는 `StatusKind`(Run/Warn/Alarm/Stop/Info) + `ApcLamp`/`ApcLampColumn`. 색은 테마가 정한다.
-
-## 4-1. 디테일 기준 (사용자 확정, 요구서가 다르게 정하면 요구서)
-
-| 항목 | 기준 |
-|---|---|
-| 창 제목 | 화면 이름만(`MainForm.TitleText`, 예: "도장 라인 모니터링"). 고객사·버전 붙이지 않음. 화면 `base("...")`도 같은 이름. 현재 시각은 라이브러리가 창 제목 줄 오른쪽에 그린다 — 화면에 시계·헤더 띠를 만들지 않는다. 그 아래 줄 기능명은 `MainForm.FunctionText`(예: "작업 시작 · LOT 스캔", 브랜드 붉은색). dialog에는 기능명 없음. 브랜드 색(`brand`)은 기능명과 묶음·구획 제목 막대에만 라이브러리가 쓴다 — 화면 코드에서 직접 쓰지 않는다(알람 빨강과 혼동) |
-| 날짜·시각 | 날짜 `yyyy-MM-dd`, 당일 이력 시각 `HH:mm:ss`, 여러 날에 걸친 이력 `yyyy-MM-dd HH:mm:ss` |
-| 소수 자리 | ℃·%RH·kN·bar·kPa·m/min·A·V·Pa·µA → `0.0`, mm → `0.00`, 불량률·가동률·수율 % → `0.0`, mΩ·nA → `0.0`, 수량·파티클(개/ft³) → `#,0`(정수), 시간 설정(s·min) → 정수(측정한 사이클 타임 s는 `0.0`. 측정값과 비교하는 상·하한·경고값도 측정값 자리수 "상한 28.0 s" — 정수는 사람이 넣는 목표·설정값만). 카드 값·표·알람 문구·기준 문구 모두 같은 자리수. 여기 없는 단위(rpm·Hz·kg 등)는 요구서를 따르고, 요구서에도 없으면 사용자에게 묻는다 |
-| 표 정렬 | `ApcGrid` 기본이 가운데(헤더 포함). 긴 글 열(알람 내용·비고·사유)만 `DefaultCellStyle.Alignment = MiddleLeft`. 숫자 열도 가운데 |
-| 표 열 폭 | 긴 글 열이 있으면 그 열 하나만 `AutoSizeMode = Fill`. 짧은 값 열(ID·시각·숫자·판정)뿐이면 램프 열 빼고 모두 Fill로 고르게 나눈다(한 열만 Fill이면 나머지가 오른쪽 끝으로 밀린다. render가 "표 폭 절반 넘게 차지"로 잡는다) |
-| 값 없음(대기·통신 전) | 빈칸(정지 설비라도 읽은 값이 있으면 그 값). `ApcValueCard.Value = ""`(값·단위 모두 안 그림), 표 셀은 `""`. `-`, `--`, `0` 쓰지 않음. 값이 없으면 판정하지 않는다 — 판정 함수에 넣지 말고 카드 `Status = Stop`, 값에서 나온 이상 사유 문구 없음(공정 상태 문구 "대기"·"통신 끊김"은 쓴다) |
-| 대기 중 직전 값 | 판정 화면이 대기(READY)인데 측정값 카드에 직전 검사 값을 남기면 값을 남긴 카드마다 `Footer`에 출처를 적는다(예: "직전 검사 CELL0260418 · 10:15:00"). 출처 없이 남기지 않는다 |
-| 공정 상태 → 상태색 | 아래 "상태색" 목록 |
-| 상태 경계값 | 상·하한은 허용 한계다: 상한과 같은 값은 알람·NG가 아니다 — **초과**부터 NG·알람(하한은 미만부터). 경고 근접은 시작값과 같은 값부터 경고(`>=`/`<=`)라, 경고 구간이 있으면 상한과 같은 값은 경고("상한 근접 60.0 %RH (상한 60.0)"), 없으면 OK. 문구도 같게: 기준 "5.0 이하 OK"·"기준 50.0 이하 · 경고 45.0 이상"(규칙 설명 "같으면 OK"는 화면에 쓰지 않는다), 알람 "상한 초과 65.4 ℃ (상한 65.0)" — 상한과 같은 값에 "초과"·"도달 알람"을 쓰지 않는다. 하한만 있는 기준(수율 95.0 % 이상, Cpk 1.33 이상)도 같다: 기준값과 같은 값은 합격이고 **미만**부터 미달. 상태 문구·램프·카드 색이 같은 판정 함수 하나를 쓴다. 같은 측정 항목(예: 사이클 타임)은 메인 타일·카드, 알람 이력, 상세 dialog 표에서 모두 그 함수 하나로 판정한다(이력에서 25.9 s가 경고인데 상세 표에서 26.3 s가 정상이면 틀린 것) |
-| 글꼴 | 테마 글꼴·`fontSize` 그대로(12). `new Font(...)`·`FontSize * 배수` 금지, 글자는 `ApcTheme.GetFont()`만(굵게 `ApcTheme.GetFont(FontStyle.Bold)`). 굵게는 구획 제목(`SectionTitle`)·묶음 제목(`ApcGroup`)·값 강조에만 — 입력칸 앞 이름표(`Caption`, `AddFieldRow`)는 보통 굵기. 판정판·카드 큰 글자는 컨트롤이 정함 |
-| 단위 표기 | 입력은 이름표 괄호 `하중 상한 (kN)`, 표시는 `ApcValueCard.Unit`·표 열 제목 `최대 하중(kN)`. 값 칸 안에 단위를 붙이지 않음 |
-| 간격 | 숫자로 정하지 않는다. 화면은 `Columns()`·`Row()`, dialog는 4b 헬퍼가 정한다(값은 `ApcLayout`) |
-| 샘플 데이터 | 아래 "샘플 데이터" 목록 |
-
-**화면 위계** (render 점검이 못 잡는 것 — 직접 확인)
-- 같은 사실은 한 곳에서 한 번: 화면의 가장 중요한 판정은 `ApcJudgePanel` 하나에 크게 — 판정판은 화면에 하나(우회·시험 모드 같은 지속 상태는 `ApcNoticeBar`). 요구서가 "가장 중요한 정보"를 정했으면(예: 납입 마감) 그것을 판정판의 큰 글자나 `SubText`에 넣는다 — 판정판 옆 작은 카드로 밀어내지 않는다. 그 사유 문장을 타일·카드 Footer·표에 되풀이하지 않는다 — 타일·카드는 색(램프·테두리)으로만 따라간다 — 판정판이 말한 값의 카드에 기준 문장("기준 95.0 이상")을 다시 쓰지 않는다. 빨강 테두리(`Alarm`)는 이상인 그 대상(설비·Lot·측정값)에만 — 하루 집계(NG 7 EA, 불량 수)는 카드 `Status`를 두지 않고 필요하면 값 글자색만 `StatusText(Alarm)`.
-- 글자에 상태색은 `ApcTheme.StatusText(kind)`(흰 바탕에서 읽히게 명도를 낮춘 색). `ApcTheme.Status(kind)`는 면·선용 — 글자에 쓰면 노랑·초록이 안 읽힌다.
-- 주 동작 버튼은 화면에 `Primary` 하나, 높이는 입력칸과 같게(`Button(...)`) — 카드·판정판 크기로 키우지 않는다. `Danger`는 되돌릴 수 없거나 안전 장치를 우회하는 동작(삭제·인터락 우회)만, 정상 처리 흐름(Lot 처리 시작)은 `Primary`. 지금 못 누르는 버튼은 `Enabled = false` + 바로 옆에 이유 한 줄(`Caption`).
-- 문구: 판정판 `SubText`·카드 `Footer`는 두 마디까지(" · " 한 번). 내부 계산식·통계 상수(σ̂, d2, 공식)는 화면에 쓰지 않는다. 안내 문장은 한 줄에 들어갈 때만. 값을 끼워 넣는 문장에 조사 자리표시("이(가)", "와(과)", "을(를)")를 쓰지 않는다 — 조사가 필요 없게 "품번 불일치 · AB222 ≠ AB212"처럼 쓴다. 비활성 버튼 옆 이유는 `Caption` 기본 글자색(빨강은 그 이유가 알람일 때만 `StatusText(Alarm)`). 이유가 없을 때는 빈 글자(`""`)로 둔다 — render는 빈 이름표를 접힘으로 보지 않고, dialog `FieldCaption`은 나중에 넣은 글자만큼 넓어진다.
-- 타일은 이름만. 요구서가 타일에 값을 요구하면(현재 Lot·수율) 부제가 아니라 `Text` 한 줄에 "T04  94.1 %"처럼 넣는다.
-- 표·그래프·입력 묶음 위 제목은 `SectionTitle()` 또는 `ApcGroup` — `Caption`을 굵게 바꿔 제목으로 쓰지 않는다(막대 없는 제목이 섞인다).
-- 나란한 표는 행 높이를 같게(`ApcGrid` 기본 행 높이를 바꾸지 않는다). 행 바탕을 상태색으로 칠하지 않는다(선택 행 파랑과 섞인다) — 눈에 띄어야 하는 행은 램프 + 해당 칸 `StatusText` 굵은 글자. 화면 메서드 이름에 `Refresh`를 쓰지 않는다(`Control.Refresh`와 겹친다 → `Reload`). 판정 기준이 없는 지표 카드(수량·OEE)에는 `ShowLamp`를 쓰지 않는다.
-
-**상태색** (공정 상태 → `StatusKind`)
-- 대기·정지·통신 끊김 = `Stop`
-- 가동·진행 중(시험 중·측정 중)·정상 완료(PASS·OK) = `Run`
-- 한계 근접·확인 필요 = `Warn`
-- 불량 판정(FAIL·NG)·설비 오류(인가 실패·통신 오류 등 작업이 멈추는 것) = `Alarm`
-- 설정 변경·교대 같은 기록 = `Info`
-- 설비 타일·표 행의 상태 = 공정 상태와 값 판정 중 나쁜 쪽. 표 행 문구는 "공정 상태 · 사유"(예: "시험중 · 저항 한계 근접"), 타일은 색만. 사유가 여럿이면 가장 나쁜 것 하나(같으면 화면 항목 순서 앞쪽).
-- 카드 `Status`는 그 카드 값의 판정만. 판정 기준이 없는 값(진행률·수량, 기준이 주어지지 않은 측정값)은 값이 갱신 중이면 `Run`, 멈췄으면(설비 오류·대기·정지, 값 없음) `Stop` — 설비 오류를 진행률 카드에 빨강으로 칠하지 않는다(설비 상태는 타일이 보인다). 예외: 판정 화면의 NG 수 카드는 NG > 0이면 `Alarm`(`JudgeView`와 같이). 정지·대기 설비가 읽은 값은 판정하지 않는다 — 값만 보이고 카드·셀은 `Stop`(기본 글자색), 타일·행은 공정 상태(정지·대기)를 따른다(멈춘 설비가 식어 하한 아래인 것은 알람이 아니다). 정상 완료한 설비의 진행률·최종값은 `Run`.
-
-**샘플 데이터**
-- 행 수: 이력·목록 표는 표 높이만큼 채운다. 짐작하지 말고 render가 알려 주는 수로 맞춘다(참고 줄 "표 아래가 빔 … N개로", 점검 줄 "표 세로 스크롤바 … N개로"). 겹침·넘침이 같이 나오면 그것부터 고치고 다시 render해서 나온 수를 쓴다(배치가 바뀌면 표 높이도 바뀐다). 설비 목록처럼 개수가 정해진 표는 그대로.
-- 시간 순서: 같은 설비의 이상 → 복귀 행은 시각 순서가 맞아야 한다(복귀가 그 이상보다 늦게).
-- 다양성: 늘린 행은 같은 문구·같은 간격을 되풀이하지 않는다(설비·문구·값·시각 간격을 섞는다. 시각만 바꾼 복사 행이 3개 이상이면 render가 "참고: … 되풀이"로 알린다).
-- 상태: 정상(Run) 위주에 그 화면에서 뜻이 있는 이상 상태를 섞는다. 모니터링은 Warn·Alarm·Stop 각각 하나 이상(요구서가 정한 상태에 경고 단계가 없으면 Warn을 만들지 않는다), 판정은 NG(Alarm) 몇 건(판정 화면에 근거 없는 Warn을 만들지 않는다).
-- 경계값: 판정 기준·상하한과 **같은 값**인 행을 하나 이상 넣어 경계값 판정이 화면에서 보이게 한다(예: 상한 5.0 Pa → 5.0 Pa OK 한 행. 경고 구간이 있어 상한이 경고 안에 들면 경고 시작 45.0 → 45.0 경고 한 행).
-- 집계: 금일 생산·OK·NG·불량률은 서로 맞고 이력 행 수 이상.
-
-## 5. 새 그림이 필요할 때만
-
-1. 프로젝트의 `assets-src/`에 SVG를 만든다. 이름 규칙 `{btn|lamp|win|icon|logo}_{이름}_{normal|hover|pressed|disabled}.svg`(램프·로고는 상태 없음), `<svg width="..">` 필수. 기존 SVG(`/c/apc-field-ui/assets-src/`)를 본떠 그린다.
-2. `/c/apc-field-ui/tools/node_modules`가 없으면 먼저 `cd /c/apc-field-ui/tools && npm install`(한 번만). 그다음
-   `node /c/apc-field-ui/tools/render-assets.mjs --out <프로젝트>/themes/<고객사>/assets --override <프로젝트>/assets-src`
-3. 기존 이름을 대체한 그림은 컨트롤이 자동으로 쓴다. 새 이름은 `ApcTheme.GetImage("icon_xxx_normal")`로 쓴다.
-
-## 6. 데이터 자리
-
-메인 화면은 `Data/IMainViewSource`(인터페이스)에만 의존하고, `Data/SampleMainViewSource`가 샘플을 준다. 화면에 맞게 인터페이스 메서드와 행 모델을 바꾼다. 화면에는 **매개변수 없는 생성자**(샘플 사용)를 남긴다 — render가 쓴다. dialog는 메인 화면에서 값을 넘겨받고 자체 인터페이스를 두지 않는다. dialog에도 **샘플 값을 넣는 매개변수 없는 생성자**를 둔다 — 없으면 render할 수 없다. 샘플 값은 서로 맞춘다(알람 문구의 기준값 = 설정값 표 = 그래프 기준선, 추이 마지막 점 = 현재값).
-
-## 7. 완료 확인
-
-1. MSBuild로 빌드하고 UTF-8 로그의 마지막 요약을 읽는다:
-   ```
-   . /c/apc-field-ui/tools/env.sh && "$MSBUILD" <sln> -v:m -nologo -noconlog "-flp:logfile=build.log;verbosity=minimal;encoding=utf-8;summary"; tail -8 build.log
-   ```
-   - `env.sh`가 설치된 Visual Studio/Build Tools에서 MSBuild를 찾는다. 못 찾으면 그 메시지를 사용자에게 전한다.
-   - 콘솔 대신 로그 파일을 읽는 이유: 한글 VS의 MSBuild 콘솔 출력은 CP949와 UTF-8이 섞여 깨진다(`PreferredUILang`·`iconv`로는 안 된다).
-   - `logfile`은 프로젝트 폴더 안 상대 경로(`build.log`)로. `../` 같은 상위 경로는 드라이브 루트로 풀려 정리(rm)가 막힌다.
-   - 요약 `경고 0개`·`오류 0개`(영문 VS면 `0 Warning(s)`·`0 Error(s)`)를 확인한다. 경고도 고친다.
-2. 메인 폼과 각 dialog를 PNG로(형식 이름은 네임스페이스 없이 클래스 이름만, 예: `MainForm`, `RecipeDialog`):
-   `/c/apc-field-ui/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe render <bin/Debug/앱.exe> MainForm <bin/Debug/themes/고객사> <out.png>` (Windows 경로는 `cygpath -w`)
-   `--size`는 생략한다: 크기 고정 dialog(`Resizable = false`)는 자기 크기, 메인 폼·화면은 1920×1080으로 그린다. 출력 폴더는 없으면 만든다.
-   예: `T=/c/apc-field-ui/src/APC.UI.Tools/bin/Debug/APC.UI.Tools.exe; $T render "$(cygpath -w bin/Debug/App.exe)" RecipeDialog "$(cygpath -w "bin/Debug/themes/고객사")" "$(cygpath -w out/RecipeDialog.png)"`
-   캡처를 받았다면 `--compare <캡처.png>` → `<out>.compare.png`
-3. **render 점검 0건까지 고친다.** render는 배치를 검사해 문제마다 `점검: <컨트롤 경로>: <문제>` 한 줄과 마지막 줄 `점검 N건`을 출력한다(검사 항목은 render가 정한다. 이 문서에 따로 나열하지 않는다). `점검:` 줄을 모두 고치고 다시 render해서 `점검 0건`을 확인한다. `참고:` 줄은 건수에 들지 않지만 4-1 "샘플 데이터" 기준대로 판단한다.
-4. PNG를 직접 열어 도구가 못 보는 것을 눈으로 확인한다. 걸리면 고치고 다시 render:
-   - 4-1의 모든 항목(표와 그 아래 상태색·샘플 데이터 목록)이 화면에서 지켜졌는가
-   - 6단계 샘플 값 정합
-   - 상태가 색만이 아니라 글(상태 문구·판정 글자)로도 보이는가
-   - 큰 빈 공간·한쪽으로 쏠린 배치가 없는가(dialog 빈 공간은 4b `SetupDialog` height 규칙을 다시 본다)
-5. 사용자에게 PNG 경로와 함께 보여 주고, 마지막 render의 `점검 0건`·빌드 경고 0을 보고한다. 요구서에 없어 정한 기준값(상·하한, 경고 시작값, 단위 소수 자리)은 "정한 기준값" 목록으로 함께 알린다 — 사용자가 고칠 수 있게. 판정 함수 옆 상수 한 곳에 둔다.
-
-x86 앱: 위 도구는 64비트로 돌아서 `PlatformTarget`이 x86인 앱이나 생성자에서 32비트 네이티브 DLL을 부르는 화면은 "어셈블리를 읽을 수 없습니다"로 실패한다. 그때는 같은 인자로 32비트 도구 `/c/apc-field-ui/src/APC.UI.Tools/bin/Debug-x86/APC.UI.Tools.exe`를 쓴다(`build.sh`가 함께 만든다). 32비트 도구로도 실패하면(네이티브 DLL·장비가 이 PC에 없음 등) 빌드 성공까지만 확인하고 render를 못 한 이유를 사용자에게 말한다.
-
-## 하지 않는 것
-
-| 하지 않음 | 대신 |
-|---|---|
-| 표준 입력·표·폼 컨트롤, `Control` 상속 직접 그리기 | 4c 표의 Apc 컨트롤 |
-| 상태색 색상 변경(run=초록, warn=노랑, alarm=빨강, stop=회색, info=파랑) | 명도만 고객사 `theme.json`에서 |
-| `/c/apc-field-ui/themes/default`, `/c/apc-field-ui/assets-src/*.svg` 수정 | 프로젝트의 `themes/<고객사>`, `assets-src/` |
-| 컨트롤 API 추측 | `docs/api.md` 확인 |
-| 앱을 실행해 띄워 두기 | 확인은 render로. 실행했다면 끝내기 전에 닫는다(떠 있는 exe가 `bin` 폴더를 잠가 다음 빌드·정리가 실패한다) |
+| Change status hues (run=green, warn=yellow, alarm=red, stop=gray, info=blue) | Lightness only, in the customer `theme.json` |
+| Edit repository `themes/default` or `assets-src/*.svg` | Project `themes/<customer>`, `assets-src/` |
+| Guess a control API | Check `docs/api.md` |
+| Leave the app running | Verify with render. If you ran it, close it before finishing (it locks `bin`) |

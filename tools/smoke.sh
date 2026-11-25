@@ -12,6 +12,9 @@ quiet tools/new-project.sh "$T/app" SmokeApp "샘플 고객" || fail new-project
 quiet "$MSBUILD" "$(cygpath -w "$T/app/SmokeApp.sln")" -v:m -nologo -p:PreferredUILang=en-US || fail build-new-project
 quiet "$TOOLS" render "$(cygpath -w "$T/app/bin/Debug/SmokeApp.exe")" MainView "$(cygpath -w "$T/app/bin/Debug/themes/샘플 고객")" "$(cygpath -w "$T/main.png")" || fail render
 [ -s "$T/main.png" ] || fail render-output
+quiet bash tools/verify.sh "$T/app/SmokeApp.sln" "$T/app/bin/Debug/SmokeApp.exe" "샘플 고객" "$T/verify" MainView MainForm || fail verify
+[ -s "$T/verify/MainForm.png" ] || fail verify-output
+tools/new-project.sh "$T/app" --check-version | grep -q "^같음" || fail check-version
 quiet "$TOOLS" render "$(cygpath -w "$T/app/bin/Debug/SmokeApp.exe")" MainView "$(cygpath -w "$T/app/bin/Debug/themes/샘플 고객")" "$(cygpath -w "$T/new-dir/main.png")" || fail render-creates-output-dir
 
 quiet "$MSBUILD" "$(cygpath -w "$T/app/SmokeApp.sln")" -v:m -nologo -p:PreferredUILang=en-US -p:PlatformTarget=x86 "-p:OutputPath=bin\x86\\" "-p:IntermediateOutputPath=obj\x86\\" || fail build-x86
@@ -36,6 +39,7 @@ mkdir -p "$T/old"
 sed 's/v4\.8/v4.0/' src/APC.UI.Checks/fixtures/csproj/old-winforms.csproj > "$T/old/Field.csproj"
 printf 'static class P { [System.STAThread] static void Main() { new APC.UI.Controls.ApcButton(); } }\n' > "$T/old/Program.cs"
 quiet tools/new-project.sh "$T/old" Field "샘플 고객" --into-existing || fail into-existing
+grep -q "할 일: Main에서" "$T/log" || fail into-existing-theme-load-hint
 quiet "$MSBUILD" "$(cygpath -w "$T/old/Field.csproj")" -v:m -nologo -p:PreferredUILang=en-US || fail build-into-existing
 [ -f "$T/old/bin/Debug/themes/샘플 고객/theme.json" ] || fail into-existing-theme-copy
 
@@ -46,6 +50,7 @@ quiet node tools/render-assets.mjs --out "$T/ov-out" --override "$T/ov" || fail 
 
 quiet bash tools/install-skill.sh "$T/skills" || fail install-skill
 grep -q "^name: apc-field-ui" "$T/skills/apc-field-ui/SKILL.md" || fail install-skill-content
+grep -q "AddCaptionRow" "$T/skills/apc-field-ui/references/dialog.md" || fail install-skill-references
 
 rm -rf "$T"
 echo "SMOKE OK"

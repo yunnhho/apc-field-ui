@@ -23,7 +23,10 @@ namespace APC.UI.Tools
             sb.Append("# ").Append(asm.GetName().Name).Append(" API (v").Append(asm.GetName().Version).Append(")\n\n");
             sb.Append("> build.sh가 자동 생성한다. 직접 고치지 않는다.\n");
 
-            foreach (var t in asm.GetExportedTypes().OrderBy(x => x.FullName, StringComparer.Ordinal))
+            var types = asm.GetExportedTypes().OrderBy(x => x.FullName, StringComparer.Ordinal).ToArray();
+            // 목차: 앞부분만 읽혀도 전체 형식 목록이 보이게. 필요한 절은 `grep -n "^## 이름"`으로 찾는다.
+            sb.Append("\n목차: ").Append(string.Join(" · ", types.Select(x => x.Name).ToArray())).Append('\n');
+            foreach (var t in types)
                 WriteType(sb, t, docs);
             return sb.ToString();
         }
@@ -179,6 +182,13 @@ namespace APC.UI.Tools
                 var summary = member.Element("summary");
                 var name = (string)member.Attribute("name");
                 if (summary == null || name == null) continue;
+                // <see cref="T:Ns.Type.Member"/>는 Value에서 빠지므로 끝 이름으로 바꿔 넣는다.
+                foreach (var see in summary.Descendants().Where(e => e.Name == "see" || e.Name == "paramref").ToList())
+                {
+                    string target = (string)see.Attribute("cref") ?? (string)see.Attribute("name") ?? (string)see.Attribute("langword") ?? "";
+                    target = Regex.Replace(target, @"^\w:|\(.*$", "");
+                    see.ReplaceWith(target.Substring(target.LastIndexOf('.') + 1));
+                }
                 map[name] = Regex.Replace(summary.Value, @"\s+", " ").Trim();
             }
             return map;

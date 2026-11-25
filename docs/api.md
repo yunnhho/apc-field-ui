@@ -2,6 +2,8 @@
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
+목차: ApcButton · ApcButtonField · ApcButtonVariant · ApcComboBox · ApcDateBox · ApcDialog · ApcForm · ApcGrid · ApcGroup · ApcIconCell · ApcIconColumn · ApcInfoStrip · ApcJudgePanel · ApcLamp · ApcLampCell · ApcLampColumn · ApcLampValue · ApcNoticeBar · ApcNumericBox · ApcScanBox · ApcStatusLegend · ApcStatusTile · ApcTabStrip · ApcTemplateView · ApcTextBox · ApcTrendChart · ApcValueCard · ScanEventArgs · Gradients · NineSlice · ScanDetector · ApcLayout · ApcTheme · AssetResolver · ScanSettings · StatusColors · StatusKind · ThemeColors · ThemeData · ThemeException · ThemeLoader
+
 ## ApcButton
 
 `APC.UI.Controls` · class : Button
@@ -27,7 +29,7 @@
 
 `APC.UI.Controls` · class : ComboBox
 
-테마 선택 목록(드롭다운 전용, 직접 입력 없음). 닫힌 상태는 입력칸 모양 + 오른쪽 그라데이션 화살표 버튼으로 직접 그리고, 펼친 목록은 항목 높이 28px×배율 이상(장갑 낀 손가락·마우스 모두 누르기 쉽게). 높이는 ItemHeight로 정해진다.
+테마 선택 목록(드롭다운 전용, 직접 입력 없음). 닫힌 상태는 입력칸 모양 + 오른쪽 그라데이션 화살표 버튼으로 직접 그리고, 펼친 목록은 항목 높이 28px×배율 이상(마우스·펜으로 누르기 쉽게). 높이는 ItemHeight로 정해진다.
 - `ApcComboBox()`
 
 ## ApcDateBox
@@ -51,7 +53,7 @@
 되돌릴 수 없는 동작(삭제, 작업 종료 등) 확인. 기본 포커스와 Enter·Esc는 모두 '취소' — 바코드 스캔의 Enter나 습관적 Enter로 실수 확인되지 않게 한다.
 - `static bool Confirm(IWin32Window owner, string message)` — 파괴적 동작 확인: 확인 버튼은 빨간 "확인".
 - `static bool Confirm(IWin32Window owner, string message, string okText, ApcButtonVariant okVariant)` — 확인 버튼 글자·종류 지정. 저장처럼 위험하지 않은 확인은 ("저장", Primary).
-- `static void Alert(IWin32Window owner, string message)` — 안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 .
+- `static void Alert(IWin32Window owner, string message)` — 안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 Warn.
 - `static void Warn(IWin32Window owner, string message)` — 경고창(입력 오류·조작 경고: 기간 역순, 빈 LOT, 잘못된·중복 스캔 등). 제목 "경고" + 노란 램프. 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
 
 ## ApcForm
@@ -63,8 +65,8 @@
 - `Rectangle ContentBounds { get; }` — 타이틀바·1px 테두리를 뺀 내용 영역(클라이언트 좌표) = Padding 안쪽.
 - `bool Resizable { get; set; }`
 - `bool ShowLogo { get; set; }` — 타이틀바 왼쪽 로고 + 가운데 큰 제목(메인 창). false면 로고 없이 왼쪽 제목(dialog, SetupDialog가 끈다).
-- `bool ShowSettings { get; set; }` — 타이틀바 최소화 왼쪽에 설정(톱니) 버튼. 설정 화면이 있는 창에서만 켠다. 누르면 . 화면(ApcTemplateView)에서는 직접 켜지 말고 UseSettingsButton을 쓴다.
-- `event EventHandler SettingsClick` — 타이틀바 설정 버튼을 눌렀다(가 true일 때만).
+- `bool ShowSettings { get; set; }` — 타이틀바 최소화 왼쪽에 설정(톱니) 버튼. 설정 화면이 있는 창에서만 켠다. 누르면 SettingsClick. 화면(ApcTemplateView)에서는 직접 켜지 말고 UseSettingsButton을 쓴다.
+- `event EventHandler SettingsClick` — 타이틀바 설정 버튼을 눌렀다(ShowSettings가 true일 때만).
 - `int ResizeGrip { get; }` — 가장자리 리사이즈 감지 폭(px).
 - `int TitleBarHeight { get; }`
 - `protected ApcGroup AddGroup(string title)` — 제목 있는 묶음(ApcGroup). 행은 AddFieldRow(group, ...)로 넣는다.
@@ -232,7 +234,7 @@
 
 `APC.UI.Controls` · class : Control
 
-전환 버튼 줄(설비군·라인 전환 등). 탭 하나하나가 보통 버튼(btn_normal)이고, 선택된 것은 눌린 버튼 + 굵은 글자 + 아래 남색 막대. 실행 버튼(남색 Primary)과 겹치지 않게 선택도 Primary 색을 쓰지 않는다. 본문 맨 위 줄에 둔다(창 제목 줄·헤더 띠가 아니다). 버튼 폭은 글자에 맞춰 자동(잘리지 않음), 버튼 사이 4px. 내용 전환은 에서 화면이 한다. 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
+전환 버튼 줄(설비군·라인 전환 등). 탭 하나하나가 보통 버튼(btn_normal)이고, 선택된 것은 눌린 버튼 + 굵은 글자 + 아래 남색 막대. 실행 버튼(남색 Primary)과 겹치지 않게 선택도 Primary 색을 쓰지 않는다. 본문 맨 위 줄에 둔다(창 제목 줄·헤더 띠가 아니다). 버튼 폭은 글자에 맞춰 자동(잘리지 않음), 버튼 사이 4px. 내용 전환은 SelectedIndexChanged에서 화면이 한다. 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
 - `ApcTabStrip()`
 - `event EventHandler SelectedIndexChanged` — 선택이 바뀌면(클릭·←/→·SelectedIndex 대입) 발생.
 - `int PreferredTabsWidth { get; }` — 모든 탭을 담는 데 필요한 폭(배치용). 탭 폭 합.
