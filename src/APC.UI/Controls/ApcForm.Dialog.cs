@@ -33,6 +33,7 @@ namespace APC.UI.Controls
         private bool _laidOut;
         private ApcButton _footerCancel, _footerConfirm;
         private ApcButton[] _footerLeft = new ApcButton[0];
+        private Label _footerNote;
 
         /// <summary>dialog 기본 속성과 크기(배율 전 px). height 0 = 내용으로 자동(AddContentFill을 쓰면 필수).</summary>
         protected void SetupDialog(string title, int width, int height = 0)
@@ -141,6 +142,26 @@ namespace APC.UI.Controls
             // → 확정 버튼은 DialogResult가 이미 있을 때(보기용 닫기 = OK)만 Esc에 묶는다.
             if (cancel != null) CancelButton = cancel;
             else if (confirm.DialogResult != DialogResult.None) CancelButton = confirm;
+        }
+
+        /// <summary>
+        /// 하단 버튼 줄의 [확정] 바로 왼쪽 안내 글(꺼진 확정 버튼의 이유: "원인 확인 전 · Release 불가").
+        /// 반환 Label의 Text를 바꿔 쓴다(이유가 없으면 ""). 글자색 기본, 알람인 이유만 ForeColor = ApcTheme.StatusText(StatusKind.Alarm).
+        /// </summary>
+        protected Label SetFooterNote(string text = "")
+        {
+            RequireSetup();
+            if (_footerNote == null)
+            {
+                _footerNote = new Label
+                {
+                    AutoSize = false, TextAlign = ContentAlignment.MiddleRight, AutoEllipsis = false, BackColor = Color.Transparent,
+                    Font = ApcTheme.GetFont(), ForeColor = ApcTheme.C(ApcTheme.Current.Colors.Text),
+                };
+                Controls.Add(_footerNote);
+            }
+            _footerNote.Text = text ?? string.Empty;
+            return _footerNote;
         }
 
         private const int SectionBar = 3, SectionBarGap = 7;   // 화면 SectionTitle·ApcGroup 제목 막대와 같은 치수
@@ -299,6 +320,7 @@ namespace APC.UI.Controls
                 l.SetBounds(lx, by, lw, btnH);
                 lx += lw + gap;
             }
+            if (_footerNote != null) _footerNote.SetBounds(lx, by, Math.Max(0, _footerConfirm.Left - gap - lx), btnH);
         }
 
         /// <summary>바닥 버튼 폭: 기본 110, 글자가 길면(비밀번호 변경 등, 글꼴 12) 글자 + 양쪽 여백만큼 넓힌다.</summary>

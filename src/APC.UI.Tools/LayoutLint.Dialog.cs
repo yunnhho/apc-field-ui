@@ -45,7 +45,8 @@ namespace APC.UI.Tools
             return a.Top < b.Bottom && b.Top < a.Bottom && Math.Abs(ca - cb) <= Math.Max(a.Height, b.Height) / 2;
         }
 
-        private static bool Enters(Control c) { return !IsApc(c) || Is(c, "ApcGroup"); }
+        // Apc 컨트롤 안(입력칸 속 TextBox 등)은 보지 않는다. 묶음 상자와 Titled() 칸(제목 + 표)은 담는 그릇이라 들어간다.
+        private static bool Enters(Control c) { return !IsApc(c) || Is(c, "ApcGroup") || c.GetType().Name == "TitledPanel"; }
 
         private static IEnumerable<Control> Containers(Control c)
         {

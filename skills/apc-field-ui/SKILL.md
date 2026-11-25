@@ -61,6 +61,7 @@ Layout is constructor code only (no designer files). Scale sizes: `S(px)` in a s
 - One row of cards/tiles/judge panel: `Columns(S(height), cells[, percents])`. A row takes height + 12 — a Panel or `ApcGroup` holding several rows is `(S(height) + S(12)) × rows` (group: `group.HeightFor(...)`). Never guess heights.
 - `SectionTitle()` / `Caption()` added directly to `Body` need `Dock = DockStyle.Top` (otherwise they overlap the row above). Inside `Row()`, leave them.
 - **Section title + table/chart** = one `Titled(title, content[, buttons…])` cell placed in a `Columns()` cell or as the `Body` Fill. Title-row buttons go here too — never put `SectionTitle` and a button together in `Row()`. Two list tables side by side filling the remaining height: `FillColumns(...)`. Do not hand-build a TableLayoutPanel.
+- **Fixed-height `Titled` cell**: `Columns(TitledHeight(ApcGrid.HeightForRows(n)), cells)` — `TitledHeight(content[, hasTools])` adds the title row and gap. Never measure the title row yourself.
 - **Several tables**: fixed-count tables (checklist, 12 cart slots, Bin top 5) get a fixed height via `ApcGrid.HeightForRows(n)`; only one list table fills the remaining height. Do not put a fixed table beside the Fill list table (the shorter one leaves a gap) — put it in a `Columns()` row above. Other cells in that row match its height.
 - A fixed-height table/chart stacked in `Body` outside `Columns()` is still wrapped: `Columns(S(height), new Control[] { grid })` (a bare Add overlaps or loses the bottom gap).
 - **Selection**: when tapping a tile makes the cards/chart below show that unit, set `Selected = true` on that tile only. When a table row is chosen, `ClearInitialSelection = false` + select the row. A "selected row" button does nothing when `CurrentRow == null`.
@@ -88,7 +89,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 | Settings group (instead of GroupBox) | `ApcGroup` |
 | Tabs (unit group / line switch, instead of TabControl) | `ApcTabStrip` — never fake it with several `ApcButton`s. Top row of body `Row(tabs, ...)` (`FailureAnalysisView`) |
 
-- **Table status column**: `ApcLampColumn` (header "상태"). For short status words (가동·대기·전송됨) use `ApcLampValue` (lamp + word in one cell) and no separate text column. Otherwise the lamp must also be readable from a text column in the same row, headed "판정" or "내용".
+- **Table status column**: `ApcLampColumn` (header "상태"). For short status words (가동·대기·전송됨) use `ApcLampValue` (lamp + word in one cell) and no separate text column; the column widens itself to the word (do not set `Width`). Otherwise the lamp must also be readable from a text column in the same row, headed "판정" or "내용".
 - **Row actions** (send, reset): no drawn buttons — `ApcIconColumn`. In `CellClick`, ignore when `ApcIconColumn.IsEnabled(cell)` is false.
 - **Out-of-spec cell**: `cell.Style.ForeColor = ApcTheme.StatusText(kind)` + bold.
 - **Two-value card** (temperature + humidity): main value `Value`, second value `Footer`. `Status` = the worse one; per-item colors `ValueStatus` / `FooterStatus` (omit them and a normal value shows in warning color). Two or more footer values → `SetFooterParts`. Side-by-side cards share one height.
@@ -124,7 +125,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 - One fact, one place:
   - The most important verdict is one big `ApcJudgePanel` (one per screen; persistent states use `ApcNoticeBar`). If the requirement names "the most important information" (e.g. delivery deadline), put it in the panel's big text or `SubText` — not in a small card beside it.
   - Do not repeat its reason sentence in tiles, card footers or tables (tiles/cards follow by color only). Do not restate the limit sentence on the card of a value the panel already speaks about.
-  - Red border (`Alarm`) only on the faulty target itself. Daily totals (NG 7 EA) get no card `Status`; at most text color `StatusText(Alarm)`.
+  - Red border (`Alarm`) only on the faulty target itself. Daily totals (NG 7 EA) never get `Status = Alarm`; at most a red number via `ValueStatus = Alarm`.
 - Status color on text = `ApcTheme.StatusText(kind)`. `ApcTheme.Status(kind)` is for fills/lines (yellow/green text is unreadable).
 - Buttons: one `Primary` main action per screen, same height as inputs (`Button(...)`). `Danger` only for irreversible or safety-bypassing actions (normal flow is `Primary`). A disabled button gets `Enabled = false` + its reason right beside it as `Caption` (default color; `StatusText(Alarm)` only if the reason is an alarm; `""` when there is none).
 - Text: judge `SubText` and card `Footer` have at most two parts (one " · "). No formulas or statistical constants (σ̂, d2). Guidance sentences only if they fit one line. No particle placeholders ("이(가)") — write "품번 불일치 · AB222 ≠ AB212".
@@ -137,7 +138,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 - 대기·정지·통신 끊김 = `Stop` / running, in progress, normal finish (PASS·OK) = `Run` / near limit, needs check = `Warn` / NG·FAIL, equipment errors that stop work = `Alarm` / records like setting change or shift change = `Info`
 - Tile and table row = the worse of process state and value verdict. Row text "공정 상태 · 사유" (e.g. "시험중 · 저항 한계 근접"); tiles use color only. Several reasons → the worst one (tie: first in screen order).
 - Card `Status` = verdict of that card's value only:
-  - Values without a spec (progress, counts): `Run` while updating, `Stop` when stopped — never paint a progress card red for an equipment error. Exception: on a judging screen the NG count card is `Alarm` when NG > 0.
+  - Values without a spec (progress, counts): `Run` while updating, `Stop` when stopped — never paint a progress card red for an equipment error. A daily NG count > 0 keeps `Status = Run` and sets only `ValueStatus = Alarm` (red number, no red border).
   - Readings of a stopped/waiting unit are not judged — card/cell `Stop`, tile/row follow the process state (a cooled unit below its lower limit is not an alarm). Values of a normally finished unit are `Run`.
 
 **Sample data**

@@ -115,7 +115,8 @@ namespace APC.UI.Demo.Templates
             _total.Value = total.ToString();
             _ok.Value = _okCount.ToString();
             _ng.Value = _ngCount.ToString();
-            _ng.Status = _ngCount > 0 ? StatusKind.Alarm : StatusKind.Run;
+            _ng.Status = StatusKind.Run;   // 하루 집계라 테두리·램프 없이(알람 테두리는 이상인 대상에만) — 글자색만
+            _ng.ValueStatus = _ngCount > 0 ? StatusKind.Alarm : (StatusKind?)null;
             _rate.Value = total == 0 ? "" : (100.0 * _ngCount / total).ToString("0.0", CultureInfo.InvariantCulture);
         }
 

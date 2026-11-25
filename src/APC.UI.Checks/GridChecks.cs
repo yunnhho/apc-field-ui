@@ -29,6 +29,9 @@ namespace APC.UI.Checks
                 Check(lc.ImageNameFor(new ApcLampValue(StatusKind.Warn, "x")) == "lamp_warn" && lc.ImageNameFor(StatusKind.Run) == "lamp_run", "grid: lamp column accepts StatusKind and ApcLampValue");
                 Check(new ApcLampValue(StatusKind.Run, "b").CompareTo(new ApcLampValue(StatusKind.Alarm, "a")) < 0
                       && new ApcLampValue(StatusKind.Run, "a").CompareTo(new ApcLampValue(StatusKind.Run, "b")) < 0, "grid: lamp value sorts by status then text");
+                Check(lamp.Width >= ApcLampColumn.WidthFor("종료 임박", g.Font), "grid: lamp column widens to show ApcLampValue text (" + lamp.Width + ")");
+                g.Rows[1].Cells[1].Value = new ApcLampValue(StatusKind.Alarm, "통신 끊김 · 재접속 대기");
+                Check(lamp.Width >= ApcLampColumn.WidthFor("통신 끊김 · 재접속 대기", g.Font), "grid: lamp column widens when a cell value changes");
                 Check(g.CellBorderStyle == DataGridViewCellBorderStyle.Single && g.GridColor.ToArgb() == ApcTheme.C(ApcTheme.Current.Colors.Border).ToArgb(), "grid: cell lines use border color (not faded)");
             }
             // 조회(Rows.Clear → 다시 채우기)를 반복해도 Fill 열 폭이 그대로(세로 스크롤바가 생겼다 없어질 때 첫 열만 늘어나던 문제).
@@ -93,9 +96,14 @@ namespace APC.UI.Checks
                 form.Show();
                 Application.DoEvents();
                 Check(g1.SelectedRows.Count == 0, "grid: no automatic first-row selection when shown (was " + g1.SelectedRows.Count + ")");
+                Check(g1.CurrentRow == null, "grid: no current row when shown (\"selected row\" buttons see nothing chosen)");
                 g1.Rows.Add("3");
                 Application.DoEvents();
                 Check(g1.SelectedRows.Count == 0, "grid: adding rows does not select one");
+                Check(g1.CurrentRow == null, "grid: adding rows does not set a current row");
+                g1.Rows.Clear(); g1.Rows.Add("4"); g1.Rows.Add("5");
+                Application.DoEvents();
+                Check(g1.CurrentRow == null && g1.SelectedRows.Count == 0, "grid: refill (Clear + Add) leaves no current row");
                 g2.Rows[1].Selected = true;
                 Application.DoEvents();
                 Check(g2.SelectedRows.Count == 1 && g2.Rows[1].Selected, "grid: explicit selection by app is kept");

@@ -219,9 +219,30 @@ namespace APC.UI.Controls
         protected override void OnRowsAdded(DataGridViewRowsAddedEventArgs e)
         {
             base.OnRowsAdded(e);
+            for (int r = e.RowIndex; r < e.RowIndex + e.RowCount && r < Rows.Count; r++) FitLampText(r, -1);
             // 현재 셀은 RowsAdded 이벤트 뒤에 잡히므로 처리 후로 미룬다.
             if (!_userSelected && IsHandleCreated) BeginInvoke((MethodInvoker)ClearAutoSelection);
         }
+        protected override void OnCellValueChanged(DataGridViewCellEventArgs e)
+        {
+            base.OnCellValueChanged(e);
+            if (e.RowIndex >= 0) FitLampText(e.RowIndex, e.ColumnIndex);
+        }
+
+        // 램프 + 문구 칸(ApcLampValue)은 문구가 다 보이게 열 최소 폭을 넓힌다. column < 0이면 그 행의 램프 열 전부.
+        private void FitLampText(int row, int column)
+        {
+            if (ApcTheme.Current == null || Rows[row].IsNewRow) return;
+            foreach (DataGridViewColumn c in Columns)
+            {
+                if (!(c is ApcLampColumn) || (column >= 0 && c.Index != column)) continue;
+                var v = Rows[row].Cells[c.Index].Value as ApcLampValue;
+                if (v == null) continue;
+                int need = ApcLampColumn.WidthFor(v.Text, c.InheritedStyle.Font ?? Font);
+                if (need > c.MinimumWidth) c.MinimumWidth = need;
+            }
+        }
+
         protected override void OnMouseDown(MouseEventArgs e) { _userSelected = true; base.OnMouseDown(e); }
         protected override void OnKeyDown(KeyEventArgs e) { _userSelected = true; base.OnKeyDown(e); }
 
