@@ -65,6 +65,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 - 카드·타일·판정판을 한 줄에: `ApcTemplateView`의 `Columns(S(높이), cells)`(같은 폭) 또는 `Columns(S(높이), cells, new[] { 50f, 25f, 25f })`(퍼센트 폭). 칸 간격·줄 간격은 헬퍼가 정한다. 한 줄은 **높이 + 12**를 차지한다(줄 아래 간격 포함) — `Columns()` 여러 줄을 Panel 하나에 담으면 그 Panel 높이는 `(S(높이) + S(12)) × 줄 수`.
 - `SectionTitle()`·`Caption()`은 Dock이 없는 Label이다. `Body`에 바로 넣을 때는 `Dock = DockStyle.Top`을 준다(안 주면 위 줄과 겹친다. 시연 두 차례 연속). `Row()` 안에 넣을 때는 그대로 둔다.
 - 타일을 누르면 아래 카드·그래프가 그 설비를 보여 주는 화면은 그 타일만 `Selected = true`(나머지 false). 표 행을 고르는 화면은 `ApcGrid { ClearInitialSelection = false }` + 그 행 선택. 선택 표시가 없으면 어느 설비 값인지 화면에서 모른다.
+- 구획 제목 + 그 아래를 채우는 표·그래프는 `Titled("대기 Lot", grid)` 한 칸으로 — `Columns()` 칸이나 `Body`의 Fill에 그대로 넣는다(제목 Dock·도킹 순서를 직접 맞추지 않는다). 한 화면에 표가 여럿이면 개수가 정해진 표(체크리스트·대차 12칸)는 `ApcGrid.HeightForRows(n)`로 높이를 고정하고, 목록 표 하나만 남은 높이를 채운다.
 - `Columns()` 밖의 고정 높이 표·그래프를 `Body`에 Top으로 쌓을 때는 `Columns(S(높이), new Control[] { grid })`로 감싼다(Dock·줄 아래 간격을 헬퍼가 준다). 그냥 Add하면 Dock이 없어 겹치거나 아래 간격이 없다.
 - `ApcGroup` 안에 `Columns()` 줄을 넣을 때 그룹 높이는 `group.HeightFor((S(높이) + S(12)) × 줄 수)`. 짐작한 숫자로 맞추지 않는다.
 - **설정 버튼은 화면 안에 두지 않는다.** 설정 화면이 있는 프로그램만 화면 생성자에서 `UseSettingsButton((s, e) => OpenSettings())` → 창 타이틀바 최소화 왼쪽에 톱니 버튼이 생긴다(화면 Dispose 때 꺼짐). 설정이 없으면 부르지 않는다. 타이틀바는 설정 전용 — 설정이 아닌 dialog(레시피·LOT 입력 등)를 여는 버튼은 관련 구획 제목 줄 오른쪽에 일반 `ApcButton`(`Row(제목, 버튼)`). 열기 순서: `AdminPasswordDialog` → `SettingsDialog`(`FailureAnalysisView.OpenSettings`). 화면 없이 창만 있으면 `ApcForm.ShowSettings = true` + `SettingsClick`.
@@ -110,7 +111,9 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 읽기 전용 값 한 줄(현재 바코드·LOT·작업자) | `ApcTextBox { ReadOnly = true }`(회색 바탕) 또는 `ApcValueCard` |
 | 큰 현재값(센서·수량·불량률) | `ApcValueCard`(Title·Value·Unit·Footer·Status). 값 글자 크기는 카드 높이를 따른다 — 나란한 카드는 같은 높이로(`Columns()`·`AddContentRow`가 맞춘다). 값이 두 개(온도 + 습도)면 주 값은 `Value`, 보조 값은 `Footer`("습도 57.0 %RH · 경고"). `Status`(램프·테두리)는 둘 중 나쁜 쪽, `ValueStatus`·`FooterStatus`는 각 항목의 판정 — 안 주면 정상인 온도가 노란 글자로 나온다. Footer에 보조 값이 둘 이상(습도 · 파티클)이면 `FooterStatus` 대신 `SetFooterParts(new[]{"습도 43.8 %RH","파티클 4,210 개/m³"}, new[]{StatusKind.Run, StatusKind.Alarm})` — 항목마다 제 색으로 그린다 |
 | 설비 상태 한 칸, 누르면 상세 | `ApcStatusTile`(Text=설비명·Status, `Click`). 부제 없음 — 사유는 판정판·표 한 곳에 |
-| OK/NG 판정 크게 | `ApcJudgePanel`(Text=큰 글자·SubText·Status: OK=Run, NG=Alarm, 대기=Stop) |
+| OK/NG 판정 크게 | `ApcJudgePanel`(Text=큰 글자·SubText·Status: OK=Run, NG=Alarm, 대기=Stop). 판정 화면이 아닌 모니터링 화면도 "지금 조치할 것" 하나를 여기에 |
+| 계속 보여야 하는 상태(인터락 우회 중·시험 모드·수동 운전) | `ApcNoticeBar`(Status·Text 굵게·Detail, 높이 44 한 줄). 판정판으로 만들지 않는다. `Body`에는 `Columns(bar.Height, new Control[] { bar })`로(아래 간격) |
+| 지금 보는 대상의 이름-값(공정·설비·Lot ID·제품·레시피) | `ApcInfoStrip`(`SetItems(...)`, `SetValue(이름, 값)`). 기본 `Dock = Top` — `Row()` 안에 넣으면 `Dock = None` + `Width`. 판정 없는 글 값(Lot ID·레시피)을 `ApcValueCard`로 만들지 않는다(값이 작고 카드 아래가 빈다) |
 | 추이 그래프 | `ApcTrendChart`(`SetValues`, XLabels, Reference, UpperLimit/LowerLimit) |
 | 상태 램프 | `ApcLamp` |
 | 설정 묶음(제목 있는 상자, GroupBox 대신) | `ApcGroup`(Text=제목, 안은 Dock/FlowLayoutPanel) |
@@ -133,19 +136,20 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 값 없음(대기·통신 전) | 빈칸(정지 설비라도 읽은 값이 있으면 그 값). `ApcValueCard.Value = ""`(값·단위 모두 안 그림), 표 셀은 `""`. `-`, `--`, `0` 쓰지 않음. 값이 없으면 판정하지 않는다 — 판정 함수에 넣지 말고 카드 `Status = Stop`, 값에서 나온 이상 사유 문구 없음(공정 상태 문구 "대기"·"통신 끊김"은 쓴다) |
 | 대기 중 직전 값 | 판정 화면이 대기(READY)인데 측정값 카드에 직전 검사 값을 남기면 값을 남긴 카드마다 `Footer`에 출처를 적는다(예: "직전 검사 CELL0260418 · 10:15:00"). 출처 없이 남기지 않는다 |
 | 공정 상태 → 상태색 | 아래 "상태색" 목록 |
-| 상태 경계값 | 상·하한은 허용 한계다: 상한과 같은 값은 알람·NG가 아니다 — **초과**부터 NG·알람(하한은 미만부터). 경고 근접은 시작값과 같은 값부터 경고(`>=`/`<=`)라, 경고 구간이 있으면 상한과 같은 값은 경고("상한 근접 60.0 %RH (상한 60.0)"), 없으면 OK. 문구도 같게: 기준 "5.0 이하 OK"·"기준 50.0 이하 · 경고 45.0 이상"(규칙 설명 "같으면 OK"는 화면에 쓰지 않는다), 알람 "상한 초과 65.4 ℃ (상한 65.0)" — 상한과 같은 값에 "초과"·"도달 알람"을 쓰지 않는다. 상태 문구·램프·카드 색이 같은 판정 함수 하나를 쓴다. 같은 측정 항목(예: 사이클 타임)은 메인 타일·카드, 알람 이력, 상세 dialog 표에서 모두 그 함수 하나로 판정한다(이력에서 25.9 s가 경고인데 상세 표에서 26.3 s가 정상이면 틀린 것) |
+| 상태 경계값 | 상·하한은 허용 한계다: 상한과 같은 값은 알람·NG가 아니다 — **초과**부터 NG·알람(하한은 미만부터). 경고 근접은 시작값과 같은 값부터 경고(`>=`/`<=`)라, 경고 구간이 있으면 상한과 같은 값은 경고("상한 근접 60.0 %RH (상한 60.0)"), 없으면 OK. 문구도 같게: 기준 "5.0 이하 OK"·"기준 50.0 이하 · 경고 45.0 이상"(규칙 설명 "같으면 OK"는 화면에 쓰지 않는다), 알람 "상한 초과 65.4 ℃ (상한 65.0)" — 상한과 같은 값에 "초과"·"도달 알람"을 쓰지 않는다. 하한만 있는 기준(수율 95.0 % 이상, Cpk 1.33 이상)도 같다: 기준값과 같은 값은 합격이고 **미만**부터 미달. 상태 문구·램프·카드 색이 같은 판정 함수 하나를 쓴다. 같은 측정 항목(예: 사이클 타임)은 메인 타일·카드, 알람 이력, 상세 dialog 표에서 모두 그 함수 하나로 판정한다(이력에서 25.9 s가 경고인데 상세 표에서 26.3 s가 정상이면 틀린 것) |
 | 글꼴 | 테마 글꼴·`fontSize` 그대로(12). `new Font(...)`·`FontSize * 배수` 금지, 글자는 `ApcTheme.GetFont()`만(굵게 `ApcTheme.GetFont(FontStyle.Bold)`). 굵게는 구획 제목(`SectionTitle`)·묶음 제목(`ApcGroup`)·값 강조에만 — 입력칸 앞 이름표(`Caption`, `AddFieldRow`)는 보통 굵기. 판정판·카드 큰 글자는 컨트롤이 정함 |
 | 단위 표기 | 입력은 이름표 괄호 `하중 상한 (kN)`, 표시는 `ApcValueCard.Unit`·표 열 제목 `최대 하중(kN)`. 값 칸 안에 단위를 붙이지 않음 |
 | 간격 | 숫자로 정하지 않는다. 화면은 `Columns()`·`Row()`, dialog는 4b 헬퍼가 정한다(값은 `ApcLayout`) |
 | 샘플 데이터 | 아래 "샘플 데이터" 목록 |
 
 **화면 위계** (render 점검이 못 잡는 것 — 직접 확인)
-- 같은 사실은 한 곳에서 한 번: 화면의 가장 중요한 판정은 `ApcJudgePanel` 하나에 크게. 그 사유 문장을 타일·카드 Footer·표에 되풀이하지 않는다 — 타일·카드는 색(램프·테두리)으로만 따라간다. 빨강 테두리(`Alarm`)는 이상인 그 대상에만.
+- 같은 사실은 한 곳에서 한 번: 화면의 가장 중요한 판정은 `ApcJudgePanel` 하나에 크게 — 판정판은 화면에 하나(우회·시험 모드 같은 지속 상태는 `ApcNoticeBar`). 요구서가 "가장 중요한 정보"를 정했으면(예: 납입 마감) 그것을 판정판의 큰 글자나 `SubText`에 넣는다 — 판정판 옆 작은 카드로 밀어내지 않는다. 그 사유 문장을 타일·카드 Footer·표에 되풀이하지 않는다 — 타일·카드는 색(램프·테두리)으로만 따라간다. 빨강 테두리(`Alarm`)는 이상인 그 대상에만.
 - 글자에 상태색은 `ApcTheme.StatusText(kind)`(흰 바탕에서 읽히게 명도를 낮춘 색). `ApcTheme.Status(kind)`는 면·선용 — 글자에 쓰면 노랑·초록이 안 읽힌다.
 - 주 동작 버튼은 화면에 `Primary` 하나, 높이는 입력칸과 같게(`Button(...)`) — 카드·판정판 크기로 키우지 않는다. `Danger`는 되돌릴 수 없거나 안전 장치를 우회하는 동작(삭제·인터락 우회)만, 정상 처리 흐름(Lot 처리 시작)은 `Primary`. 지금 못 누르는 버튼은 `Enabled = false` + 바로 옆에 이유 한 줄(`Caption`).
-- 문구: 판정판 `SubText`·카드 `Footer`는 두 마디까지(" · " 한 번). 내부 계산식·통계 상수(σ̂, d2, 공식)는 화면에 쓰지 않는다. 안내 문장은 한 줄에 들어갈 때만.
+- 문구: 판정판 `SubText`·카드 `Footer`는 두 마디까지(" · " 한 번). 내부 계산식·통계 상수(σ̂, d2, 공식)는 화면에 쓰지 않는다. 안내 문장은 한 줄에 들어갈 때만. 값을 끼워 넣는 문장에 조사 자리표시("이(가)", "와(과)", "을(를)")를 쓰지 않는다 — 조사가 필요 없게 "품번 불일치 · AB222 ≠ AB212"처럼 쓴다. 비활성 버튼 옆 이유는 `Caption` 기본 글자색(빨강은 그 이유가 알람일 때만 `StatusText(Alarm)`).
+- 타일은 이름만. 요구서가 타일에 값을 요구하면(현재 Lot·수율) 부제가 아니라 `Text` 한 줄에 "T04  94.1 %"처럼 넣는다.
 - 표·그래프·입력 묶음 위 제목은 `SectionTitle()` 또는 `ApcGroup` — `Caption`을 굵게 바꿔 제목으로 쓰지 않는다(막대 없는 제목이 섞인다).
-- 나란한 표는 행 높이를 같게(`ApcGrid` 기본 행 높이를 바꾸지 않는다). 판정 기준이 없는 지표 카드(수량·OEE)에는 `ShowLamp`를 쓰지 않는다.
+- 나란한 표는 행 높이를 같게(`ApcGrid` 기본 행 높이를 바꾸지 않는다). 행 바탕을 상태색으로 칠하지 않는다(선택 행 파랑과 섞인다) — 눈에 띄어야 하는 행은 램프 + 해당 칸 `StatusText` 굵은 글자. 화면 메서드 이름에 `Refresh`를 쓰지 않는다(`Control.Refresh`와 겹친다 → `Reload`). 판정 기준이 없는 지표 카드(수량·OEE)에는 `ShowLamp`를 쓰지 않는다.
 
 **상태색** (공정 상태 → `StatusKind`)
 - 대기·정지·통신 끊김 = `Stop`

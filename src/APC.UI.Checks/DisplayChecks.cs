@@ -60,6 +60,7 @@ namespace APC.UI.Checks
             }
             CheckSteelInkSurfaces();
             CheckTitleClockAndTabs();
+            CheckNoticeTileTitled();
             // 같은 높이 카드는 Footer 유무와 관계없이 값이 같은 높이에 그려진다(한 줄 카드의 값이 들쭉날쭉하지 않게).
             Check(ValueTop(new ApcValueCard { Value = "88" }) == ValueTop(new ApcValueCard { Value = "88", Footer = "NG / 검사 수" }), "card: value sits at same height with or without footer");
             // 값이 두 개인 카드(온도 + Footer 습도): 카드 상태는 경고여도 정상인 주 값은 보통 글자색.
@@ -173,6 +174,38 @@ namespace APC.UI.Checks
             Check(ApcTheme.Contrast(ApcTheme.StatusText(StatusKind.Warn), Color.White) >= 4.5, "status text: warn text readable on white (>= 4.5:1)");
             Check(ApcTheme.StatusText(StatusKind.Alarm).ToArgb() == ApcTheme.Status(StatusKind.Alarm).ToArgb() || ApcTheme.Contrast(ApcTheme.Status(StatusKind.Alarm), Color.White) < 4.5,
                   "status text: already-readable colors unchanged");
+        }
+
+        /// <summary>알림 띠(연한 상태색 바탕 + 왼쪽 상태색 막대), 낮은 타일 램프 최소 20px, 제목 + 내용 구획.</summary>
+        private static void CheckNoticeTileTitled()
+        {
+            using (var bar = new ApcNoticeBar { Text = "인터락 E05 우회 중", Detail = "15:52까지", Size = new Size(600, ApcTheme.Px(44)) })
+            using (var bmp = new Bitmap(bar.Width, bar.Height))
+            {
+                bar.DrawToBitmap(bmp, new Rectangle(Point.Empty, bar.Size));
+                var warn = ApcTheme.Status(StatusKind.Warn);
+                Check(Near(bmp.GetPixel(2, bar.Height / 2), warn, 2), "notice bar: status stripe on the left");
+                var bg = bmp.GetPixel(bar.Width - 4, bar.Height / 2);
+                Check(bg.R > 200 && bg.G > 200 && !Near(bg, ApcTheme.C(ApcTheme.Current.Colors.Panel[0]), 2), "notice bar: light status tint background");
+                using (var plain = new ApcNoticeBar()) Check(plain.Height < ApcTheme.Px(60), "notice bar: default height is one low line (does not compete with judge panel)");
+                Check(ApcStatusTile.LampSize(3) == 0, "tile: lamp size never negative");
+            }
+            Check(ApcStatusTile.LampSize(ApcTheme.Px(40)) >= ApcTheme.Px(20), "tile: lamp keeps 20px in a field-height tile");
+            Check(ApcStatusTile.LampSize(ApcTheme.Px(96)) == ApcTheme.Px(32), "tile: lamp 32px in a normal tile");
+            using (var v = new TitledProbe())
+            {
+                v.Size = new Size(500, 300);
+                v.PerformLayout();
+                Check(v.Grid.Dock == System.Windows.Forms.DockStyle.Fill && v.Grid.Top > 0 && v.Grid.Bottom == v.Panel.ClientSize.Height, "titled: content fills below the title (" + v.Grid.Top + "," + v.Grid.Height + ")");
+                Check(v.Panel.Controls.Count == 3, "titled: title + gap + content");
+            }
+        }
+
+        private sealed class TitledProbe : ApcTemplateView
+        {
+            public readonly ApcGrid Grid = new ApcGrid();
+            public readonly System.Windows.Forms.Panel Panel;
+            public TitledProbe() : base("probe") { Panel = Titled("대기 Lot", Grid); Body.Controls.Add(Panel); }
         }
 
         private sealed class SectionProbe : ApcTemplateView

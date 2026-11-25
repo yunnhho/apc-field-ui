@@ -8,7 +8,7 @@ using APC.UI.Theming;
 namespace APC.UI.Demo.Templates
 {
     /// <summary>
-    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 본문 맨 위 줄에 설비군 전환 버튼(ApcTabStrip) + 시험 모드 안내(시각은 창 제목 줄), 설정은 타이틀바 톱니(UseSettingsButton),
+    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 본문 맨 위 시험 모드 알림 띠(ApcNoticeBar) → 설비군 전환 버튼(ApcTabStrip)(시각은 창 제목 줄), 설정은 타이틀바 톱니(UseSettingsButton),
     /// 2단 헤더 그리드(B1/B2 묶음)가 화면 폭을 채움, 행 동작은 아이콘 열(ApcIconColumn: 할 수 없으면 회색), 상태는 램프 + 문구 한 칸(ApcLampValue).
     /// </summary>
     internal sealed class FailureAnalysisView : ApcTemplateView
@@ -21,11 +21,10 @@ namespace APC.UI.Demo.Templates
 
         public FailureAnalysisView() : base("연마기 불량 방지 시스템")
         {
-            // 설비군 전환 버튼·시험 모드 안내는 본문 맨 위 한 줄
             _tabs.SetTabs(Groups);   // 첫 탭이 선택된다. 표 내용은 아래 SelectGroup(0)에서
             _tabs.Width = _tabs.PreferredTabsWidth;
-            var testMode = Caption("ⓘ 시험 모드 : 가상 장비로 동작합니다.");
-            testMode.ForeColor = ApcTheme.StatusText(StatusKind.Info);
+            // 시험 모드는 판정이 아닌 지속 상태 → 알림 띠(ApcNoticeBar)
+            var testMode = new ApcNoticeBar { Status = StatusKind.Info, Text = "시험 모드", Detail = "가상 장비로 동작합니다. 실제 설비에 전송되지 않습니다." };
 
             UseSettingsButton((s, e) => OpenSettings());   // 설정은 화면 안 버튼이 아니라 창 타이틀바(최소화 왼쪽) 톱니
 
@@ -33,7 +32,8 @@ namespace APC.UI.Demo.Templates
             _grid.CellClick += OnCellClick;
 
             Body.Controls.Add(_grid);   // Fill 먼저
-            Body.Controls.Add(Row(_tabs, testMode));
+            Body.Controls.Add(Row(_tabs));
+            Body.Controls.Add(Columns(testMode.Height, new Control[] { testMode }));   // 맨 위: 시험 모드 알림 띠(아래 간격은 Columns가), 그 아래 설비군 전환 버튼
             SelectGroup(0);
             _tabs.SelectedIndexChanged += (s, e) => SelectGroup(_tabs.SelectedIndex);
         }

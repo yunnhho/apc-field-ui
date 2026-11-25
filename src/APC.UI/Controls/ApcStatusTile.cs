@@ -47,7 +47,8 @@ namespace APC.UI.Controls
             var c = ApcTheme.Current.Colors;
             Cards.DrawFrame(g, Size, _status, _hover || Focused, _selected);
 
-            int pad = S(14), lamp = Math.Min(S(32), Height - 2 * pad);
+            // 램프는 20~32px: 낮은 타일(입력칸 높이)에서도 점이 되지 않게 위아래 여백을 줄인다
+            int pad = S(14), lamp = LampSize(Height);
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.DrawImage(Cards.Lamp(_status), new Rectangle(pad, (Height - lamp) / 2, lamp, lamp));
 
@@ -89,6 +90,13 @@ namespace APC.UI.Controls
         {
             if (disposing) ApcTheme.Changed -= OnThemeChanged;
             base.Dispose(disposing);
+        }
+
+        internal const int MinLamp = 20;
+
+        internal static int LampSize(int height)
+        {
+            return Math.Max(0, Math.Min(Math.Max(S(MinLamp), height - 2 * S(14)), Math.Min(S(32), height - S(6))));
         }
 
         private static int S(int px) { return (int)Math.Round(px * ApcTheme.Scale); }

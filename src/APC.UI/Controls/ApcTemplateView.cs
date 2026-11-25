@@ -74,6 +74,26 @@ namespace APC.UI.Controls
             };
         }
 
+        /// <summary>
+        /// 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()의 칸이나 Body의 Fill에 그대로 넣는다
+        /// (제목 Dock=Top, 내용 Dock=Fill — 도킹 순서를 화면 코드가 맞추지 않아도 된다).
+        /// </summary>
+        protected static Panel Titled(string title, Control content)
+        {
+            if (content == null) throw new ArgumentNullException("content");
+            var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
+            var head = SectionTitle(title);
+            head.AutoSize = false;
+            head.Dock = DockStyle.Top;
+            head.Height = head.PreferredHeight;
+            head.TextAlign = ContentAlignment.MiddleLeft;
+            content.Dock = DockStyle.Fill;
+            panel.Controls.Add(content);   // Fill 먼저, Top은 나중에 Add한 것이 위
+            panel.Controls.Add(new Panel { Dock = DockStyle.Top, Height = S(ApcLayout.RowGap), BackColor = Color.Transparent });
+            panel.Controls.Add(head);
+            return panel;
+        }
+
         /// <summary>구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).</summary>
         protected static Label SectionTitle(string text)
         {
