@@ -16,7 +16,7 @@ namespace APC.UI.Demo.Templates
     {
         private const int TrendPoints = 30;
         private static readonly float[] TrendPercents = { 0f, 100f / 3, 100f / 3, 100f / 3 };   // 0번(호기 타일)은 TileWidth 고정폭
-        private const int TileWidth = 190;   // "관리선 이탈" + 램프가 1280 폭에서도 안 잘리게
+        private const int TileWidth = 150;   // 램프 + "1호기"가 1280 폭에서도 안 잘리게(타일 부제 없음)
 
         /// <summary>관리 항목: 이름, 단위, 설정값, 관리선(±), SPEC(±). 정한 기준값 — 요구서가 있으면 그 값으로.</summary>
         private sealed class Item
@@ -153,9 +153,8 @@ namespace APC.UI.Demo.Templates
         {
             var state = UnitState(unit);
             var cells = new Control[TrendPercents.Length];
-            // 줄 머리 = 호기 타일(누를 동작이 없어 TabStop 끔). 좁은 칸이라 문구는 사유의 판정만("SPEC 초과"), 항목은 위 표에 있다.
-            string tileText = state.Status == StatusKind.Alarm ? "SPEC 초과" : state.Status == StatusKind.Warn ? "관리선 이탈" : state.Text;
-            cells[0] = new ApcStatusTile { Text = (string)Units[unit][0], Status = state.Status, StatusText = tileText, TabStop = false };
+            // 줄 머리 = 호기 타일(램프 + 호기, 누를 동작이 없어 TabStop 끔). 사유는 위 표의 상태 칸에 있다.
+            cells[0] = new ApcStatusTile { Text = (string)Units[unit][0], Status = state.Status, TabStop = false };
             for (int i = 1; i < cells.Length; i++)
             {
                 var item = Items[i - 1];

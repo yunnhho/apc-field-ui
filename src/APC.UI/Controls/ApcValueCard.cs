@@ -81,8 +81,10 @@ namespace APC.UI.Controls
             Gradients.Fill(g, new Rectangle(inset, inset, Width - 2 * inset, titleH - inset), c.GridHeader);
             using (var pen = new Pen(ApcTheme.C(c.Border))) g.DrawLine(pen, inset, titleH, Width - inset, titleH);
 
-            int lamp = _showLamp ? S(20) : 0;
-            if (_showLamp)
+            // 정지(판정 없음)면 램프를 그리지 않는다 — 회색 램프가 지표 카드마다 붙으면 "정지"로 읽힌다. 값은 이미 흐리다.
+            bool lampOn = _showLamp && _status != StatusKind.Stop;
+            int lamp = lampOn ? S(20) : 0;
+            if (lampOn)
             {
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.DrawImage(Cards.Lamp(_status), new Rectangle(Width - pad - lamp, (titleH - lamp) / 2, lamp, lamp));
@@ -105,7 +107,7 @@ namespace APC.UI.Controls
 
         private static Color FooterColor(StatusKind s)
         {
-            return s == StatusKind.Warn || s == StatusKind.Alarm ? ApcTheme.Status(s) : ApcTheme.C(ApcTheme.Current.Colors.TextMuted);
+            return s == StatusKind.Warn || s == StatusKind.Alarm ? ApcTheme.StatusText(s) : ApcTheme.C(ApcTheme.Current.Colors.TextMuted);
         }
 
         // 항목을 이어 그린다. 전체 폭으로 정렬 위치를 잡고, 넘치면 남은 칸에서 말줄임(render 점검에 잡힌다).
@@ -139,7 +141,7 @@ namespace APC.UI.Controls
             // 값 글자는 영역 높이에 맞춘다(카드를 키우면 값도 커진다).
             float px = Math.Max(12f, Math.Min(sizeBase * 0.55f, S(64)));
             using (var big = new Font(ApcTheme.Current.FontFamily, px, FontStyle.Bold, GraphicsUnit.Pixel))
-            using (var unitFont = new Font(ApcTheme.Current.FontFamily, Math.Max(10f, px * 0.42f), FontStyle.Regular, GraphicsUnit.Pixel))
+            using (var unitFont = new Font(ApcTheme.Current.FontFamily, Math.Max(ApcTheme.GetFont().SizeInPoints * g.DpiY / 72f, px * UnitRatio), FontStyle.Bold, GraphicsUnit.Pixel))
             {
                 var noPad = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
                 var vs = TextRenderer.MeasureText(g, text, big, Size.Empty, noPad);
@@ -154,6 +156,8 @@ namespace APC.UI.Controls
                     TextRenderer.DrawText(g, _unit, unitFont, new Point(x + vs.Width + gap, y + vs.Height - us.Height - S(2)), muted, noPad);
             }
         }
+
+        private const float UnitRatio = 0.5f;   // 단위 = 값 글자의 절반, 굵게(작고 흐리면 %·mm가 안 보인다). 최소 본문 글자 크기.
 
         private static TextFormatFlags AlignFlag(HorizontalAlignment a)
         {

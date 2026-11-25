@@ -1,4 +1,4 @@
-# APC.UI API (v1.22.1.0)
+# APC.UI API (v1.23.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -69,7 +69,7 @@
 - `int TitleBarHeight { get; }`
 - `protected ApcGroup AddGroup(string title)` — 제목 있는 묶음(ApcGroup). 행은 AddFieldRow(group, ...)로 넣는다.
 - `protected CreateParams CreateParams { get; }`
-- `protected Label SectionTitle(string text)` — 구획 제목(굵게 + 아래 폭 전체 구분선). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.
+- `protected Label SectionTitle(string text)` — 구획 제목(왼쪽 브랜드색 막대 + 굵게 + 아래 폭 전체 구분선 — 묶음·화면 구획 제목과 같은 표시). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.
 - `protected static Label FieldCaption(string text)` — 행 안 trailing 이름표(보통 굵기, 글자 폭).
 - `protected void AddCaptionRow(ApcGroup group, params string[] captions)` — 묶음 안 열 제목 줄. 바로 다음 AddFieldRow(group, ...) 행의 [이름표, 입력칸, trailing...] 위에 순서대로 맞춰 놓인다("" = 그 칸 제목 없음). 여러 행이 같은 칸(포트·신호·로직…)을 가질 때 행마다 FieldCaption을 되풀이하지 않고 위에 한 번만 쓴다.
 - `protected void AddContent(Control c)` — 표·판정판 등 자유 요소. 높이는 c.Height(ApcTheme.Px로 지정), 폭은 내용 폭.
@@ -102,16 +102,6 @@
 - `ApcGroup()`
 - `int HeightFor(int contentHeight)` — 안 내용 높이(배율 적용 px)를 담는 묶음 높이 = 제목 띠 + 위아래 여백 + 내용. 화면에서 Columns() 줄을 담으면 내용 = 줄 높이 합.
 - `string Text { get; set; }` — 제목 띠 글자.
-
-## ApcHeaderBar
-
-`APC.UI.Controls` · class : Panel
-
-화면 상단 띠: 오른쪽 끝에 현재 시각(1초마다 갱신)만 그린다. 왼쪽은 화면이 탭 등을 넣는 자리(ApcTemplateView.HeaderTools). 프로그램 이름은 창 제목 줄에, 상태는 화면 본문(타일·램프·알람 띠)에 있으므로 띠에는 그리지 않는다. Title·Status·StatusText는 기존 화면 호환을 위해 값만 보관한다.
-- `ApcHeaderBar()`
-- `StatusKind Status { get; set; }` — 상태(보관만, 그리지 않음).
-- `string StatusText { get; set; }` — 상태 문구(보관만, 그리지 않음).
-- `string Title { get; set; }` — 화면 이름(창 제목과 같은 값). 띠에는 그리지 않는다.
 
 ## ApcIconCell
 
@@ -222,18 +212,17 @@
 
 `APC.UI.Controls` · class : Control
 
-설비 타일: 램프 + 설비명 + 상태 문구. 누르면 Click(상세 dialog 열기 등). 마우스를 올리거나 포커스면 파란 테두리, 알람이면 굵은 알람색 테두리. Tab으로 옮겨 Enter·Space로도 누른다.
+설비 타일: 램프 + 설비명(부제 없음 — 상태는 램프 색, 사유는 화면의 배너·표가 말한다). 누르면 Click(상세 dialog 열기 등). 마우스를 올리거나 포커스면 파란 테두리, 알람이면 굵은 알람색 테두리. Tab으로 옮겨 Enter·Space로도 누른다.
 - `ApcStatusTile()`
 - `StatusKind Status { get; set; }`
 - `bool Selected { get; set; }` — 선택 표시(바탕이 표 선택 행 색). 타일을 눌러 아래 카드·그래프가 그 설비를 보여 줄 때 그 타일 하나만 true.
-- `string StatusText { get; set; }`
-- `string Text { get; set; }` — 설비명(굵게, 램프 오른쪽 윗줄).
+- `string Text { get; set; }` — 설비명(굵게, 램프 오른쪽 세로 가운데).
 
 ## ApcTabStrip
 
 `APC.UI.Controls` · class : Control
 
-탭 줄(설비군·라인 전환 등). 선택 탭은 흰 바탕 + 위쪽 강조선 + 굵은 글자로 아래 내용과 이어져 보이고, 나머지는 묶음 제목 띠와 같은 회색 그라데이션이다 — 실행 버튼(파란 Primary)과 모양이 겹치지 않는다. 탭 폭은 글자에 맞춰 자동(잘리지 않음). 내용 전환은 에서 화면이 한다. 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
+전환 버튼 줄(설비군·라인 전환 등). 탭 하나하나가 보통 버튼(btn_normal)이고, 선택된 것은 눌린 버튼 + 굵은 글자 + 아래 남색 막대. 실행 버튼(남색 Primary)과 겹치지 않게 선택도 Primary 색을 쓰지 않는다. 본문 맨 위 줄에 둔다(창 제목 줄·헤더 띠가 아니다). 버튼 폭은 글자에 맞춰 자동(잘리지 않음), 버튼 사이 4px. 내용 전환은 에서 화면이 한다. 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
 - `ApcTabStrip()`
 - `event EventHandler SelectedIndexChanged` — 선택이 바뀌면(클릭·←/→·SelectedIndex 대입) 발생.
 - `int PreferredTabsWidth { get; }` — 모든 탭을 담는 데 필요한 폭(배치용). 탭 폭 합.
@@ -246,9 +235,8 @@
 
 `APC.UI.Controls` · class : UserControl
 
-모든 기능 화면의 공통 틀: 상단 ApcHeaderBar, 가운데 Body.
+모든 기능 화면의 공통 틀: Body 하나. 프로그램 이름·기능명·현재 시각은 창 제목 줄(ApcForm)에 있다.
 - `protected ApcTemplateView(string title)`
-- `protected readonly ApcHeaderBar Header`
 - `protected readonly Panel Body` — 내용 영역(Padding 16px). 도킹 순서: 같은 Dock(Top 등)끼리는 나중에 Add한 것이 바깥(위)에 온다. Fill을 먼저 Add하고, Top 줄들은 화면 아래쪽 것부터 위쪽 것 순서로 Add한다(또는 SetChildIndex(fill, 0)).
 - `protected static ApcButton Button(string text, ApcButtonVariant variant, int width = 110)`
 - `protected static FlowLayoutPanel Row(params Control[] controls)` — 왼쪽→오른쪽으로 쌓는 한 줄(필터·버튼 줄).
@@ -256,7 +244,6 @@
 - `protected static Label SectionTitle(string text)` — 구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).
 - `protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)` — 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px. height는 칸 높이(배율 적용한 값, 예: S(150)).
 - `protected static int S(int px)` — 배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.
-- `protected void HeaderTools(params Control[] controls)` — 탭(ApcTabStrip)·안내 문구 등을 헤더 띠 왼쪽에 둔다(띠 오른쪽은 현재 시각). 탭이 있는 화면은 본문이 아니라 여기에 탭을 넣는다. 띠 높이를 48px로 늘리고, 탭은 아래끝을 띠 아래선에 붙이고 나머지는 세로 가운데. 생성자에서 한 번 부른다.
 - `protected void UseSettingsButton(EventHandler onClick)` — 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다. 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
 
 ## ApcTextBox
@@ -352,6 +339,7 @@
 - `const int BaseMinHeight`
 - `static Color C(string hex)`
 - `static Color Status(StatusKind kind)`
+- `static Color StatusText(StatusKind kind)` — 밝은 바탕(흰·패널) 위 글자용 상태색. 상태색 그대로면 노랑(경고)·초록은 흰 바탕 대비가 낮아 멀리서 안 읽힌다 → 명도만 낮춰 대비 4.5:1 이상으로. 색상(hue)은 같다. 램프·배너 면 색은 Status.
 - `static Font GetFont(FontStyle style = 0)`
 - `static Image GetImage(string baseName)` — 캐시된 이미지. 호출 측에서 Dispose 하지 않는다.
 - `static ThemeData Current { get; }`

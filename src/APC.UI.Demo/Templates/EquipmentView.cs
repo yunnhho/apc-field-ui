@@ -13,15 +13,15 @@ namespace APC.UI.Demo.Templates
     {
         private const int SampleHistoryRows = 19;
 
-        // 설비명, 상태, 상태 문구
+        // 설비명, 상태(타일은 램프 + 이름만, 사유는 값 카드·알람 이력에)
         private static readonly object[][] Machines =
         {
-            new object[] { "전처리", StatusKind.Run, "가동 · 정상" },
-            new object[] { "하도 부스", StatusKind.Run, "가동 · 정상" },
-            new object[] { "상도 부스", StatusKind.Warn, "경고 · 습도 상한 근접" },
-            new object[] { "건조로1", StatusKind.Run, "가동 · 정상" },
-            new object[] { "건조로2", StatusKind.Alarm, "알람 · 온도 상한 초과" },
-            new object[] { "냉각 존", StatusKind.Stop, "정지 · 계획 정지" },
+            new object[] { "전처리", StatusKind.Run },
+            new object[] { "하도 부스", StatusKind.Run },
+            new object[] { "상도 부스", StatusKind.Warn },
+            new object[] { "건조로1", StatusKind.Run },
+            new object[] { "건조로2", StatusKind.Alarm },
+            new object[] { "냉각 존", StatusKind.Stop },
         };
 
         // 제목, 값, 단위, 상태, 아래 줄 — 값·기준은 알람 이력·상세 dialog와 같게
@@ -41,7 +41,7 @@ namespace APC.UI.Demo.Templates
             for (int i = 0; i < Machines.Length; i++)
             {
                 var m = Machines[i];
-                var tile = new ApcStatusTile { Text = (string)m[0], Status = (StatusKind)m[1], StatusText = (string)m[2], Dock = DockStyle.Fill };
+                var tile = new ApcStatusTile { Text = (string)m[0], Status = (StatusKind)m[1], Dock = DockStyle.Fill };
                 tile.Click += (s, e) => OpenDetail();
                 tiles[i] = tile;
             }

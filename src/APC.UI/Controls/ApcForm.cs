@@ -45,6 +45,7 @@ namespace APC.UI.Controls
             UpdateMaximizedBounds();
             ApcTheme.Changed += OnThemeChanged;
             ApplyThemeFont();
+            _clock.Tick += (s, e) => { var r = ClockBounds; if (!r.IsEmpty) Invalidate(r); };
         }
 
         [DefaultValue("")]
@@ -198,6 +199,13 @@ namespace APC.UI.Controls
             var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis;
             if (ShowLogo)
             {
+                var clock = ClockBounds;
+                if (!clock.IsEmpty)
+                {
+                    TextRenderer.DrawText(g, ClockText, ApcTheme.GetFont(), clock, ApcTheme.C(c.Text),
+                        TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.Right | TextFormatFlags.NoPadding);
+                    right = clock.Left - ApcTheme.Px(16);
+                }
                 DrawMainTitle(g, Rectangle.FromLTRB(x, 0, Math.Max(x, right), TitleBarHeight), flags);
             }
             else
@@ -208,6 +216,24 @@ namespace APC.UI.Controls
             if (_showSettings) DrawWinButton(g, WinButton.Settings, "win_settings", true);
             if (MinimizeBox) DrawWinButton(g, WinButton.Minimize, "win_minimize", true);
             DrawWinButton(g, WinButton.Close, "win_close", true);
+        }
+
+        private const string ClockFormat = "yyyy-MM-dd HH:mm:ss";
+        private readonly Timer _clock = new Timer { Interval = 1000 };
+
+        internal string ClockText { get { return DateTime.Now.ToString(ClockFormat); } }
+
+        /// <summary>메인 창 현재 시각 자리: 창 버튼 왼쪽, 제목 줄 세로 가운데. 글자 폭은 고정 형식 견본으로 잰다.</summary>
+        internal Rectangle ClockBounds
+        {
+            get
+            {
+                if (!ShowLogo || ApcTheme.Current == null) return Rectangle.Empty;
+                int w = TextRenderer.MeasureText("0000-00-00 00:00:00", ApcTheme.GetFont()).Width;
+                int left = LeftmostButton().Left - ApcTheme.Px(16) - w;
+                // 좁은 창: 시계가 로고·제목을 덮느니 생략한다(제목이 먼저)
+                return left < ClientSize.Width / 2 ? Rectangle.Empty : new Rectangle(left, 0, w, TitleBarHeight);
+            }
         }
 
         internal Rectangle SettingsButtonBounds { get { return ButtonRect(WinButton.Settings); } }
@@ -277,7 +303,7 @@ namespace APC.UI.Controls
         public bool ShowLogo
         {
             get { return _showLogo; }
-            set { _showLogo = value; UpdatePadding(); Invalidate(); }
+            set { _showLogo = value; _clock.Enabled = value && IsHandleCreated; UpdatePadding(); Invalidate(); }
         }
 
 
@@ -400,11 +426,13 @@ namespace APC.UI.Controls
         {
             base.OnHandleCreated(e);
             if (_edgeFilter == null) { _edgeFilter = new EdgeResizeFilter(this); Application.AddMessageFilter(_edgeFilter); }
+            if (ShowLogo) _clock.Start();   // 메인 창만 제목 줄에 현재 시각
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
             if (_edgeFilter != null) { Application.RemoveMessageFilter(_edgeFilter); _edgeFilter = null; }
+            _clock.Stop();
             base.OnHandleDestroyed(e);
         }
 
@@ -465,6 +493,7 @@ namespace APC.UI.Controls
             if (disposing)
             {
                 ApcTheme.Changed -= OnThemeChanged;
+                _clock.Dispose();
                 if (_titleFont != null) _titleFont.Dispose();
                 if (_functionFont != null) _functionFont.Dispose();
             }

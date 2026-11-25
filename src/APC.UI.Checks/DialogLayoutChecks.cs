@@ -260,7 +260,7 @@ namespace APC.UI.Checks
         private sealed class FillDialog : ApcForm
         {
             public readonly ApcTrendChart Chart = new ApcTrendChart();
-            public readonly ApcHeaderBar Head = new ApcHeaderBar { Title = "h" };
+            public readonly ApcInfoStrip Head = new ApcInfoStrip { Dock = DockStyle.Top };
             public readonly ApcButton CloseButton = new ApcButton { Text = "닫기", DialogResult = DialogResult.OK };
 
             public FillDialog(int height, bool twoFills)

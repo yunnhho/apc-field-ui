@@ -31,7 +31,7 @@ namespace APC.UI.Checks
             using (var bmp = Renderer.Render(demo, "ProductionView", theme, new Size(1920, 1080)))
             {
                 Check(bmp.Width == 1920 && bmp.Height == 1080, "render: requested size");
-                Check(bmp.GetPixel(10, 10) != bmp.GetPixel(960, 1070), "render: not a blank image");
+                Check(bmp.GetPixel(10, 10) != bmp.GetPixel(960, 540), "render: not a blank image");
             }
             Check(Throws<RenderException>(() => Renderer.Render(demo, "ProductonView", theme, new Size(800, 600)), "ProductionView"), "render: typo lists candidates");
             Check(Throws<RenderException>(() => Renderer.Render(demo, "ProductionView", Path.Combine(Root, "nope"), new Size(800, 600)), "nope"), "render: bad theme path reported");

@@ -97,6 +97,37 @@ namespace APC.UI.Theming
             return ThemeLoader.GetStatusColor(Current, kind);
         }
 
+        /// <summary>
+        /// 밝은 바탕(흰·패널) 위 글자용 상태색. 상태색 그대로면 노랑(경고)·초록은 흰 바탕 대비가 낮아 멀리서 안 읽힌다 →
+        /// 명도만 낮춰 대비 4.5:1 이상으로. 색상(hue)은 같다. 램프·배너 면 색은 Status.
+        /// </summary>
+        public static Color StatusText(StatusKind kind)
+        {
+            var c = Status(kind);
+            for (int i = 0; i < 20 && Contrast(c, Color.White) < MinTextContrast; i++)
+                c = Color.FromArgb((int)(c.R * 0.92), (int)(c.G * 0.92), (int)(c.B * 0.92));
+            return c;
+        }
+
+        private const double MinTextContrast = 4.5;
+
+        internal static double Contrast(Color a, Color b)
+        {
+            double la = Luminance(a), lb = Luminance(b);
+            return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
+        }
+
+        private static double Luminance(Color c)
+        {
+            return 0.2126 * Lin(c.R) + 0.7152 * Lin(c.G) + 0.0722 * Lin(c.B);
+        }
+
+        private static double Lin(int v)
+        {
+            double s = v / 255.0;
+            return s <= 0.03928 ? s / 12.92 : Math.Pow((s + 0.055) / 1.055, 2.4);
+        }
+
         public static Color C(string hex)
         {
             return ThemeLoader.ParseColor(hex);

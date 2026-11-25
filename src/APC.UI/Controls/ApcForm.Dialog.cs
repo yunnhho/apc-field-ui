@@ -143,18 +143,23 @@ namespace APC.UI.Controls
             else if (confirm.DialogResult != DialogResult.None) CancelButton = confirm;
         }
 
+        private const int SectionBar = 3, SectionBarGap = 7;   // 화면 SectionTitle·ApcGroup 제목 막대와 같은 치수
         private readonly HashSet<Control> _sectionTitles = new HashSet<Control>();
 
-        /// <summary>구획 제목(굵게 + 아래 폭 전체 구분선). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.</summary>
+        /// <summary>구획 제목(왼쪽 브랜드색 막대 + 굵게 + 아래 폭 전체 구분선 — 묶음·화면 구획 제목과 같은 표시). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.</summary>
         protected Label SectionTitle(string text)
         {
             var l = new Label
             {
                 Text = text, AutoSize = false, Height = ApcTheme.Px(32), TextAlign = ContentAlignment.MiddleLeft, BackColor = Color.Transparent,
                 Font = ApcTheme.GetFont(FontStyle.Bold), ForeColor = ApcTheme.C(ApcTheme.Current.Colors.Text),
+                Padding = new Padding(ApcTheme.Px(SectionBar + SectionBarGap), 0, 0, 0),
             };
             l.Paint += (s, e) =>
             {
+                int barH = Math.Min(l.Height, TextRenderer.MeasureText("가", l.Font).Height);
+                using (var mark = new SolidBrush(ApcTheme.C(ApcTheme.Current.Colors.Brand)))
+                    e.Graphics.FillRectangle(mark, 0, (l.Height - 2 - barH) / 2, ApcTheme.Px(SectionBar), barH);
                 // 진한 선 + 아래 흰 선 = 파인 홈(입체 구분선)
                 using (var pen = new Pen(ApcTheme.C(ApcTheme.Current.Colors.Border))) e.Graphics.DrawLine(pen, 0, l.Height - 2, l.Width, l.Height - 2);
                 e.Graphics.DrawLine(Pens.White, 0, l.Height - 1, l.Width, l.Height - 1);

@@ -59,11 +59,11 @@ namespace APC.UI.Demo.Catalog
 
 
             var tiles = Flow();
-            tiles.Controls.Add(Tile("전처리", StatusKind.Run, "가동 · 정상"));
-            tiles.Controls.Add(Tile("상도 부스", StatusKind.Warn, "경고 · 습도 상한 근접"));
-            tiles.Controls.Add(Tile("건조로 2", StatusKind.Alarm, "알람 · 온도 상한 초과"));
-            tiles.Controls.Add(Tile("냉각 존", StatusKind.Stop, "정지 · 계획 정지"));
-            tiles.Controls.Add(Tile("검사기", StatusKind.Info, "점검 중"));
+            tiles.Controls.Add(Tile("전처리", StatusKind.Run));
+            tiles.Controls.Add(Tile("상도 부스", StatusKind.Warn));
+            tiles.Controls.Add(Tile("건조로 2", StatusKind.Alarm));
+            tiles.Controls.Add(Tile("냉각 존", StatusKind.Stop));
+            tiles.Controls.Add(Tile("검사기", StatusKind.Info));
             Body.Controls.Add(tiles);
             Body.Controls.Add(Row(Caption("설비 타일 (ApcStatusTile): 마우스를 올리면 파란 테두리, 누르면 Click → 선택(Selected) 바탕")));
         }
@@ -73,9 +73,9 @@ namespace APC.UI.Demo.Catalog
             return new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, BackColor = Color.Transparent, Padding = new Padding(0, 0, 0, S(8)) };
         }
 
-        private ApcStatusTile Tile(string name, StatusKind status, string text)
+        private ApcStatusTile Tile(string name, StatusKind status)
         {
-            var t = new ApcStatusTile { Text = name, Status = status, StatusText = text, Width = S(250) };
+            var t = new ApcStatusTile { Text = name, Status = status, Width = S(250) };
             t.Click += (s, e) =>
             {
                 foreach (var other in t.Parent.Controls.OfType<ApcStatusTile>()) other.Selected = other == t;

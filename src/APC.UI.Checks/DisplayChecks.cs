@@ -59,12 +59,12 @@ namespace APC.UI.Checks
                 Check(bmp.GetPixel(1, card.Height / 2).ToArgb() == ApcTheme.Status(StatusKind.Alarm).ToArgb(), "card: alarm draws thick alarm border");
             }
             CheckSteelInkSurfaces();
-            CheckHeaderTools();
+            CheckTitleClockAndTabs();
             // 같은 높이 카드는 Footer 유무와 관계없이 값이 같은 높이에 그려진다(한 줄 카드의 값이 들쭉날쭉하지 않게).
             Check(ValueTop(new ApcValueCard { Value = "88" }) == ValueTop(new ApcValueCard { Value = "88", Footer = "NG / 검사 수" }), "card: value sits at same height with or without footer");
             // 값이 두 개인 카드(온도 + Footer 습도): 카드 상태는 경고여도 정상인 주 값은 보통 글자색.
-            Check(!HasColor(new ApcValueCard { Value = "22.9", Status = StatusKind.Warn, ValueStatus = StatusKind.Run }, ApcTheme.Status(StatusKind.Warn), false), "card: ValueStatus overrides value color");
-            Check(HasColor(new ApcValueCard { Value = "22.9", Status = StatusKind.Warn }, ApcTheme.Status(StatusKind.Warn), false), "card: value follows Status when ValueStatus unset");
+            Check(!HasColor(new ApcValueCard { Value = "22.9", Status = StatusKind.Warn, ValueStatus = StatusKind.Run }, ApcTheme.StatusText(StatusKind.Warn), false), "card: ValueStatus overrides value color");
+            Check(HasColor(new ApcValueCard { Value = "22.9", Status = StatusKind.Warn }, ApcTheme.StatusText(StatusKind.Warn), false), "card: value follows Status when ValueStatus unset (text-safe warn color)");
             Check(!HasColor(new ApcValueCard { Footer = "습도 51.3 %RH · 정상", Status = StatusKind.Alarm, FooterStatus = StatusKind.Run }, ApcTheme.Status(StatusKind.Alarm), true), "card: FooterStatus overrides footer color");
             // Footer 보조 값이 여러 개: 항목마다 제 색(정상 습도는 회색, 알람 파티클만 빨강).
             var alarm = ApcTheme.Status(StatusKind.Alarm);
@@ -138,20 +138,6 @@ namespace APC.UI.Checks
                 group.DrawToBitmap(bmp, new Rectangle(Point.Empty, group.Size));
                 Check(bmp.GetPixel(ApcTheme.Px(10) + 1, group.TitleHeight / 2).ToArgb() == ApcTheme.C(c.Brand).ToArgb(), "group: brand bar beside label");
             }
-            using (var bar = new ApcHeaderBar { Title = "체결기 #1", StatusText = "가동중", Size = new Size(600, 40) })
-            using (var bmp = new Bitmap(bar.Width, bar.Height))
-            {
-                bar.DrawToBitmap(bmp, new Rectangle(Point.Empty, bar.Size));
-                var px = bmp.GetPixel(2, bar.Height / 2);
-                Check(px.R > 200 && px.G > 200 && px.B > 200, "header bar: light background");
-                bool blank = true;
-                for (int x = 2; x < bar.ClockBounds.Left - 2 && blank; x++)
-                    for (int y = 4; y < bar.Height - 4 && blank; y++)
-                        blank = bmp.GetPixel(x, y).ToArgb() == bmp.GetPixel(2, y).ToArgb();
-                Check(blank, "header bar: nothing but the clock (no title, no status)");
-                Check(System.Text.RegularExpressions.Regex.IsMatch(bar.ClockText, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"), "header bar: clock shows yyyy-MM-dd HH:mm:ss");
-                Check(bar.ClockBounds.Right <= bar.Width - ApcTheme.Px(12), "header bar: clock at right");
-            }
             using (var v = new SectionProbe())
             {
                 v.Title.Size = v.Title.PreferredSize;
@@ -163,27 +149,30 @@ namespace APC.UI.Checks
             }
         }
 
-        private static void CheckHeaderTools()
+        /// <summary>시각은 메인 창 제목 줄(창 버튼 왼쪽)에, dialog에는 없다. 화면 틀에는 헤더 띠가 없다. 탭은 버튼 모양.</summary>
+        private static void CheckTitleClockAndTabs()
         {
-            using (var v = new TabProbe())
+            using (var f = new ApcForm { ClientSize = new Size(1200, 400), TitleText = "t", FunctionText = "f" })
             {
-                Check(v.Tabs.Parent != null && v.Tabs.Parent.Parent == v.Bar, "header tools: tabs go into the header strip");
-                Check(v.Tabs.Bottom == v.Bar.Height, "header tools: tab bottom touches header bottom line");
-                Check(v.Note.Parent == v.Tabs.Parent && v.Note.Left > v.Tabs.Right, "header tools: extra controls follow the tabs");
+                var clock = f.ClockBounds;
+                Check(!clock.IsEmpty && clock.Right < f.MinimizeButtonBounds.Left && clock.Bottom <= f.TitleBarHeight, "title clock: in main title bar, left of window buttons");
+                Check(System.Text.RegularExpressions.Regex.IsMatch(f.ClockText, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"), "title clock: yyyy-MM-dd HH:mm:ss");
+                f.ShowLogo = false;
+                Check(f.ClockBounds.IsEmpty, "title clock: dialogs (no logo) have no clock");
             }
-        }
-
-        private sealed class TabProbe : ApcTemplateView
-        {
-            public readonly ApcTabStrip Tabs = new ApcTabStrip();
-            public readonly System.Windows.Forms.Label Note = Caption("ⓘ 안내");
-            public ApcHeaderBar Bar { get { return Header; } }
-            public TabProbe() : base("probe")
+            using (var v = new SectionProbe())
+                Check(v.Controls.Count == 1 && v.Controls[0] is System.Windows.Forms.Panel, "template view: body only, no header strip");
+            using (var tabs = new ApcTabStrip { Size = new Size(400, ApcTheme.Px(40)) })
+            using (var bmp = new Bitmap(tabs.Width, tabs.Height))
             {
-                Tabs.SetTabs(new[] { "1라인", "2라인" });
-                Tabs.Width = Tabs.PreferredTabsWidth;
-                HeaderTools(Tabs, Note);
+                tabs.SetTabs("A", "B");
+                tabs.DrawToBitmap(bmp, new Rectangle(Point.Empty, tabs.Size));
+                var gap = bmp.GetPixel(tabs.TabBounds(0).Right + 1, tabs.Height / 2);
+                Check(gap.A == 0 || gap.ToArgb() == bmp.GetPixel(tabs.Width - 2, tabs.Height / 2).ToArgb(), "tabstrip: middle of the gap between buttons shows background");
             }
+            Check(ApcTheme.Contrast(ApcTheme.StatusText(StatusKind.Warn), Color.White) >= 4.5, "status text: warn text readable on white (>= 4.5:1)");
+            Check(ApcTheme.StatusText(StatusKind.Alarm).ToArgb() == ApcTheme.Status(StatusKind.Alarm).ToArgb() || ApcTheme.Contrast(ApcTheme.Status(StatusKind.Alarm), Color.White) < 4.5,
+                  "status text: already-readable colors unchanged");
         }
 
         private sealed class SectionProbe : ApcTemplateView
