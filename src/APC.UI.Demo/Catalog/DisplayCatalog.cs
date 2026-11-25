@@ -85,8 +85,8 @@ namespace APC.UI.Demo.Catalog
             foreach (DataGridViewColumn col in waits.Columns) col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             waits.Rows.Add("L2611-0482", "1:35");
             waits.Rows.Add("L2611-0485", "2:10");
-            Body.Controls.Add(Columns(S(170), new Control[] { Titled("대기 Lot", waits), Titled("최근 이벤트", events) }));
-            Body.Controls.Add(Row(Caption("제목 + 표 구획 (Titled): Columns() 칸·Body Fill에 그대로")));
+            Body.Controls.Add(Columns(S(170), new Control[] { Titled("대기 Lot", waits), Titled("최근 이벤트", events, Button("전체 보기", ApcButtonVariant.Normal)) }));
+            Body.Controls.Add(Row(Caption("제목 + 표 구획 (Titled): 제목 줄 오른쪽 버튼 · Columns()/FillColumns() 칸·Body Fill에 그대로")));
 
             Body.Controls.Add(new ApcNoticeBar { Text = "인터락 E05 우회 중", Detail = "15:52까지 · 생산분은 추가 검사 대상" });
             Body.Controls.Add(Row(Caption("지속 상태 알림 띠 (ApcNoticeBar): 우회·시험 모드 — 판정판과 크기를 다투지 않는다")));

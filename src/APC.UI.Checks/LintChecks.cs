@@ -39,6 +39,8 @@ namespace APC.UI.Checks
 
         private static void CheckLintCatches()
         {
+            Check(!Lint(p => p.Controls.Add(new FlowLayoutPanel { Dock = DockStyle.Top, Controls = { new Label { AutoSize = true, Text = "" } } })).Any(i => i.Contains("접힘")), "lint: empty caption (not yet filled) is not a collapse");
+            Check(Lint(p => p.Controls.Add(new Label { AutoSize = false, Size = new Size(0, 20), Text = "이유" })).Any(i => i.Contains("접힘")), "lint: collapsed caption with text is still caught");
             Check(Lint(p => p.Controls.Add(new Label { Text = "아주 긴 이름표 글자입니다", AutoSize = false, Width = 40, Height = 20 })).Any(i => i.Contains("글자 잘림")), "lint: clipped label");
             Check(Lint(p => p.Controls.Add(new ApcButton { Text = "레시피 불러오기", Width = 40 })).Any(i => i.Contains("글자 잘림")), "lint: clipped button");
             Check(Lint(p => { var c = new ApcComboBox { Width = 60 }; c.Items.Add("모델 A-1234567 긴 이름"); p.Controls.Add(c); }).Any(i => i.Contains("글자 잘림")), "lint: narrow combo");

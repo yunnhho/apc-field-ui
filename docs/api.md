@@ -1,4 +1,4 @@
-# APC.UI API (v1.24.0.0)
+# APC.UI API (v1.25.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -123,7 +123,7 @@
 
 `APC.UI.Controls` · class : Control
 
-이름-값 정보판 한 줄: [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time]처럼 진한 이름 칸과 흰 값 칸이 번갈아 나온다. 화면 헤더 아래 "지금 무엇을 보는가"(공정·설비·LOT·SPEC 등)를 적는 줄. 이름 칸은 글자 폭, 값 칸은 남은 폭을 똑같이 나눈다. 값이 없으면 빈칸. 입력칸이 아니다(읽기 전용 표시).
+이름-값 정보판 한 줄: [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time]처럼 진한 이름 칸과 흰 값 칸이 번갈아 나온다. 화면 헤더 아래 "지금 무엇을 보는가"(공정·설비·LOT·SPEC 등)를 적는 줄. 이름 칸은 글자 폭, 값 칸은 제 글자 폭 + 남은 폭을 똑같이 나눠 받는다(긴 값이 먼저 잘리지 않게). 값이 없으면 빈칸. 입력칸이 아니다(읽기 전용 표시).
 - `ApcInfoStrip()`
 - `string GetValue(string name)`
 - `void SetItems(params string[] names)` — 이름 칸들(왼→오). 값은 모두 빈칸으로 시작한다.
@@ -252,8 +252,9 @@
 - `protected static FlowLayoutPanel Row(params Control[] controls)` — 왼쪽→오른쪽으로 쌓는 한 줄(필터·버튼 줄).
 - `protected static Label Caption(string text)`
 - `protected static Label SectionTitle(string text)` — 구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).
-- `protected static Panel Titled(string title, Control content)` — 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()의 칸이나 Body의 Fill에 그대로 넣는다 (제목 Dock=Top, 내용 Dock=Fill — 도킹 순서를 화면 코드가 맞추지 않아도 된다).
+- `protected static Panel Titled(string title, Control content, params Control[] tools)` — 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()·FillColumns()의 칸이나 Body의 Fill에 그대로 넣는다 (제목 Dock=Top, 내용 Dock=Fill — 도킹 순서를 화면 코드가 맞추지 않아도 된다). tools는 제목 줄 오른쪽 끝에 놓는 버튼 등(Button(...)). 제목은 나중에 panel.Text = "..."로 바꾼다.
 - `protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)` — 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px. height는 칸 높이(배율 적용한 값, 예: S(150)).
+- `protected static TableLayoutPanel FillColumns(Control[] cells, float[] percents = null)` — 남은 높이를 모두 채우는 나란한 칸(Dock=Fill) — 목록 표 두 개를 나란히 둘 때(칸은 보통 Titled(...)). Body에서는 Fill이므로 Top 줄들보다 먼저 Add한다.
 - `protected static int S(int px)` — 배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.
 - `protected void UseSettingsButton(EventHandler onClick)` — 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다. 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
 

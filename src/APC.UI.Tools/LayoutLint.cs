@@ -78,7 +78,8 @@ namespace APC.UI.Tools
         private static void Walk(Control c, string path, List<string> issues, Theme theme)
         {
             var shown = c.Controls.Cast<Control>().Where(x => x.Visible).ToList();
-            foreach (var z in shown.Where(x => x.Width <= 0 || x.Height <= 0))
+            // 빈 이름표(아직 채우지 않은 안내 글)는 접혀도 보이는 것이 없다
+            foreach (var z in shown.Where(x => (x.Width <= 0 || x.Height <= 0) && !(x is Label && x.Text.Length == 0)))
                 issues.Add(path + " > " + Describe(z) + ": 크기 0으로 접힘(" + z.Width + "x" + z.Height + ") — 자리가 모자란다");
             var visible = shown.Where(x => x.Width > 0 && x.Height > 0).ToList();
             CheckSiblings(c, visible, path, issues);
