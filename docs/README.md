@@ -20,7 +20,7 @@ Claude Code 스킬: `skills/apc-field-ui/SKILL.md`가 원본이다. `bash tools/
 3. `Main`에서 폼을 띄우기 전에 `ApcTheme.Load(@"...\themes\<고객사>")`를 호출한다. `ThemeException`이 나면 메시지에 파일과 항목이 적혀 있다.
 4. 폼은 `ApcForm`을 상속하고 표준 입력·표시 컨트롤 대신 Apc 컨트롤을 쓴다. 삭제 같은 되돌릴 수 없는 동작 앞에는 `ApcDialog.Confirm(this, "...")`, 저장 확인은 `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`, 입력 오류 안내는 `ApcDialog.Alert(this, "...")`.
    - 입력: `ApcButton` / `ApcTextBox` / `ApcScanBox`(바코드) / `ApcComboBox` / `ApcNumericBox` / `ApcDateBox`
-   - 표시: `ApcGrid` + `ApcLampColumn`(램프, `ApcLampValue`면 램프+문구) + `ApcIconColumn`(행 동작 아이콘) / `ApcLamp` / `ApcGroup`(설정 묶음) / `ApcValueCard`(현재값) / `ApcStatusTile`(설비, 클릭) / `ApcJudgePanel`(OK·NG) / `ApcTrendChart`(추이) / `ApcHeaderBar`
+   - 표시: `ApcGrid` + `ApcLampColumn`(램프, `ApcLampValue`면 램프+문구) + `ApcIconColumn`(행 동작 아이콘) / `ApcLamp` / `ApcGroup`(설정 묶음) / `ApcValueCard`(현재값) / `ApcStatusTile`(설비, 클릭) / `ApcJudgePanel`(OK·NG) / `ApcTrendChart`(추이)
    - `Label`과 배치용 패널(`Panel`, `FlowLayoutPanel`, `TableLayoutPanel`)은 표준 그대로 쓴다.
 5. 앱 매니페스트에 `<dpiAware>true</dpiAware>`를 넣는다(`src/APC.UI.Demo/app.manifest` 참고).
 

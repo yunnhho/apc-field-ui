@@ -93,7 +93,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | `AddCaptionRow(group, "블럭", "COM", "신호", ...)` | 묶음 안 칸 제목 줄. 바로 다음 `AddFieldRow(group, ...)` 행의 [이름표, 입력칸, trailing...] 위에 순서대로 놓인다(`""` = 제목 없음). 여러 행이 같은 칸을 가지면(블록별 포트·신호·로직) 행마다 `FieldCaption`을 되풀이하지 말고 이것으로 한 번만 |
 | `AddContent(c)` / `AddContentFill(c)` | 표·상태 줄·그래프. `AddContent`는 `c.Height`(`ApcTheme.Px`) 그대로, `AddContentFill`은 남은 높이(`SetupDialog`에 height 필수, 하나만). 표 높이는 `ApcGrid.HeightForRows(행 수)` |
 | `AddContentRow(c1, c2, ...)` | 카드 여러 개를 한 줄에 같은 폭·같은 높이(가장 큰 `c.Height`)로. 2×2는 두 번 부른다. 카드 격자를 `TableLayoutPanel`로 직접 짜지 않는다(자식 기본 `Margin` 3px 때문에 render "빈 공간" 점검이 나온다) |
-| `SectionTitle(text)` | 구획 제목(굵게 + 아래 폭 전체 구분선). `AddContent(SectionTitle("..."))`. 상자(`AddGroup`) 없이 입력 행을 나눌 때 |
+| `SectionTitle(text)` | 구획 제목(왼쪽 붉은 막대 + 굵게 + 아래 폭 전체 구분선). `AddContent(SectionTitle("..."))`. 상자(`AddGroup`) 없이 입력 행을 나눌 때 |
 | `SetFooter(cancel, confirm[, left...])` | 오른쪽 아래 **[확정][취소]**(취소가 오른쪽 끝, 110×40), 왼쪽 보조 버튼(`비밀번호 변경` 등). Esc = 취소. 보기용은 `SetFooter(null, 닫기)` + 닫기에 `DialogResult = OK`(그래야 Esc도 닫기). 확정 버튼 하나뿐인 입력 dialog는 Esc가 없다 — 취소 버튼을 둔다. Enter(`AcceptButton`)는 스캔이 없는 dialog에서만 직접 지정 |
 
 - 헬퍼는 **생성자에서만** 부른다(표시 직전 한 번 배치, 그 뒤 호출은 예외). 이름표는 `AddFieldRow`가 만든다. `Label`·`Font`·`Panel` 버튼 줄을 직접 만들지 않는다. 한 dialog가 폭에 안 들어가면(render "부모 밖으로 넘침") `SetupDialog` 폭을 늘린다.
@@ -106,15 +106,15 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 글자 입력 / 바코드 | `ApcTextBox` / `ApcScanBox`: 화면의 `OnHandleCreated`에서 `var f = FindForm(); if (f != null) _scan.Attach(f);`(생성자엔 폼이 없다) |
 | 선택 목록 / 숫자 / 날짜 | `ApcComboBox` / `ApcNumericBox`(Minimum·Maximum·DecimalPlaces·Increment, ▲/▼는 칸 안 오른쪽에 위아래로) / `ApcDateBox` |
 | 버튼 | `ApcButton`(Normal·Primary·Danger) |
-| 표 | `ApcGrid` + 상태 열 `ApcLampColumn`(셀 값 = `StatusKind`, 열 제목 "상태"). 상태 문구가 짧으면(가동·대기·전송됨) 셀 값 `new ApcLampValue(kind, "문구")`로 램프 + 문구를 한 칸에 — 이때는 따로 글 열을 두지 않는다. 행마다 누르는 동작(전송·초기화)은 버튼을 그리지 말고 `ApcIconColumn { IconName = "icon_play" | "icon_reset" }`(셀 값 true = 파란 아이콘, false = 회색 = 지금 못 함), `CellClick`에서 `ApcIconColumn.IsEnabled(cell)`이 false면 아무것도 하지 않는다. 램프 색이 무엇인지 같은 행의 글 열로도 읽혀야 한다 — 그 열 제목은 "판정"·"내용"("상태"는 램프 열과 겹친다). 기준 이탈 값 셀은 `cell.Style.ForeColor = ApcTheme.Status(kind)` + 굵게(선택 행에서도 색이 유지된다) |
+| 표 | `ApcGrid` + 상태 열 `ApcLampColumn`(셀 값 = `StatusKind`, 열 제목 "상태"). 상태 문구가 짧으면(가동·대기·전송됨) 셀 값 `new ApcLampValue(kind, "문구")`로 램프 + 문구를 한 칸에 — 이때는 따로 글 열을 두지 않는다. 행마다 누르는 동작(전송·초기화)은 버튼을 그리지 말고 `ApcIconColumn { IconName = "icon_play" | "icon_reset" }`(셀 값 true = 파란 아이콘, false = 회색 = 지금 못 함), `CellClick`에서 `ApcIconColumn.IsEnabled(cell)`이 false면 아무것도 하지 않는다. 램프 색이 무엇인지 같은 행의 글 열로도 읽혀야 한다 — 그 열 제목은 "판정"·"내용"("상태"는 램프 열과 겹친다). 기준 이탈 값 셀은 `cell.Style.ForeColor = ApcTheme.StatusText(kind)` + 굵게(선택 행에서도 색이 유지된다) |
 | 읽기 전용 값 한 줄(현재 바코드·LOT·작업자) | `ApcTextBox { ReadOnly = true }`(회색 바탕) 또는 `ApcValueCard` |
 | 큰 현재값(센서·수량·불량률) | `ApcValueCard`(Title·Value·Unit·Footer·Status). 값 글자 크기는 카드 높이를 따른다 — 나란한 카드는 같은 높이로(`Columns()`·`AddContentRow`가 맞춘다). 값이 두 개(온도 + 습도)면 주 값은 `Value`, 보조 값은 `Footer`("습도 57.0 %RH · 경고"). `Status`(램프·테두리)는 둘 중 나쁜 쪽, `ValueStatus`·`FooterStatus`는 각 항목의 판정 — 안 주면 정상인 온도가 노란 글자로 나온다. Footer에 보조 값이 둘 이상(습도 · 파티클)이면 `FooterStatus` 대신 `SetFooterParts(new[]{"습도 43.8 %RH","파티클 4,210 개/m³"}, new[]{StatusKind.Run, StatusKind.Alarm})` — 항목마다 제 색으로 그린다 |
-| 설비 상태 한 칸, 누르면 상세 | `ApcStatusTile`(Text=설비명·Status·StatusText, `Click`) |
+| 설비 상태 한 칸, 누르면 상세 | `ApcStatusTile`(Text=설비명·Status, `Click`). 부제 없음 — 사유는 판정판·표 한 곳에 |
 | OK/NG 판정 크게 | `ApcJudgePanel`(Text=큰 글자·SubText·Status: OK=Run, NG=Alarm, 대기=Stop) |
 | 추이 그래프 | `ApcTrendChart`(`SetValues`, XLabels, Reference, UpperLimit/LowerLimit) |
 | 상태 램프 | `ApcLamp` |
 | 설정 묶음(제목 있는 상자, GroupBox 대신) | `ApcGroup`(Text=제목, 안은 Dock/FlowLayoutPanel) |
-| 탭(설비군·라인 전환, TabControl 대신) | `ApcTabStrip`(`SetTabs(...)`, `Width = PreferredTabsWidth`, `SelectedIndexChanged`에서 내용 전환). 버튼을 탭처럼 쓰지 않는다(선택 탭이 실행 버튼과 같은 모양이 됨). 탭은 본문이 아니라 헤더 띠 왼쪽에 `HeaderTools(tabs, 안내문구...)`로 넣는다(생성자에서 한 번, 탭 아래끝이 띠 아래선에 붙는다) — `FailureAnalysisView` |
+| 탭(설비군·라인 전환, TabControl 대신) | `ApcTabStrip`(`SetTabs(...)`, `Width = PreferredTabsWidth`, `SelectedIndexChanged`에서 내용 전환). 버튼 모양(선택 = 눌린 버튼 + 아래 남색 막대)이라 `ApcButton`을 여러 개 놓아 흉내 내지 않는다. 본문 맨 위 줄 `Body.Controls.Add(Row(tabs, 안내문구...))`(Fill을 먼저 Add) — `FailureAnalysisView` |
 | 입력 표(칸에 바로 입력·스캔) | `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + 열별 `ReadOnly`(읽기 전용 열은 자동 회색, `SelectionMode = CellSelect`면 입력 중인 행의 읽기 전용 칸은 연한 파랑) |
 
 - **표준 컨트롤 금지**: `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`과 `Control`을 상속해 직접 그린 카드·타일·그래프를 만들지 않는다. 위 표의 Apc 컨트롤을 쓴다. 표준으로 쓰는 것은 `Label`과 배치용 `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`뿐. 표에 없는 요소가 꼭 필요하면 만들지 말고 사용자에게 알린다(라이브러리에 추가할 후보).
@@ -125,7 +125,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 
 | 항목 | 기준 |
 |---|---|
-| 창 제목 | 화면 이름만(`MainForm.TitleText`, 예: "도장 라인 모니터링"). 고객사·버전 붙이지 않음. 화면 헤더 제목(`base("...")`)도 같은 이름(헤더 띠에는 그리지 않는다. 헤더 띠는 오른쪽 끝 현재 시각만 — 상태·요약을 넣지 않는다). 그 아래 줄 기능명은 `MainForm.FunctionText`(예: "작업 시작 · LOT 스캔", 브랜드 붉은색). dialog에는 기능명 없음. 브랜드 색(`brand`)은 기능명과 묶음·구획 제목 막대에만 라이브러리가 쓴다 — 화면 코드에서 직접 쓰지 않는다(알람 빨강과 혼동) |
+| 창 제목 | 화면 이름만(`MainForm.TitleText`, 예: "도장 라인 모니터링"). 고객사·버전 붙이지 않음. 화면 `base("...")`도 같은 이름. 현재 시각은 라이브러리가 창 제목 줄 오른쪽에 그린다 — 화면에 시계·헤더 띠를 만들지 않는다. 그 아래 줄 기능명은 `MainForm.FunctionText`(예: "작업 시작 · LOT 스캔", 브랜드 붉은색). dialog에는 기능명 없음. 브랜드 색(`brand`)은 기능명과 묶음·구획 제목 막대에만 라이브러리가 쓴다 — 화면 코드에서 직접 쓰지 않는다(알람 빨강과 혼동) |
 | 날짜·시각 | 날짜 `yyyy-MM-dd`, 당일 이력 시각 `HH:mm:ss`, 여러 날에 걸친 이력 `yyyy-MM-dd HH:mm:ss` |
 | 소수 자리 | ℃·%RH·kN·bar·kPa·m/min·A·V·Pa·µA → `0.0`, mm → `0.00`, 불량률·가동률·수율 % → `0.0`, mΩ·nA → `0.0`, 수량·파티클(개/ft³) → `#,0`(정수), 시간 설정(s·min) → 정수(측정한 사이클 타임 s는 `0.0`. 측정값과 비교하는 상·하한·경고값도 측정값 자리수 "상한 28.0 s" — 정수는 사람이 넣는 목표·설정값만). 카드 값·표·알람 문구·기준 문구 모두 같은 자리수. 여기 없는 단위(rpm·Hz·kg 등)는 요구서를 따르고, 요구서에도 없으면 사용자에게 묻는다 |
 | 표 정렬 | `ApcGrid` 기본이 가운데(헤더 포함). 긴 글 열(알람 내용·비고·사유)만 `DefaultCellStyle.Alignment = MiddleLeft`. 숫자 열도 가운데 |
@@ -139,13 +139,21 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 간격 | 숫자로 정하지 않는다. 화면은 `Columns()`·`Row()`, dialog는 4b 헬퍼가 정한다(값은 `ApcLayout`) |
 | 샘플 데이터 | 아래 "샘플 데이터" 목록 |
 
+**화면 위계** (render 점검이 못 잡는 것 — 직접 확인)
+- 같은 사실은 한 곳에서 한 번: 화면의 가장 중요한 판정은 `ApcJudgePanel` 하나에 크게. 그 사유 문장을 타일·카드 Footer·표에 되풀이하지 않는다 — 타일·카드는 색(램프·테두리)으로만 따라간다. 빨강 테두리(`Alarm`)는 이상인 그 대상에만.
+- 글자에 상태색은 `ApcTheme.StatusText(kind)`(흰 바탕에서 읽히게 명도를 낮춘 색). `ApcTheme.Status(kind)`는 면·선용 — 글자에 쓰면 노랑·초록이 안 읽힌다.
+- 주 동작 버튼은 화면에 `Primary` 하나, 높이는 입력칸과 같게(`Button(...)`) — 카드·판정판 크기로 키우지 않는다. `Danger`는 되돌릴 수 없거나 안전 장치를 우회하는 동작(삭제·인터락 우회)만, 정상 처리 흐름(Lot 처리 시작)은 `Primary`. 지금 못 누르는 버튼은 `Enabled = false` + 바로 옆에 이유 한 줄(`Caption`).
+- 문구: 판정판 `SubText`·카드 `Footer`는 두 마디까지(" · " 한 번). 내부 계산식·통계 상수(σ̂, d2, 공식)는 화면에 쓰지 않는다. 안내 문장은 한 줄에 들어갈 때만.
+- 표·그래프·입력 묶음 위 제목은 `SectionTitle()` 또는 `ApcGroup` — `Caption`을 굵게 바꿔 제목으로 쓰지 않는다(막대 없는 제목이 섞인다).
+- 나란한 표는 행 높이를 같게(`ApcGrid` 기본 행 높이를 바꾸지 않는다). 판정 기준이 없는 지표 카드(수량·OEE)에는 `ShowLamp`를 쓰지 않는다.
+
 **상태색** (공정 상태 → `StatusKind`)
 - 대기·정지·통신 끊김 = `Stop`
 - 가동·진행 중(시험 중·측정 중)·정상 완료(PASS·OK) = `Run`
 - 한계 근접·확인 필요 = `Warn`
 - 불량 판정(FAIL·NG)·설비 오류(인가 실패·통신 오류 등 작업이 멈추는 것) = `Alarm`
 - 설정 변경·교대 같은 기록 = `Info`
-- 설비 타일·표 행의 상태 = 공정 상태와 값 판정 중 나쁜 쪽. 문구는 "공정 상태 · 사유"(예: "시험중 · 저항 한계 근접"). 사유가 여럿이면 가장 나쁜 것 하나(같으면 화면 항목 순서 앞쪽).
+- 설비 타일·표 행의 상태 = 공정 상태와 값 판정 중 나쁜 쪽. 표 행 문구는 "공정 상태 · 사유"(예: "시험중 · 저항 한계 근접"), 타일은 색만. 사유가 여럿이면 가장 나쁜 것 하나(같으면 화면 항목 순서 앞쪽).
 - 카드 `Status`는 그 카드 값의 판정만. 판정 기준이 없는 값(진행률·수량, 기준이 주어지지 않은 측정값)은 값이 갱신 중이면 `Run`, 멈췄으면(설비 오류·대기·정지, 값 없음) `Stop` — 설비 오류를 진행률 카드에 빨강으로 칠하지 않는다(설비 상태는 타일이 보인다). 예외: 판정 화면의 NG 수 카드는 NG > 0이면 `Alarm`(`JudgeView`와 같이). 정지·대기 설비가 읽은 값은 판정하지 않는다 — 값만 보이고 카드·셀은 `Stop`(기본 글자색), 타일·행은 공정 상태(정지·대기)를 따른다(멈춘 설비가 식어 하한 아래인 것은 알람이 아니다). 정상 완료한 설비의 진행률·최종값은 `Run`.
 
 **샘플 데이터**

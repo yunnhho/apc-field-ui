@@ -185,11 +185,11 @@ namespace APC.UI.Checks
                 tabs.SelectedIndex = 2;
                 Check(fired == 2, "tabstrip: index change fires");
                 var b0 = tabs.TabBounds(0); var b1 = tabs.TabBounds(1); var b2 = tabs.TabBounds(2);
-                Check(b1.Left == b0.Right && b2.Left == b1.Right, "tabstrip: tabs placed side by side");
+                Check(b1.Left == b0.Right + ApcTheme.Px(4) && b2.Left == b1.Right + ApcTheme.Px(4), "tabstrip: buttons side by side with 4px gap");
                 Check(b1.Width >= ApcTheme.Px(120), "tabstrip: short tab keeps min width");
                 int need = TextRenderer.MeasureText(tabs.GetTabText(2), ApcTheme.GetFont(FontStyle.Bold)).Width;
                 Check(b2.Width > need, "tabstrip: long tab widens to fit bold text (no cut)");
-                Check(tabs.PreferredTabsWidth == b2.Right, "tabstrip: preferred width = sum of tabs");
+                Check(tabs.PreferredTabsWidth == b2.Right, "tabstrip: preferred width = buttons + gaps");
                 bool threw = false;
                 try { tabs.SelectedIndex = 3; } catch (ArgumentOutOfRangeException) { threw = true; }
                 Check(threw && tabs.SelectedIndex == 2, "tabstrip: out-of-range index rejected");

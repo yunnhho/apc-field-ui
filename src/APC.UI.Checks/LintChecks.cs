@@ -73,9 +73,9 @@ namespace APC.UI.Checks
                 g.Rows.Add("x");
                 p.Controls.Add(g);
             }).Any(i => LayoutLint.IsNote(i) && i.Contains("표 아래가 빔")), "lint: underfilled read-only grid is a note");
-            Check(Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3", StatusText = "경고 · 금형 온도 상한 근접 64.0 ℃", Status = StatusKind.Warn, Width = 160, Height = 80 }))
-                .Any(i => i.Contains("말줄임")), "lint: ellipsized tile status text");
-            Check(!Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3", StatusText = "경고", Width = 160, Height = 80 })).Any(i => i.Contains("말줄임")), "lint: fitting tile text passes");
+            Check(Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3 금형 온도 조절기 (2차)", Status = StatusKind.Warn, Width = 160, Height = 80 }))
+                .Any(i => i.Contains("말줄임")), "lint: ellipsized tile name");
+            Check(!Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3", Width = 160, Height = 80 })).Any(i => i.Contains("말줄임")), "lint: fitting tile text passes");
             CheckGridFitsMatchesScrollbar();
             // 겹침이 있으면 표 높이가 바뀔 것이라 행 수 참고를 내지 않는다(B 시연: 겹침 고친 뒤 18행 → 17행)
             Check(!Lint(p =>

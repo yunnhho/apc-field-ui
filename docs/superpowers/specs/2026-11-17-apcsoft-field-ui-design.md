@@ -113,7 +113,6 @@ APCSOFT가 고객사마다 새로 만드는 현장 프로그램(WinForms)에 **�
 | `ApcForm` | `Form` | 테두리 없는 창. 그라데이션 타이틀바, 로고, `win_*` 이미지 버튼 사용. |
 | `ApcButton` | `Button` | 9-slice 이미지 버튼. 4가지 상태. 변형은 `Primary`/`Normal`/`Danger`. |
 | `ApcLamp` | `Control` | 상태 램프. `Status` 속성에 따라 `lamp_*` 이미지를 쓰고, 알람일 때 깜빡일 수 있다. |
-| `ApcHeaderBar` | `Panel` | 설비명과 상태 램프를 보여주는 화면 상단 띠 |
 | `ApcScanBox` | `TextBox` | 바코드 입력란. 폼의 `KeyPreview`로 포커스와 무관하게 스캔을 받는다. 키 간격이 짧으면(임계값은 테마에 설정, 기본 50ms) 스캔으로 판단한다. Enter를 종료 문자로 쓰며 `Scanned` 이벤트를 발생시킨다. |
 | `ApcGrid` | `DataGridView` | 테마 스타일을 적용한다. 상태 컬럼(`ApcLampColumn`)을 제공한다. |
 | `ApcTheme` | 정적 클래스 | 테마 로드·검증, 이미지 해석(배율 선택), 변경 이벤트 |

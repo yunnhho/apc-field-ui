@@ -9,12 +9,11 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 설비 타일: 램프 + 설비명 + 상태 문구. 누르면 Click(상세 dialog 열기 등). 마우스를 올리거나 포커스면 파란 테두리,
+    /// 설비 타일: 램프 + 설비명(부제 없음 — 상태는 램프 색, 사유는 화면의 배너·표가 말한다). 누르면 Click(상세 dialog 열기 등). 마우스를 올리거나 포커스면 파란 테두리,
     /// 알람이면 굵은 알람색 테두리. Tab으로 옮겨 Enter·Space로도 누른다.
     /// </summary>
     public class ApcStatusTile : Control
     {
-        private string _statusText = "";
         private StatusKind _status = StatusKind.Stop;
         private bool _hover;
         private bool _keyPressed;   // 키를 누르고 있어도(자동 반복) Click은 한 번
@@ -32,14 +31,11 @@ namespace APC.UI.Controls
 
         [DefaultValue(StatusKind.Stop)] public StatusKind Status { get { return _status; } set { _status = value; Invalidate(); } }
 
-        /// <summary>설비명 아래 한 줄(예: "가동 · 정상", "알람 · 온도 상한 초과").</summary>
         private bool _selected;
         /// <summary>선택 표시(바탕이 표 선택 행 색). 타일을 눌러 아래 카드·그래프가 그 설비를 보여 줄 때 그 타일 하나만 true.</summary>
         [DefaultValue(false)] public bool Selected { get { return _selected; } set { _selected = value; Invalidate(); } }
 
-        [DefaultValue("")] public string StatusText { get { return _statusText; } set { _statusText = value ?? ""; Invalidate(); } }
-
-        /// <summary>설비명(굵게, 램프 오른쪽 윗줄).</summary>
+        /// <summary>설비명(굵게, 램프 오른쪽 세로 가운데).</summary>
         public override string Text { get { return base.Text; } set { base.Text = value; } }
 
         protected override void OnTextChanged(EventArgs e) { base.OnTextChanged(e); Invalidate(); }
@@ -55,12 +51,9 @@ namespace APC.UI.Controls
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.DrawImage(Cards.Lamp(_status), new Rectangle(pad, (Height - lamp) / 2, lamp, lamp));
 
-            int x = pad * 2 + lamp, w = Width - x - pad, half = Height / 2;
-            var flags = TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.Left;
-            TextClip.Draw(g, this, Text, ApcTheme.GetFont(FontStyle.Bold), new Rectangle(x, 0, w, half - S(2)), ApcTheme.C(c.Text),
-                flags | TextFormatFlags.Bottom);
-            var sc = _status == StatusKind.Warn || _status == StatusKind.Alarm ? ApcTheme.Status(_status) : ApcTheme.C(c.TextMuted);
-            TextClip.Draw(g, this, _statusText, ApcTheme.GetFont(), new Rectangle(x, half + S(2), w, half - S(2)), sc, flags | TextFormatFlags.Top);
+            int x = pad * 2 + lamp, w = Width - x - pad;
+            var flags = TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.VerticalCenter;
+            TextClip.Draw(g, this, Text, ApcTheme.GetFont(FontStyle.Bold), new Rectangle(x, 0, w, Height), ApcTheme.C(c.Text), flags);
         }
 
         protected override void OnMouseEnter(EventArgs e) { _hover = true; Invalidate(); base.OnMouseEnter(e); }

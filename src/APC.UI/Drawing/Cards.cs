@@ -10,7 +10,7 @@ namespace APC.UI.Drawing
         internal static Color EmphasisColor(StatusKind status)
         {
             var c = ApcTheme.Current.Colors;
-            if (status == StatusKind.Warn || status == StatusKind.Alarm) return ApcTheme.Status(status);
+            if (status == StatusKind.Warn || status == StatusKind.Alarm) return ApcTheme.StatusText(status);
             return ApcTheme.C(status == StatusKind.Stop ? c.TextMuted : c.Text);
         }
 

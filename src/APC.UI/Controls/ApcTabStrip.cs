@@ -8,14 +8,14 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 탭 줄(설비군·라인 전환 등). 선택 탭은 흰 바탕 + 위쪽 강조선 + 굵은 글자로 아래 내용과 이어져 보이고,
-    /// 나머지는 묶음 제목 띠와 같은 회색 그라데이션이다 — 실행 버튼(파란 Primary)과 모양이 겹치지 않는다.
-    /// 탭 폭은 글자에 맞춰 자동(잘리지 않음). 내용 전환은 <see cref="SelectedIndexChanged"/>에서 화면이 한다.
+    /// 전환 버튼 줄(설비군·라인 전환 등). 탭 하나하나가 보통 버튼(btn_normal)이고, 선택된 것은 눌린 버튼 + 굵은 글자 + 아래 남색 막대.
+    /// 실행 버튼(남색 Primary)과 겹치지 않게 선택도 Primary 색을 쓰지 않는다. 본문 맨 위 줄에 둔다(창 제목 줄·헤더 띠가 아니다).
+    /// 버튼 폭은 글자에 맞춰 자동(잘리지 않음), 버튼 사이 4px. 내용 전환은 <see cref="SelectedIndexChanged"/>에서 화면이 한다.
     /// 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
     /// </summary>
     public class ApcTabStrip : Control
     {
-        private const int BaseTabPad = 20, BaseMinTab = 120, BaseAccent = 3, BaseHeight = 40;
+        private const int BaseTabPad = 20, BaseMinTab = 120, BaseAccent = 3, BaseHeight = 40, BaseGap = 4;
         private readonly List<string> _tabs = new List<string>();
         private int _selected = -1;
         private int _hover = -1;
@@ -65,13 +65,13 @@ namespace APC.UI.Controls
         /// <summary>모든 탭을 담는 데 필요한 폭(배치용). 탭 폭 합.</summary>
         public int PreferredTabsWidth
         {
-            get { int w = 0; for (int i = 0; i < _tabs.Count; i++) w += TabWidth(i); return w; }
+            get { int w = 0; for (int i = 0; i < _tabs.Count; i++) w += TabWidth(i) + (i > 0 ? ApcTheme.Px(BaseGap) : 0); return w; }
         }
 
         internal Rectangle TabBounds(int index)
         {
             int x = 0;
-            for (int i = 0; i < index; i++) x += TabWidth(i);
+            for (int i = 0; i < index; i++) x += TabWidth(i) + ApcTheme.Px(BaseGap);
             return new Rectangle(x, 0, TabWidth(index), Height);
         }
 
@@ -93,44 +93,32 @@ namespace APC.UI.Controls
         {
             var g = e.Graphics;
             if (ApcTheme.Current == null) { g.Clear(SystemColors.Control); return; }
-            var c = ApcTheme.Current.Colors;
-            int bottom = Height - 1;
-            using (var border = new Pen(ApcTheme.C(c.Border)))
-            {
-                g.DrawLine(border, 0, bottom, Width, bottom);   // 탭 아래 기준선(선택 탭에서만 끊김)
-                for (int i = 0; i < _tabs.Count; i++) DrawTab(g, i, border, c);
-            }
+            for (int i = 0; i < _tabs.Count; i++) DrawTab(g, i, ApcTheme.Current.Colors);
         }
 
-        private void DrawTab(Graphics g, int i, Pen border, ThemeColors c)
+        private void DrawTab(Graphics g, int i, ThemeColors c)
         {
             var r = TabBounds(i);
             bool selected = i == _selected;
-            int top = selected ? 0 : ApcTheme.Px(4);   // 선택 탭은 조금 더 높게(앞으로 나온 느낌)
-            var face = new Rectangle(r.X, top, r.Width - 1, Height - top);
-            if (selected)
+            string state = !Enabled ? "disabled" : selected ? "pressed" : i == _hover ? "hover" : "normal";
+            var img = ApcTheme.GetImage("btn_normal_" + state);
+            var sl = ApcTheme.Current.ButtonSlice;
+            NineSlice.Draw(g, img, r, new Padding(sl[0], sl[1], sl[2], sl[3]), ApcTheme.ImageScale(img));
+            if (selected && Enabled)
             {
-                using (var b = new SolidBrush(Color.White)) g.FillRectangle(b, face);
-                using (var accent = new SolidBrush(ApcTheme.C(c.Header[1]))) g.FillRectangle(accent, face.X, top, face.Width + 1, ApcTheme.Px(BaseAccent));
+                int a = ApcTheme.Px(BaseAccent), inset = ApcTheme.Px(6);
+                using (var accent = new SolidBrush(ApcTheme.C(c.Header[1]))) g.FillRectangle(accent, r.X + inset, r.Bottom - inset - a + ApcTheme.Px(2), r.Width - 2 * inset, a);
             }
-            else
-            {
-                Gradients.Fill(g, new Rectangle(face.X, face.Y, face.Width, face.Height - 1), c.GridHeader);
-                if (i == _hover) using (var b = new SolidBrush(Color.FromArgb(40, Color.White))) g.FillRectangle(b, face);
-            }
-            g.DrawLine(border, face.Left, top, face.Left, Height - 1);
-            g.DrawLine(border, face.Right, top, face.Right, Height - 1);
-            if (!selected) g.DrawLine(border, face.Left, top, face.Right, top);
-            else using (var white = new Pen(Color.White)) g.DrawLine(white, face.Left + 1, Height - 1, face.Right - 1, Height - 1);
 
-            var font = selected ? BoldFont() : (ApcTheme.Current == null ? Font : ApcTheme.GetFont());
+            var font = selected ? BoldFont() : ApcTheme.GetFont();
             var color = !Enabled ? ApcTheme.C(c.TextMuted) : selected ? ApcTheme.C(c.Text) : ApcTheme.C(c.TextMuted);
-            TextRenderer.DrawText(g, _tabs[i], font, new Rectangle(face.X, top, face.Width, Height - top), color,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+            var tr = r;
+            if (selected) tr.Offset(0, 1);
+            TextRenderer.DrawText(g, _tabs[i], font, tr, color, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
             if (selected && Focused && ShowFocusCues)
             {
-                var f = Rectangle.Inflate(face, -4, -4);
-                using (var pen = new Pen(FieldFrame.FocusColor)) g.DrawRectangle(pen, f.X, f.Y + ApcTheme.Px(BaseAccent), f.Width - 1, f.Height - 1 - ApcTheme.Px(BaseAccent));
+                var f = Rectangle.Inflate(r, -3, -3);
+                using (var pen = new Pen(FieldFrame.FocusColor)) g.DrawRectangle(pen, f.X, f.Y, f.Width - 1, f.Height - 1);
             }
         }
 
