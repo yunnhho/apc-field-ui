@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using APC.UI.Theming;
 
@@ -75,23 +76,44 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()의 칸이나 Body의 Fill에 그대로 넣는다
+        /// 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()·FillColumns()의 칸이나 Body의 Fill에 그대로 넣는다
         /// (제목 Dock=Top, 내용 Dock=Fill — 도킹 순서를 화면 코드가 맞추지 않아도 된다).
+        /// tools는 제목 줄 오른쪽 끝에 놓는 버튼 등(Button(...)). 제목은 나중에 panel.Text = "..."로 바꾼다.
         /// </summary>
-        protected static Panel Titled(string title, Control content)
+        protected static Panel Titled(string title, Control content, params Control[] tools)
         {
             if (content == null) throw new ArgumentNullException("content");
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             var head = SectionTitle(title);
             head.AutoSize = false;
-            head.Dock = DockStyle.Top;
-            head.Height = head.PreferredHeight;
+            head.Dock = DockStyle.Fill;
             head.TextAlign = ContentAlignment.MiddleLeft;
+            var bar = new Panel { Dock = DockStyle.Top, Height = head.PreferredHeight, BackColor = Color.Transparent };
+            bar.Controls.Add(head);
+            if (tools != null && tools.Length > 0)
+            {
+                var right = new FlowLayoutPanel { Dock = DockStyle.Right, AutoSize = true, WrapContents = false, FlowDirection = FlowDirection.RightToLeft, BackColor = Color.Transparent, Padding = Padding.Empty, Margin = Padding.Empty };
+                for (int i = tools.Length - 1; i >= 0; i--)   // RightToLeft: 마지막 것이 오른쪽 끝
+                {
+                    tools[i].Margin = new Padding(i == tools.Length - 1 ? 0 : S(ApcLayout.ItemGap), 0, 0, 0);
+                    right.Controls.Add(tools[i]);
+                }
+                bar.Height = Math.Max(bar.Height, tools.Max(t => t.Height));
+                bar.Controls.Add(right);
+            }
+            var panel = new TitledPanel(head) { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             content.Dock = DockStyle.Fill;
             panel.Controls.Add(content);   // Fill 먼저, Top은 나중에 Add한 것이 위
             panel.Controls.Add(new Panel { Dock = DockStyle.Top, Height = S(ApcLayout.RowGap), BackColor = Color.Transparent });
-            panel.Controls.Add(head);
+            panel.Controls.Add(bar);
             return panel;
+        }
+
+        /// <summary>Titled() 칸: Text가 제목 글자다(스캔한 Lot에 따라 제목을 바꿀 때).</summary>
+        private sealed class TitledPanel : Panel
+        {
+            private readonly Label _head;
+            public TitledPanel(Label head) { _head = head; }
+            public override string Text { get { return _head.Text; } set { _head.Text = value; } }
         }
 
         /// <summary>구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).</summary>
@@ -147,6 +169,18 @@ namespace APC.UI.Controls
                 cells[i].Margin = new Padding(0, 0, i == cells.Length - 1 ? 0 : S(ApcLayout.RowGap), 0);
                 t.Controls.Add(cells[i], i, 0);
             }
+            return t;
+        }
+
+        /// <summary>
+        /// 남은 높이를 모두 채우는 나란한 칸(Dock=Fill) — 목록 표 두 개를 나란히 둘 때(칸은 보통 Titled(...)).
+        /// Body에서는 Fill이므로 Top 줄들보다 먼저 Add한다.
+        /// </summary>
+        protected static TableLayoutPanel FillColumns(Control[] cells, float[] percents = null)
+        {
+            var t = Columns(0, cells, percents);
+            t.Dock = DockStyle.Fill;
+            t.Padding = Padding.Empty;
             return t;
         }
 

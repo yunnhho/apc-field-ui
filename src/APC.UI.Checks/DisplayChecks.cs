@@ -198,14 +198,35 @@ namespace APC.UI.Checks
                 v.PerformLayout();
                 Check(v.Grid.Dock == System.Windows.Forms.DockStyle.Fill && v.Grid.Top > 0 && v.Grid.Bottom == v.Panel.ClientSize.Height, "titled: content fills below the title (" + v.Grid.Top + "," + v.Grid.Height + ")");
                 Check(v.Panel.Controls.Count == 3, "titled: title + gap + content");
+                v.Panel.Text = "대기 Lot (3)";
+                Check(v.Panel.Text == "대기 Lot (3)", "titled: Text changes the title");
+                Check(v.Tool.Parent != null && v.Tool.Right + v.Tool.Parent.Left == v.Tools.ClientSize.Width, "titled: tool button at the right end of the title bar");
+                Check(v.Fill.Dock == System.Windows.Forms.DockStyle.Fill && v.Fill.Height > 0 && v.Fill.Top >= v.Panel.Bottom, "fill columns: fills remaining height below the Top rows");
             }
+            var w = ApcInfoStrip.ValueWidths(600, new[] { 100, 300, 100 });
+            Check(w[1] >= 300 && w[0] >= 100 && w[0] + w[1] + w[2] <= 600, "info strip: long value keeps its width when space remains");
+            w = ApcInfoStrip.ValueWidths(300, new[] { 100, 300, 200 });
+            Check(w[1] > w[0] && w[0] + w[1] + w[2] <= 300, "info strip: shrinks by text ratio when short");
+            Check(System.Linq.Enumerable.All(ApcInfoStrip.ValueWidths(-50, new[] { 100, 0 }), x => x == 0), "info strip: no negative value width when names fill the line");
         }
 
         private sealed class TitledProbe : ApcTemplateView
         {
             public readonly ApcGrid Grid = new ApcGrid();
-            public readonly System.Windows.Forms.Panel Panel;
-            public TitledProbe() : base("probe") { Panel = Titled("대기 Lot", Grid); Body.Controls.Add(Panel); }
+            public readonly ApcButton Tool = Button("새로 고침", ApcButtonVariant.Normal);
+            public readonly System.Windows.Forms.Panel Panel, Tools;
+            public readonly System.Windows.Forms.TableLayoutPanel Fill;
+            public TitledProbe() : base("probe")
+            {
+                Panel = Titled("대기 Lot", Grid);
+                var other = Titled("이벤트", new ApcGrid(), Tool);
+                Tools = (System.Windows.Forms.Panel)Tool.Parent.Parent;
+                Fill = FillColumns(new System.Windows.Forms.Control[] { other });
+                Body.Controls.Add(Fill);
+                Body.Controls.Add(Panel);
+                Panel.Dock = System.Windows.Forms.DockStyle.Top;
+                Panel.Height = 200;
+            }
         }
 
         private sealed class SectionProbe : ApcTemplateView

@@ -172,12 +172,15 @@ namespace APC.UI.Controls
         protected static Label FieldCaption(string text)
         {
             var font = ApcTheme.GetFont();
-            return new Label
+            var label = new Label
             {
                 Text = text, AutoSize = false, Width = TextRenderer.MeasureText(text, font).Width + ApcTheme.Px(4),
                 TextAlign = ContentAlignment.MiddleLeft, BackColor = Color.Transparent,
                 Font = font, ForeColor = ApcTheme.C(ApcTheme.Current.Colors.Text),
             };
+            // 빈 글자로 만들고 나중에 채우는 칸(뒤쪽 안내 등)도 잘리지 않게 글자 폭을 따라간다
+            label.TextChanged += (s, e) => label.Width = TextRenderer.MeasureText(label.Text, label.Font).Width + ApcTheme.Px(4);
+            return label;
         }
 
         protected override void OnLoad(EventArgs e)

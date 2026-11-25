@@ -65,7 +65,9 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 - 카드·타일·판정판을 한 줄에: `ApcTemplateView`의 `Columns(S(높이), cells)`(같은 폭) 또는 `Columns(S(높이), cells, new[] { 50f, 25f, 25f })`(퍼센트 폭). 칸 간격·줄 간격은 헬퍼가 정한다. 한 줄은 **높이 + 12**를 차지한다(줄 아래 간격 포함) — `Columns()` 여러 줄을 Panel 하나에 담으면 그 Panel 높이는 `(S(높이) + S(12)) × 줄 수`.
 - `SectionTitle()`·`Caption()`은 Dock이 없는 Label이다. `Body`에 바로 넣을 때는 `Dock = DockStyle.Top`을 준다(안 주면 위 줄과 겹친다. 시연 두 차례 연속). `Row()` 안에 넣을 때는 그대로 둔다.
 - 타일을 누르면 아래 카드·그래프가 그 설비를 보여 주는 화면은 그 타일만 `Selected = true`(나머지 false). 표 행을 고르는 화면은 `ApcGrid { ClearInitialSelection = false }` + 그 행 선택. 선택 표시가 없으면 어느 설비 값인지 화면에서 모른다.
-- 구획 제목 + 그 아래를 채우는 표·그래프는 `Titled("대기 Lot", grid)` 한 칸으로 — `Columns()` 칸이나 `Body`의 Fill에 그대로 넣는다(제목 Dock·도킹 순서를 직접 맞추지 않는다). 한 화면에 표가 여럿이면 개수가 정해진 표(체크리스트·대차 12칸)는 `ApcGrid.HeightForRows(n)`로 높이를 고정하고, 목록 표 하나만 남은 높이를 채운다.
+- 구획 제목 + 그 아래를 채우는 표·그래프는 `Titled("대기 Lot", grid)` 한 칸으로 — `Columns()` 칸이나 `Body`의 Fill에 그대로 넣는다(제목 Dock·도킹 순서를 직접 맞추지 않는다). 제목 줄 오른쪽 버튼은 `Titled("이력", grid, Button("전체 보기", ApcButtonVariant.Normal))`, 실행 중 제목 바꾸기는 `panel.Text = "대기 Lot (3)"`. `SectionTitle`과 버튼을 `Row()`에 같이 넣지 않는다.
+- 남은 높이를 채우는 목록 표 두 개를 나란히: `Body.Controls.Add(FillColumns(new Control[] { Titled(...), Titled(...) }))`(Fill이므로 Top 줄들보다 먼저 Add). TableLayoutPanel을 직접 짜지 않는다.
+- 한 화면에 표가 여럿이면 개수가 정해진 표(체크리스트·대차 12칸·Bin 상위 5)는 `ApcGrid.HeightForRows(n)`로 높이를 고정하고, 목록 표 하나만 남은 높이를 채운다. 정해진 표를 Fill 목록 표와 **나란히 두지 않는다**(짧은 쪽 아래가 빈다) — `Columns(제목 + 표 높이, ...)` 줄로 위에 두고 목록 표는 그 아래 Fill. 같은 줄의 다른 칸(그래프·다른 정해진 표)도 그 높이에 맞춘다.
 - `Columns()` 밖의 고정 높이 표·그래프를 `Body`에 Top으로 쌓을 때는 `Columns(S(높이), new Control[] { grid })`로 감싼다(Dock·줄 아래 간격을 헬퍼가 준다). 그냥 Add하면 Dock이 없어 겹치거나 아래 간격이 없다.
 - `ApcGroup` 안에 `Columns()` 줄을 넣을 때 그룹 높이는 `group.HeightFor((S(높이) + S(12)) × 줄 수)`. 짐작한 숫자로 맞추지 않는다.
 - **설정 버튼은 화면 안에 두지 않는다.** 설정 화면이 있는 프로그램만 화면 생성자에서 `UseSettingsButton((s, e) => OpenSettings())` → 창 타이틀바 최소화 왼쪽에 톱니 버튼이 생긴다(화면 Dispose 때 꺼짐). 설정이 없으면 부르지 않는다. 타이틀바는 설정 전용 — 설정이 아닌 dialog(레시피·LOT 입력 등)를 여는 버튼은 관련 구획 제목 줄 오른쪽에 일반 `ApcButton`(`Row(제목, 버튼)`). 열기 순서: `AdminPasswordDialog` → `SettingsDialog`(`FailureAnalysisView.OpenSettings`). 화면 없이 창만 있으면 `ApcForm.ShowSettings = true` + `SettingsClick`.
@@ -113,7 +115,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 설비 상태 한 칸, 누르면 상세 | `ApcStatusTile`(Text=설비명·Status, `Click`). 부제 없음 — 사유는 판정판·표 한 곳에 |
 | OK/NG 판정 크게 | `ApcJudgePanel`(Text=큰 글자·SubText·Status: OK=Run, NG=Alarm, 대기=Stop). 판정 화면이 아닌 모니터링 화면도 "지금 조치할 것" 하나를 여기에 |
 | 계속 보여야 하는 상태(인터락 우회 중·시험 모드·수동 운전) | `ApcNoticeBar`(Status·Text 굵게·Detail, 높이 44 한 줄). 판정판으로 만들지 않는다. `Body`에는 `Columns(bar.Height, new Control[] { bar })`로(아래 간격) |
-| 지금 보는 대상의 이름-값(공정·설비·Lot ID·제품·레시피) | `ApcInfoStrip`(`SetItems(...)`, `SetValue(이름, 값)`). 기본 `Dock = Top` — `Row()` 안에 넣으면 `Dock = None` + `Width`. 판정 없는 글 값(Lot ID·레시피)을 `ApcValueCard`로 만들지 않는다(값이 작고 카드 아래가 빈다) |
+| 지금 보는 대상의 이름-값(공정·설비·Lot ID·제품·레시피) | `ApcInfoStrip`(`SetItems(...)`, `SetValue(이름, 값)`). 기본 `Dock = Top` — `Row()` 안에 넣으면 `Dock = None` + `Width`. 값 칸 폭은 값 글자 길이를 따라 나뉜다(긴 제품명·프로그램명이 먼저 잘리지 않는다). 판정 없는 글 값(Lot ID·레시피)을 `ApcValueCard`로 만들지 않는다(값이 작고 카드 아래가 빈다) |
 | 추이 그래프 | `ApcTrendChart`(`SetValues`, XLabels, Reference, UpperLimit/LowerLimit) |
 | 상태 램프 | `ApcLamp` |
 | 설정 묶음(제목 있는 상자, GroupBox 대신) | `ApcGroup`(Text=제목, 안은 Dock/FlowLayoutPanel) |
@@ -143,10 +145,10 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 | 샘플 데이터 | 아래 "샘플 데이터" 목록 |
 
 **화면 위계** (render 점검이 못 잡는 것 — 직접 확인)
-- 같은 사실은 한 곳에서 한 번: 화면의 가장 중요한 판정은 `ApcJudgePanel` 하나에 크게 — 판정판은 화면에 하나(우회·시험 모드 같은 지속 상태는 `ApcNoticeBar`). 요구서가 "가장 중요한 정보"를 정했으면(예: 납입 마감) 그것을 판정판의 큰 글자나 `SubText`에 넣는다 — 판정판 옆 작은 카드로 밀어내지 않는다. 그 사유 문장을 타일·카드 Footer·표에 되풀이하지 않는다 — 타일·카드는 색(램프·테두리)으로만 따라간다. 빨강 테두리(`Alarm`)는 이상인 그 대상에만.
+- 같은 사실은 한 곳에서 한 번: 화면의 가장 중요한 판정은 `ApcJudgePanel` 하나에 크게 — 판정판은 화면에 하나(우회·시험 모드 같은 지속 상태는 `ApcNoticeBar`). 요구서가 "가장 중요한 정보"를 정했으면(예: 납입 마감) 그것을 판정판의 큰 글자나 `SubText`에 넣는다 — 판정판 옆 작은 카드로 밀어내지 않는다. 그 사유 문장을 타일·카드 Footer·표에 되풀이하지 않는다 — 타일·카드는 색(램프·테두리)으로만 따라간다 — 판정판이 말한 값의 카드에 기준 문장("기준 95.0 이상")을 다시 쓰지 않는다. 빨강 테두리(`Alarm`)는 이상인 그 대상(설비·Lot·측정값)에만 — 하루 집계(NG 7 EA, 불량 수)는 카드 `Status`를 두지 않고 필요하면 값 글자색만 `StatusText(Alarm)`.
 - 글자에 상태색은 `ApcTheme.StatusText(kind)`(흰 바탕에서 읽히게 명도를 낮춘 색). `ApcTheme.Status(kind)`는 면·선용 — 글자에 쓰면 노랑·초록이 안 읽힌다.
 - 주 동작 버튼은 화면에 `Primary` 하나, 높이는 입력칸과 같게(`Button(...)`) — 카드·판정판 크기로 키우지 않는다. `Danger`는 되돌릴 수 없거나 안전 장치를 우회하는 동작(삭제·인터락 우회)만, 정상 처리 흐름(Lot 처리 시작)은 `Primary`. 지금 못 누르는 버튼은 `Enabled = false` + 바로 옆에 이유 한 줄(`Caption`).
-- 문구: 판정판 `SubText`·카드 `Footer`는 두 마디까지(" · " 한 번). 내부 계산식·통계 상수(σ̂, d2, 공식)는 화면에 쓰지 않는다. 안내 문장은 한 줄에 들어갈 때만. 값을 끼워 넣는 문장에 조사 자리표시("이(가)", "와(과)", "을(를)")를 쓰지 않는다 — 조사가 필요 없게 "품번 불일치 · AB222 ≠ AB212"처럼 쓴다. 비활성 버튼 옆 이유는 `Caption` 기본 글자색(빨강은 그 이유가 알람일 때만 `StatusText(Alarm)`).
+- 문구: 판정판 `SubText`·카드 `Footer`는 두 마디까지(" · " 한 번). 내부 계산식·통계 상수(σ̂, d2, 공식)는 화면에 쓰지 않는다. 안내 문장은 한 줄에 들어갈 때만. 값을 끼워 넣는 문장에 조사 자리표시("이(가)", "와(과)", "을(를)")를 쓰지 않는다 — 조사가 필요 없게 "품번 불일치 · AB222 ≠ AB212"처럼 쓴다. 비활성 버튼 옆 이유는 `Caption` 기본 글자색(빨강은 그 이유가 알람일 때만 `StatusText(Alarm)`). 이유가 없을 때는 빈 글자(`""`)로 둔다 — render는 빈 이름표를 접힘으로 보지 않고, dialog `FieldCaption`은 나중에 넣은 글자만큼 넓어진다.
 - 타일은 이름만. 요구서가 타일에 값을 요구하면(현재 Lot·수율) 부제가 아니라 `Text` 한 줄에 "T04  94.1 %"처럼 넣는다.
 - 표·그래프·입력 묶음 위 제목은 `SectionTitle()` 또는 `ApcGroup` — `Caption`을 굵게 바꿔 제목으로 쓰지 않는다(막대 없는 제목이 섞인다).
 - 나란한 표는 행 높이를 같게(`ApcGrid` 기본 행 높이를 바꾸지 않는다). 행 바탕을 상태색으로 칠하지 않는다(선택 행 파랑과 섞인다) — 눈에 띄어야 하는 행은 램프 + 해당 칸 `StatusText` 굵은 글자. 화면 메서드 이름에 `Refresh`를 쓰지 않는다(`Control.Refresh`와 겹친다 → `Reload`). 판정 기준이 없는 지표 카드(수량·OEE)에는 `ShowLamp`를 쓰지 않는다.
@@ -164,7 +166,7 @@ APCSOFT 현장 프로그램 화면은 **APC.UI 라이브러리**로 만든다. �
 - 행 수: 이력·목록 표는 표 높이만큼 채운다. 짐작하지 말고 render가 알려 주는 수로 맞춘다(참고 줄 "표 아래가 빔 … N개로", 점검 줄 "표 세로 스크롤바 … N개로"). 겹침·넘침이 같이 나오면 그것부터 고치고 다시 render해서 나온 수를 쓴다(배치가 바뀌면 표 높이도 바뀐다). 설비 목록처럼 개수가 정해진 표는 그대로.
 - 시간 순서: 같은 설비의 이상 → 복귀 행은 시각 순서가 맞아야 한다(복귀가 그 이상보다 늦게).
 - 다양성: 늘린 행은 같은 문구·같은 간격을 되풀이하지 않는다(설비·문구·값·시각 간격을 섞는다. 시각만 바꾼 복사 행이 3개 이상이면 render가 "참고: … 되풀이"로 알린다).
-- 상태: 정상(Run) 위주에 그 화면에서 뜻이 있는 이상 상태를 섞는다. 모니터링은 Warn·Alarm·Stop 각각 하나 이상, 판정은 NG(Alarm) 몇 건(판정 화면에 근거 없는 Warn을 만들지 않는다).
+- 상태: 정상(Run) 위주에 그 화면에서 뜻이 있는 이상 상태를 섞는다. 모니터링은 Warn·Alarm·Stop 각각 하나 이상(요구서가 정한 상태에 경고 단계가 없으면 Warn을 만들지 않는다), 판정은 NG(Alarm) 몇 건(판정 화면에 근거 없는 Warn을 만들지 않는다).
 - 경계값: 판정 기준·상하한과 **같은 값**인 행을 하나 이상 넣어 경계값 판정이 화면에서 보이게 한다(예: 상한 5.0 Pa → 5.0 Pa OK 한 행. 경고 구간이 있어 상한이 경고 안에 들면 경고 시작 45.0 → 45.0 경고 한 행).
 - 집계: 금일 생산·OK·NG·불량률은 서로 맞고 이력 행 수 이상.
 
