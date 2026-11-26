@@ -149,6 +149,15 @@ namespace APC.UI.Checks
             // 확정 버튼 하나(DialogResult 없음)는 Esc용 CancelButton이 되면 안 된다 — 누르면 Click 처리 전에 Cancel로 닫힌다
             using (var d = new SingleButtonDialog())
                 Check(d.Save.DialogResult == DialogResult.None && d.CancelButton == null, "dialog: SetFooter(null, confirm) keeps confirm's DialogResult");
+            // 꺼진 확정 버튼의 이유: 하단 줄 [확정] 바로 왼쪽, 같은 높이, 점검 0건
+            using (var d = new FooterNoteDialog())
+            {
+                ShowOffscreen(d);
+                var issues = LayoutLint.Inspect(d);
+                foreach (var i in issues) Console.WriteLine("      " + i);
+                Check(d.Note.Top == d.Save.Top && d.Note.Height == d.Save.Height && d.Note.Right < d.Save.Left && d.Note.Width > d.Save.Width, "dialog footer note: left of confirm on the button row");
+                Check(issues.Count == 0, "dialog footer note: no layout issues");
+            }
             // 행 a, b → 묶음 → 행 c: 묶음을 사이에 둔 간격은 행 간격 비교에서 뺀다
             using (var d = new MixedDialog())
             {
@@ -168,6 +177,20 @@ namespace APC.UI.Checks
                 SetupDialog("t", 400);
                 AddFieldRow("이름", new ApcTextBox());
                 SetFooter(null, Save);
+            }
+        }
+
+        private sealed class FooterNoteDialog : ApcForm
+        {
+            public readonly ApcButton Save = new ApcButton { Text = "Release", Variant = ApcButtonVariant.Primary, Enabled = false };
+            public readonly Label Note;
+
+            public FooterNoteDialog()
+            {
+                SetupDialog("t", 520);
+                AddFieldRow("Lot", new ApcTextBox());
+                SetFooter(new ApcButton { Text = "취소" }, Save);
+                Note = SetFooterNote("원인 확인 전 · Release 불가");
             }
         }
 

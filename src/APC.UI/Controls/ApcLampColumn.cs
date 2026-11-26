@@ -20,12 +20,21 @@ namespace APC.UI.Controls
             HeaderText = "상태";
             DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
+
+        /// <summary>램프 + 문구(ApcLampValue)가 다 보이는 폭. ApcGrid가 행을 넣을 때 이 폭보다 좁으면 넓힌다(기본 56px에선 "가동"도 잘린다).</summary>
+        internal static int WidthFor(string text, Font font)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+            return ApcTheme.Px(ApcLampCell.TextLeftPad) + (int)(ApcLampCell.BaseLamp * ApcTheme.Scale) + ApcTheme.Px(ApcLampCell.Gap)
+                + TextRenderer.MeasureText(text, font).Width + ApcTheme.Px(ApcLampCell.TextLeftPad);
+        }
     }
 
     public class ApcLampCell : DataGridViewTextBoxCell
     {
-        private const int BaseLamp = 18;
-        private const int TextLeftPad = 8;
+        internal const int BaseLamp = 18;
+        internal const int TextLeftPad = 8;
+        internal const int Gap = 6;
 
         public override Type ValueType { get { return typeof(object); } }
 
@@ -53,7 +62,7 @@ namespace APC.UI.Controls
 
             int side = Math.Min((int)(BaseLamp * ApcTheme.Scale), cellBounds.Height - 4);
             string text = value is ApcLampValue ? ((ApcLampValue)value).Text : null;
-            int gap = ApcTheme.Px(6);
+            int gap = ApcTheme.Px(Gap);
             int textW = string.IsNullOrEmpty(text) ? 0 : TextRenderer.MeasureText(g, text, cellStyle.Font).Width;
             int total = side + (textW > 0 ? gap + textW : 0);
             int x = textW > 0 ? cellBounds.X + ApcTheme.Px(TextLeftPad)   // 문구가 있으면 램프 왼쪽 고정

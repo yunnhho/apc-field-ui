@@ -1,4 +1,4 @@
-# APC.UI API (v1.25.0.0)
+# APC.UI API (v1.26.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -72,6 +72,7 @@
 - `protected ApcGroup AddGroup(string title)` — 제목 있는 묶음(ApcGroup). 행은 AddFieldRow(group, ...)로 넣는다.
 - `protected CreateParams CreateParams { get; }`
 - `protected Label SectionTitle(string text)` — 구획 제목(왼쪽 브랜드색 막대 + 굵게 + 아래 폭 전체 구분선 — 묶음·화면 구획 제목과 같은 표시). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.
+- `protected Label SetFooterNote(string text = "")` — 하단 버튼 줄의 [확정] 바로 왼쪽 안내 글(꺼진 확정 버튼의 이유: "원인 확인 전 · Release 불가"). 반환 Label의 Text를 바꿔 쓴다(이유가 없으면 ""). 글자색 기본, 알람인 이유만 ForeColor = ApcTheme.StatusText(StatusKind.Alarm).
 - `protected static Label FieldCaption(string text)` — 행 안 trailing 이름표(보통 굵기, 글자 폭).
 - `protected void AddCaptionRow(ApcGroup group, params string[] captions)` — 묶음 안 열 제목 줄. 바로 다음 AddFieldRow(group, ...) 행의 [이름표, 입력칸, trailing...] 위에 순서대로 맞춰 놓인다("" = 그 칸 제목 없음). 여러 행이 같은 칸(포트·신호·로직…)을 가질 때 행마다 FieldCaption을 되풀이하지 않고 위에 한 번만 쓴다.
 - `protected void AddContent(Control c)` — 표·판정판 등 자유 요소. 높이는 c.Height(ApcTheme.Px로 지정), 폭은 내용 폭.
@@ -258,6 +259,7 @@
 - `protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)` — 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px. height는 칸 높이(배율 적용한 값, 예: S(150)).
 - `protected static TableLayoutPanel FillColumns(Control[] cells, float[] percents = null)` — 남은 높이를 모두 채우는 나란한 칸(Dock=Fill) — 목록 표 두 개를 나란히 둘 때(칸은 보통 Titled(...)). Body에서는 Fill이므로 Top 줄들보다 먼저 Add한다.
 - `protected static int S(int px)` — 배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.
+- `protected static int TitledHeight(int contentHeight, bool hasTools = false)` — 고정 높이 Titled() 칸의 전체 높이 = 제목 줄 + 간격 + contentHeight. 표 칸이면 Columns(TitledHeight(ApcGrid.HeightForRows(n)), ...). 제목 줄에 버튼(tools)을 넣었으면 hasTools = true(버튼 높이만큼 제목 줄이 높다).
 - `protected void UseSettingsButton(EventHandler onClick)` — 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다. 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
 
 ## ApcTextBox

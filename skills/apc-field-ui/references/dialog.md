@@ -44,6 +44,7 @@ Per type:
 | `AddContentRow(c1, c2, ...)` | Cards in one row, same width and height. 2×2 = call twice |
 | `SectionTitle(text)` | Section title; `AddContent(SectionTitle("..."))` to split input rows without a box |
 | `SetFooter(cancel, confirm[, left...])` | Bottom-right **[확정][취소]** (details below) |
+| `SetFooterNote(text)` | Reason text just left of the confirm button (returns the `Label`) |
 
 - **`AddFieldRow`**
   - One label column for the whole dialog (widest label) → all fields start at the same x.
@@ -56,6 +57,7 @@ Per type:
   - Read-only: `SetFooter(null, 닫기)` + `DialogResult = OK` on close (so Esc also closes).
   - An input dialog with only a confirm button has no Esc — add a cancel button.
   - Set Enter (`AcceptButton`) only in dialogs without scanning.
+  - Disabled confirm button → `Enabled = false` + its reason via `SetFooterNote("원인 확인 전 · Release 불가")` (`""` when enabled; alarm reasons `ForeColor = ApcTheme.StatusText(StatusKind.Alarm)`). Never put the reason in a field row's trailing caption.
 
 ## Rules
 
@@ -63,4 +65,5 @@ Per type:
 - `AddFieldRow` makes the labels. Do not create `Label`, `Font` or `Panel` button rows yourself.
 - Render reports "부모 밖으로 넘침" → widen the `SetupDialog` width.
 - Render reports big empty space → omit the `SetupDialog` height (size to content) unless the dialog uses `AddContentFill`.
+- **Prerequisites come from data, not from the dialog.** When a confirm action depends on earlier steps (cause confirmed, customer approved, re-test done), the dialog receives their state from the caller and shows it read-only (status row, lamp table, `ApcInfoStrip`). Never offer a combo/field that lets the user switch a prerequisite to "완료" and unlock the action. Only the step this dialog performs is input.
 - Give the dialog a **parameterless constructor that fills sample values** — render needs it.

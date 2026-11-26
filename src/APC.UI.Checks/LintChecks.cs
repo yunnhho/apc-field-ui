@@ -68,6 +68,7 @@ namespace APC.UI.Checks
                 for (int r = 0; r < 20; r++) g.Rows.Add("x");
                 p.Controls.Add(g);
             }).Any(i => i.Contains("세로 스크롤바")), "lint: grid scrollbar");
+            Check(Lint(p => p.Controls.Add(new TitledScrollProbe())).Any(i => i.Contains("세로 스크롤바")), "lint: grid inside Titled() is checked");
             Check(Lint(p =>
             {
                 var g = new ApcGrid { Width = 300, Height = 250, ReadOnly = true };
@@ -96,9 +97,10 @@ namespace APC.UI.Checks
                 g.Columns.Add(lamp); g.Columns.Add("id", "설비");
                 g.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 g.Rows.Add(new ApcLampValue(StatusKind.Alarm, "알람"), "A-01");
+                lamp.MinimumWidth = 5; lamp.Width = w;   // 행을 넣으면 열이 저절로 넓어진다 → 앱이 다시 좁힌 경우를 본다
                 p.Controls.Add(g);
             });
-            Check(lintLamp(56).Any(i => i.Contains("'알람' 말줄임")), "lint: clipped lamp value text");
+            Check(lintLamp(40).Any(i => i.Contains("'알람' 말줄임")), "lint: clipped lamp value text");
             Check(!lintLamp(120).Any(i => i.Contains("말줄임")), "lint: fitting lamp value text passes");
             // 이력 샘플: 시각만 다르고 나머지가 같은 행이 되풀이되면 참고로 알린다(C 시연: 19행 중 7쌍).
             Func<string[][], List<string>> lintHistory = rows => Lint(p =>
@@ -213,6 +215,18 @@ namespace APC.UI.Checks
                 f.Show();
                 Application.DoEvents();
                 return LayoutLint.Inspect(f);
+            }
+        }
+
+        private sealed class TitledScrollProbe : ApcTemplateView
+        {
+            public TitledScrollProbe() : base("probe")
+            {
+                Dock = DockStyle.Fill;
+                var g = new ApcGrid();
+                g.Columns.Add("a", "A");
+                for (int r = 0; r < 20; r++) g.Rows.Add("x" + r);
+                Body.Controls.Add(Titled("이력", g));
             }
         }
 

@@ -87,9 +87,10 @@ namespace APC.UI.Controls
             head.AutoSize = false;
             head.Dock = DockStyle.Fill;
             head.TextAlign = ContentAlignment.MiddleLeft;
-            var bar = new Panel { Dock = DockStyle.Top, Height = head.PreferredHeight, BackColor = Color.Transparent };
+            bool hasTools = tools != null && tools.Length > 0;
+            var bar = new Panel { Dock = DockStyle.Top, Height = TitleBarHeight(head, hasTools), BackColor = Color.Transparent };
             bar.Controls.Add(head);
-            if (tools != null && tools.Length > 0)
+            if (hasTools)
             {
                 var right = new FlowLayoutPanel { Dock = DockStyle.Right, AutoSize = true, WrapContents = false, FlowDirection = FlowDirection.RightToLeft, BackColor = Color.Transparent, Padding = Padding.Empty, Margin = Padding.Empty };
                 for (int i = tools.Length - 1; i >= 0; i--)   // RightToLeft: 마지막 것이 오른쪽 끝
@@ -106,6 +107,20 @@ namespace APC.UI.Controls
             panel.Controls.Add(new Panel { Dock = DockStyle.Top, Height = S(ApcLayout.RowGap), BackColor = Color.Transparent });
             panel.Controls.Add(bar);
             return panel;
+        }
+
+        /// <summary>
+        /// 고정 높이 Titled() 칸의 전체 높이 = 제목 줄 + 간격 + contentHeight. 표 칸이면 Columns(TitledHeight(ApcGrid.HeightForRows(n)), ...).
+        /// 제목 줄에 버튼(tools)을 넣었으면 hasTools = true(버튼 높이만큼 제목 줄이 높다).
+        /// </summary>
+        protected static int TitledHeight(int contentHeight, bool hasTools = false)
+        {
+            using (var head = SectionTitle("가")) return TitleBarHeight(head, hasTools) + S(ApcLayout.RowGap) + contentHeight;
+        }
+
+        private static int TitleBarHeight(Label head, bool hasTools)
+        {
+            return hasTools ? Math.Max(head.PreferredHeight, S(ApcLayout.FieldHeight)) : head.PreferredHeight;
         }
 
         /// <summary>Titled() 칸: Text가 제목 글자다(스캔한 Lot에 따라 제목을 바꿀 때).</summary>
