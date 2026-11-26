@@ -8,11 +8,12 @@ using APC.UI.Theming;
 namespace APC.UI.Demo.Templates
 {
     /// <summary>
-    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 본문 맨 위 시험 모드 알림 띠(ApcNoticeBar) → 설비군 전환 버튼(ApcTabStrip)(시각은 창 제목 줄), 설정은 타이틀바 톱니(UseSettingsButton),
-    /// 2단 헤더 그리드(B1/B2 묶음)가 화면 폭을 채움, 행 동작은 아이콘 열(ApcIconColumn: 할 수 없으면 회색), 상태는 램프 + 문구 한 칸(ApcLampValue).
+    /// 연마기 불량 방지 시스템(references/FailureAnalysis.png → 현장 수정본) 재구성: 본문 맨 위 한 줄에 설비군 전환 버튼(ApcTabStrip) + 오른쪽 남은 폭에 시험 모드 알림 띠(ApcNoticeBar)(시각은 창 제목 줄), 설정은 타이틀바 톱니(UseSettingsButton),
+    /// 2단 헤더 그리드(B1/B2 묶음)가 화면 폭을 채우고 행 높이를 줄여 전 행이 스크롤 없이 보임(설비 입력·확인이 주 업무), 행 동작은 아이콘 열(ApcIconColumn: 할 수 없으면 회색), 상태는 램프 + 문구 한 칸(ApcLampValue).
     /// </summary>
     internal sealed class FailureAnalysisView : ApcTemplateView
     {
+        private const int MaxRowHeight = 34;   // 멀리서도 읽히는 높이. 넓은 화면에선 이 높이로
         private const int ColCurrent = 9, ColSend = 11, ColReset = 12, ColStatus = 13;
         private static readonly string[] Groups = { "저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08" };
 
@@ -31,11 +32,20 @@ namespace APC.UI.Demo.Templates
             BuildColumns();
             _grid.CellClick += OnCellClick;
 
+            // 탭 옆에 알림 띠: 띠가 따로 한 줄을 차지하지 않아 표에 높이가 더 간다
+            int gap = S(ApcLayout.RowGap);
+            var top = new Panel { Dock = DockStyle.Top, Height = _tabs.Height + gap, Padding = new Padding(0, 0, 0, gap) };
+            testMode.Dock = DockStyle.Fill;
+            _tabs.Dock = DockStyle.Left;
+            top.Controls.Add(testMode);                                       // Fill 먼저
+            top.Controls.Add(new Panel { Dock = DockStyle.Left, Width = gap });   // 탭과 띠 사이 간격
+            top.Controls.Add(_tabs);
+
             Body.Controls.Add(_grid);   // Fill 먼저
-            Body.Controls.Add(Row(_tabs));
-            Body.Controls.Add(Columns(testMode.Height, new Control[] { testMode }));   // 맨 위: 시험 모드 알림 띠(아래 간격은 Columns가), 그 아래 설비군 전환 버튼
+            Body.Controls.Add(top);
             SelectGroup(0);
             _tabs.SelectedIndexChanged += (s, e) => SelectGroup(_tabs.SelectedIndex);
+            _grid.Resize += (s, e) => FitRows();
         }
 
         /// <summary>설정 진입: 관리자 확인 → 설정 dialog(샘플은 비밀번호 검사 생략).</summary>
@@ -75,7 +85,6 @@ namespace APC.UI.Demo.Templates
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 col.FillWeight = weights[i];
             }
-            _grid.RowTemplate.Height = S(34);   // 24행이 1080 화면에 스크롤 없이, 멀리서도 읽히는 높이
             foreach (var name in new[] { "target", "current", "rpm" })
                 _grid.Columns[name].DefaultCellStyle.Font = ApcTheme.GetFont(FontStyle.Bold);   // 작업자가 보는 값 강조
 
@@ -91,13 +100,25 @@ namespace APC.UI.Demo.Templates
             _grid.Rows.Clear();
             int no = 0;
             for (int m = 0; m < machines; m++)
+            {
+                string machine = prefix + (firstMachine + m).ToString("00");
+                if (index == 2) { _grid.Rows.Add(SampleRow(++no, machine)); continue; }   // 고속은 열·단 없이 1대 1행
                 for (int col = 1; col <= 2; col++)
                     for (int stage = 1; stage <= 4; stage++)
-                    {
-                        no++;
-                        string name = prefix + (firstMachine + m).ToString("00") + " (" + col + "열 " + stage + "단)";
-                        _grid.Rows.Add(SampleRow(no, name));
-                    }
+                        _grid.Rows.Add(SampleRow(++no, machine + " (" + col + "열 " + stage + "단)"));
+            }
+            FitRows();
+        }
+
+        /// <summary>전 행이 스크롤 없이 보이게 행 높이를 표 높이에 맞춤(최대 34px, 최소 테마 MinHeight — 그보다 행이 많으면 스크롤).</summary>
+        private void FitRows()
+        {
+            int rows = _grid.Rows.Count;
+            if (rows == 0) return;
+            int fit = (_grid.ClientSize.Height - _grid.ColumnHeadersHeight - 2) / rows;
+            int h = Math.Max(ApcTheme.MinHeight, Math.Min(S(MaxRowHeight), fit));
+            _grid.RowTemplate.Height = h;
+            foreach (DataGridViewRow row in _grid.Rows) row.Height = h;
         }
 
         /// <summary>앞쪽 몇 행만 가동 데이터, 나머지는 끊김 — 원본 캡처(전부 끊김)보다 상태 표현을 보여주기 위해.</summary>
