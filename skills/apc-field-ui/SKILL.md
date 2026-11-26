@@ -124,6 +124,8 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 **Screen hierarchy** (render cannot check these — verify yourself)
 - One fact, one place:
   - The most important verdict is one big `ApcJudgePanel` (one per screen; persistent states use `ApcNoticeBar`). If the requirement names "the most important information" (e.g. delivery deadline), put it in the panel's big text or `SubText` — not in a small card beside it.
+  - The judge panel sits in the **top row of `Body`** (the first `Columns()` under the title bar), never below tiles or tables.
+  - A cause planted in the sample data (unit, Bin, item: "T04 only has high SB23") must be readable on screen as text: one cause in the panel `SubText` and a table column. A cause that exists only in the data source does not count.
   - Do not repeat its reason sentence in tiles, card footers or tables (tiles/cards follow by color only). Do not restate the limit sentence on the card of a value the panel already speaks about.
   - Red border (`Alarm`) only on the faulty target itself. Daily totals (NG 7 EA) never get `Status = Alarm`; at most a red number via `ValueStatus = Alarm`.
 - Status color on text = `ApcTheme.StatusText(kind)`. `ApcTheme.Status(kind)` is for fills/lines (yellow/green text is unreadable).
@@ -159,7 +161,12 @@ Copy this list into your response and tick each item. On failure, fix and redo f
 
 ```
 - [ ] verify.sh: build warnings 0, errors 0, every type 점검 0건
-- [ ] PNG review: all of 4-1, step 5 sample consistency, status readable as text, no big gaps or lopsided layout
+- [ ] PNG review: answer each with yes/no (all of 4-1 still applies)
+  - [ ] Judge panel in the top row of the screen?
+  - [ ] The cause (unit/Bin/item) readable as text on screen?
+  - [ ] Every blocked action stays blocked — the user cannot unlock it by changing a combo/field on the screen or dialog?
+  - [ ] No empty area below or beside a table/chart, no lopsided row?
+  - [ ] Sample values agree (step 5) and status readable as text, not color only?
 - [ ] Report: PNG paths, 점검 0건, build warnings 0, list of chosen limits
 ```
 
