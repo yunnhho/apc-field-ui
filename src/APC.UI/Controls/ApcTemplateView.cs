@@ -99,6 +99,8 @@ namespace APC.UI.Controls
                     right.Controls.Add(tools[i]);
                 }
                 bar.Height = Math.Max(bar.Height, tools.Max(t => t.Height));
+                // 버튼보다 낮은 것(꺼진 버튼 이유 Caption 등)은 제목 줄 세로 가운데에
+                foreach (var t in tools) t.Margin = new Padding(t.Margin.Left, Math.Max(0, (bar.Height - t.Height) / 2), 0, 0);
                 bar.Controls.Add(right);
             }
             var panel = new TitledPanel(head) { Dock = DockStyle.Fill, BackColor = Color.Transparent };

@@ -201,6 +201,8 @@ namespace APC.UI.Checks
                 v.Panel.Text = "대기 Lot (3)";
                 Check(v.Panel.Text == "대기 Lot (3)", "titled: Text changes the title");
                 Check(v.Tool.Parent != null && v.Tool.Right + v.Tool.Parent.Left == v.Tools.ClientSize.Width, "titled: tool button at the right end of the title bar");
+                Check(v.Reason.Right <= v.Tool.Left && System.Math.Abs((v.Reason.Top + v.Reason.Height / 2) - (v.Tool.Top + v.Tool.Height / 2)) <= 1,
+                      "titled: reason caption left of its button, vertically centered (" + v.Reason.Top + "/" + v.Tool.Top + ")");
                 Check(v.Fill.Dock == System.Windows.Forms.DockStyle.Fill && v.Fill.Height > 0 && v.Fill.Top >= v.Panel.Bottom, "fill columns: fills remaining height below the Top rows");
                 Check(TitledProbe.HeightOf(v.Grid.Height, false) == v.Panel.Height, "titled height: title + gap + content (" + TitledProbe.HeightOf(v.Grid.Height, false) + "/" + v.Panel.Height + ")");
                 Check(TitledProbe.HeightOf(v.OtherGrid.Height, true) == v.Other.Height, "titled height: with tool button (" + TitledProbe.HeightOf(v.OtherGrid.Height, true) + "/" + v.Other.Height + ")");
@@ -216,12 +218,13 @@ namespace APC.UI.Checks
         {
             public readonly ApcGrid Grid = new ApcGrid(), OtherGrid = new ApcGrid();
             public readonly ApcButton Tool = Button("새로 고침", ApcButtonVariant.Normal);
+            public readonly System.Windows.Forms.Label Reason = Caption("합격 Lot · 대상 아님");
             public readonly System.Windows.Forms.Panel Panel, Tools, Other;
             public readonly System.Windows.Forms.TableLayoutPanel Fill;
             public TitledProbe() : base("probe")
             {
                 Panel = Titled("대기 Lot", Grid);
-                Other = Titled("이벤트", OtherGrid, Tool);
+                Other = Titled("이벤트", OtherGrid, Reason, Tool);
                 Tools = (System.Windows.Forms.Panel)Tool.Parent.Parent;
                 Fill = FillColumns(new System.Windows.Forms.Control[] { Other });
                 Body.Controls.Add(Fill);

@@ -51,6 +51,7 @@ Per type:
   - Groups using `AddCaptionRow` keep their own label column (a long block name does not push other groups).
   - No trailing → the field fills the width. With trailing (`FieldCaption("신호")`, fields, buttons…) each uses its own `Width`, left to right.
 - **`AddCaptionRow`**: captions sit over the next `AddFieldRow(group, ...)` row's [label, field, trailing...] in order (`""` = none). When rows share columns (port, signal, logic per block), use this once instead of repeating `FieldCaption` per row.
+- **`ApcInfoStrip` in a dialog**: at most 4 name-value pairs per strip; more → a second strip below (`AddContent` twice). Short names ("최종(%)").
 - **`AddContentRow`**: never build card grids with `TableLayoutPanel` (default child `Margin` 3px triggers the render empty-space check).
 - **`SetFooter`**
   - Cancel at the far right, buttons 110×40, helper buttons (`비밀번호 변경`) on the left. Esc = cancel.
@@ -66,4 +67,4 @@ Per type:
 - Render reports "부모 밖으로 넘침" → widen the `SetupDialog` width.
 - Render reports big empty space → omit the `SetupDialog` height (size to content) unless the dialog uses `AddContentFill`.
 - **Prerequisites come from data, not from the dialog.** When a confirm action depends on earlier steps (cause confirmed, customer approved, re-test done), the dialog receives their state from the caller and shows it read-only (status row, lamp table, `ApcInfoStrip`). Never offer a combo/field that lets the user switch a prerequisite to "완료" and unlock the action. Only the step this dialog performs is input.
-- Give the dialog a **parameterless constructor that fills sample values** — render needs it.
+- Give the dialog a **parameterless constructor that fills sample values** — render needs it. If the dialog can block its confirm action, the sample starts in the **blocked state** (e.g. Release selected with prerequisites missing) so the PNG shows the disabled button and its reason.

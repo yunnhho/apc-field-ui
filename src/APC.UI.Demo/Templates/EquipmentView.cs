@@ -11,7 +11,7 @@ namespace APC.UI.Demo.Templates
     /// </summary>
     internal sealed class EquipmentView : ApcTemplateView
     {
-        private const int SampleHistoryRows = 19;
+        private const int SampleHistoryRows = 22;
 
         // 설비명, 상태(타일은 램프 + 이름만, 사유는 값 카드·알람 이력에)
         private static readonly object[][] Machines =
@@ -80,9 +80,8 @@ namespace APC.UI.Demo.Templates
                 grid.Rows.Add(o[0], at.ToString("HH:mm:ss"), o[1], o[2]);
             }
 
-            // Top 도킹은 나중에 Add한 것이 위 → 이력(Fill) 먼저, 그다음 아래 줄부터
-            Body.Controls.Add(grid);
-            Body.Controls.Add(Row(SectionTitle("최근 알람 이력")));
+            // Top 도킹은 나중에 Add한 것이 위 → 제목 + 이력(Fill) 먼저, 그다음 아래 줄부터
+            Body.Controls.Add(Titled("최근 알람 이력", grid));
             Body.Controls.Add(Columns(S(120), cards));
             Body.Controls.Add(Columns(S(90), tiles));
         }
