@@ -210,6 +210,8 @@ namespace APC.UI.Checks
                 Check(v.Fill.Dock == System.Windows.Forms.DockStyle.Fill && v.Fill.Height > 0 && v.Fill.Top >= v.Panel.Bottom, "fill columns: fills remaining height below the Top rows");
                 Check(TitledProbe.HeightOf(v.Grid.Height, false) == v.Panel.Height, "titled height: title + gap + content (" + TitledProbe.HeightOf(v.Grid.Height, false) + "/" + v.Panel.Height + ")");
                 Check(TitledProbe.HeightOf(v.OtherGrid.Height, true) == v.Other.Height, "titled height: with tool button (" + TitledProbe.HeightOf(v.OtherGrid.Height, true) + "/" + v.Other.Height + ")");
+                Check(v.Legend.Height > 0 && v.Legend.Width == v.Legend.PreferredWidth && v.Legend.Parent.Height >= v.Legend.Height,
+                      "titled: legend tool keeps its size (" + v.Legend.Width + "x" + v.Legend.Height + ")");
             }
             var w = ApcInfoStrip.ValueWidths(600, new[] { 100, 300, 100 });
             Check(w[1] >= 300 && w[0] >= 100 && w[0] + w[1] + w[2] <= 600, "info strip: long value keeps its width when space remains");
@@ -223,13 +225,19 @@ namespace APC.UI.Checks
             public readonly ApcGrid Grid = new ApcGrid(), OtherGrid = new ApcGrid();
             public readonly ApcButton Tool = Button("새로 고침", ApcButtonVariant.Normal);
             public readonly System.Windows.Forms.Label Reason = Caption("합격 Lot · 대상 아님");
-            public readonly System.Windows.Forms.Panel Panel, Tools, Other;
+            public readonly ApcStatusLegend Legend = new ApcStatusLegend();
+            public readonly System.Windows.Forms.Panel Panel, Tools, Other, WithLegend;
             public readonly System.Windows.Forms.TableLayoutPanel Fill;
             public TitledProbe() : base("probe")
             {
                 Panel = Titled("대기 Lot", Grid);
                 Other = Titled("이벤트", OtherGrid, Reason, Tool);
                 Tools = (System.Windows.Forms.Panel)Tool.Parent.Parent;
+                Legend.SetItems(new ApcLampValue(StatusKind.Alarm, "교체 필요"), new ApcLampValue(StatusKind.Warn, "주의"));
+                WithLegend = Titled("수명 경고", new ApcGrid(), Legend);
+                WithLegend.Dock = System.Windows.Forms.DockStyle.Top;
+                WithLegend.Height = 200;
+                Body.Controls.Add(WithLegend);
                 Fill = FillColumns(new System.Windows.Forms.Control[] { Other });
                 Body.Controls.Add(Fill);
                 Body.Controls.Add(Panel);
