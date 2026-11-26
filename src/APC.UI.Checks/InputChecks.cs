@@ -54,6 +54,26 @@ namespace APC.UI.Checks
             Check(typeof(ApcTextBox).IsAssignableFrom(typeof(ApcScanBox)), "scanbox shares the field look (derives ApcTextBox)");
             CheckFocusedFieldFill();
 
+            using (var chk = new ApcCheckBox { Text = "예열 온도 확인" })
+            {
+                Check(chk.Height == fieldH, "checkbox: same height as text field (was " + chk.Height + ")");
+                Check(chk.Width == chk.PreferredWidth && chk.Width > chk.BoxBounds.Width, "checkbox: width follows text");
+                int w = chk.Width;
+                chk.Text = "예열 온도 180~220 ℃ 확인";
+                Check(chk.Width > w, "checkbox: width grows with text");
+                Check(!chk.Checked, "checkbox: starts unchecked");
+                int changed = 0;
+                chk.CheckedChanged += (s, e) => changed++;
+                chk.Checked = true;
+                Check(changed == 1, "checkbox: CheckedChanged once");
+                using (var bmp = new Bitmap(chk.Width, chk.Height))
+                {
+                    chk.DrawToBitmap(bmp, new Rectangle(Point.Empty, chk.Size));
+                    var box = chk.BoxBounds;
+                    Check(bmp.GetPixel(box.X + 2, box.Y + 2).B > 120, "checkbox: checked box filled blue");
+                }
+            }
+
             using (var cb = new ApcComboBox())
             {
                 cb.Items.AddRange(new object[] { "A", "B" });

@@ -1,8 +1,8 @@
-# APC.UI API (v1.26.2.0)
+# APC.UI API (v1.27.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
-목차: ApcButton · ApcButtonField · ApcButtonVariant · ApcComboBox · ApcDateBox · ApcDialog · ApcForm · ApcGrid · ApcGroup · ApcIconCell · ApcIconColumn · ApcInfoStrip · ApcJudgePanel · ApcLamp · ApcLampCell · ApcLampColumn · ApcLampValue · ApcNoticeBar · ApcNumericBox · ApcScanBox · ApcStatusLegend · ApcStatusTile · ApcTabStrip · ApcTemplateView · ApcTextBox · ApcTrendChart · ApcValueCard · ScanEventArgs · Gradients · NineSlice · ScanDetector · ApcLayout · ApcTheme · AssetResolver · ScanSettings · StatusColors · StatusKind · ThemeColors · ThemeData · ThemeException · ThemeLoader
+목차: ApcButton · ApcButtonField · ApcButtonVariant · ApcCheckBox · ApcComboBox · ApcDateBox · ApcDialog · ApcForm · ApcGrid · ApcGroup · ApcIconCell · ApcIconColumn · ApcInfoStrip · ApcJudgePanel · ApcLamp · ApcLampCell · ApcLampColumn · ApcLampValue · ApcNoticeBar · ApcNumericBox · ApcScanBox · ApcStatusLegend · ApcStatusTile · ApcTabStrip · ApcTemplateView · ApcTextBox · ApcTrendChart · ApcValueCard · ScanEventArgs · Gradients · NineSlice · ScanDetector · ApcLayout · ApcTheme · AssetResolver · ScanSettings · StatusColors · StatusKind · ThemeColors · ThemeData · ThemeException · ThemeLoader
 
 ## ApcButton
 
@@ -24,6 +24,14 @@
 `APC.UI.Controls` · enum
 
 - Normal, Primary, Danger
+
+## ApcCheckBox
+
+`APC.UI.Controls` · class : CheckBox
+
+확인 체크(예열 온도 확인, 안전 점검 완료 등). 입력칸과 같은 높이, 왼쪽 네모 + 오른쪽 문장. 네모·글자 어디를 눌러도 바뀐다. 체크되면 네모가 확인 버튼 파랑으로 차고 흰 체크 표시. Width는 글자에 맞춰 정해진다(AddFieldRow의 field로 넣으면 칸 폭). 체크해야 진행되는 동작은 CheckedChanged에서 확정 버튼 Enabled와 그 이유(SetFooterNote)를 함께 바꾼다.
+- `ApcCheckBox()`
+- `int PreferredWidth { get; }` — 네모 + 간격 + 글자 폭(배율 적용 px).
 
 ## ApcComboBox
 
@@ -205,11 +213,11 @@
 
 `APC.UI.Controls` · class : ApcTextBox
 
-바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다. 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다. 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다. 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패.
+바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다. 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다. 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다. 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다). Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) — 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다. 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach한다: 포커스된 스캔 칸이 받고, 포커스가 다른 곳이면 먼저 Attach한 칸이 받는다. 받은 칸의 Scanned에서 다음 스캔 칸으로 Focus()를 옮기면 순서대로 스캔된다.
 - `ApcScanBox()`
 - `const int FlashMs`
 - `event EventHandler<ScanEventArgs> Scanned`
-- `void Attach(Form host)` — 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로 화면의 OnHandleCreated에서 FindForm()으로 부른다: var f = FindForm(); if (f != null) _scan.Attach(f);
+- `void Attach(Form host)` — 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로 화면의 OnHandleCreated에서 FindForm()으로 부른다: var f = FindForm(); if (f != null) _scan.Attach(f); dialog(ApcForm)는 폼 자신이므로 생성자에서 _scan.Attach(this)로 부른다.
 - `void Flash(bool success)` — 성공 = 초록 플래시 + 짧은 비프, 실패 = 빨강 플래시 + 경고음.
 
 ## ApcStatusLegend

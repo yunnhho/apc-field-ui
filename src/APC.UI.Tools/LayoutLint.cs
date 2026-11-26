@@ -19,11 +19,11 @@ namespace APC.UI.Tools
         private static readonly HashSet<string> Forbidden = new HashSet<string>
         {
             "Button", "TextBox", "MaskedTextBox", "RichTextBox", "ComboBox", "ListBox", "NumericUpDown",
-            "DateTimePicker", "DataGridView", "GroupBox", "CheckedListBox", "ListView", "TabControl",
+            "DateTimePicker", "DataGridView", "GroupBox", "CheckedListBox", "ListView", "TabControl", "CheckBox", "RadioButton",
         };
         private static readonly HashSet<string> FieldTypes = new HashSet<string>
         {
-            "ApcTextBox", "ApcScanBox", "ApcComboBox", "ApcNumericBox", "ApcDateBox", "ApcButton",
+            "ApcTextBox", "ApcScanBox", "ApcComboBox", "ApcNumericBox", "ApcDateBox", "ApcButton", "ApcCheckBox",
         };
         private static readonly HashSet<string> ConfirmTexts = new HashSet<string> { "확인", "저장", "적용", "등록", "삭제" };
 

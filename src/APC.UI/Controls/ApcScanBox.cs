@@ -21,7 +21,11 @@ namespace APC.UI.Controls
     /// 바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다.
     /// 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다.
     /// 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다.
-    /// 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패.
+    /// 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다).
+    /// Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) —
+    /// 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다.
+    /// 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach한다: 포커스된 스캔 칸이 받고, 포커스가 다른 곳이면 먼저 Attach한 칸이 받는다.
+    /// 받은 칸의 Scanned에서 다음 스캔 칸으로 Focus()를 옮기면 순서대로 스캔된다.
     /// </summary>
     public class ApcScanBox : ApcTextBox, IMessageFilter
     {
@@ -57,6 +61,7 @@ namespace APC.UI.Controls
         /// <summary>
         /// 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로
         /// 화면의 OnHandleCreated에서 FindForm()으로 부른다: <c>var f = FindForm(); if (f != null) _scan.Attach(f);</c>
+        /// dialog(ApcForm)는 폼 자신이므로 생성자에서 <c>_scan.Attach(this)</c>로 부른다.
         /// </summary>
         public void Attach(Form host)
         {

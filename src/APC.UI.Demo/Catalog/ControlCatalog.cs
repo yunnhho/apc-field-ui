@@ -25,7 +25,7 @@ namespace APC.UI.Demo.Catalog
             info.Click += (s, e) => ApcDialog.Alert(FindForm(), "COM3 연결되었습니다.");
             Body.Controls.Add(Row(Caption("확인창"), confirm, save, warn, info));
 
-            var grid = new ApcGrid { Height = S(150), Dock = DockStyle.Top, ReadOnly = true };
+            var grid = new ApcGrid { Height = ApcGrid.HeightForRows(5), Dock = DockStyle.Top, ReadOnly = true };
             grid.Columns.Add(new ApcLampColumn());
             grid.Columns.Add("a", "LOT");
             grid.Columns.Add("b", "품목");
@@ -57,6 +57,12 @@ namespace APC.UI.Demo.Catalog
             var off = new ApcTextBox { Width = S(160), Text = "비활성", Enabled = false };
             foreach (Control c in new Control[] { text, readOnly, off }) c.Margin = new Padding(0, 0, S(8), 0);
             Body.Controls.Add(Row(Caption("입력칸"), text, readOnly, off));
+
+            var check = new ApcCheckBox { Text = "예열 온도 180~220 ℃ 확인", Checked = true };
+            var uncheck = new ApcCheckBox { Text = "금형 클램프 체결 확인" };
+            var checkOff = new ApcCheckBox { Text = "비활성", Enabled = false };
+            foreach (Control c in new Control[] { check, uncheck, checkOff }) c.Margin = new Padding(0, 0, S(16), 0);
+            Body.Controls.Add(Row(Caption("확인 체크 (ApcCheckBox)"), check, uncheck, checkOff));
 
             var tabs = new ApcTabStrip();
             tabs.SetTabs("저속 연마기 ST-GR-01~03", "저속 연마기 ST-GR-04~06", "고속 연마기 ST-GB-01~08");

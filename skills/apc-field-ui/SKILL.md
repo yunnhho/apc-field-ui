@@ -79,6 +79,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 | Text input / barcode | `ApcTextBox` / `ApcScanBox` |
 | Choice / number / date | `ApcComboBox` / `ApcNumericBox` / `ApcDateBox` |
 | Button | `ApcButton` (Normal, Primary, Danger) |
+| Confirm check (preheat checked, clamp fastened) | `ApcCheckBox` — `Text` is the full sentence; a blocked confirm follows `CheckedChanged` |
 | Table / input table (type or scan into cells) | `ApcGrid` / `ApcGrid { ReadOnly = false, ClearInitialSelection = false }` + per-column `ReadOnly` |
 | Read-only single value (current barcode, LOT, operator) | `ApcTextBox { ReadOnly = true }` or `ApcValueCard` |
 | Large current value (sensor, count, defect rate) | `ApcValueCard` |
@@ -90,12 +91,13 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 | Settings group (instead of GroupBox) | `ApcGroup` |
 | Tabs (unit group / line switch, instead of TabControl) | `ApcTabStrip` — never fake it with several `ApcButton`s. Top row of body `Row(tabs, ...)` (`FailureAnalysisView`) |
 
+- **Scan fields** (`ApcScanBox`): only attached boxes raise `Scanned` — screen: `OnHandleCreated` + `FindForm()`; dialog: `Attach(this)` in the constructor. Several scan fields in one form (mold + badge): attach all; the focused one receives the scan, otherwise the first attached — move `Focus()` to the next box in `Scanned`. Typed text + Enter is not a scan (`Scanned` does not fire); that is how "scan only, no typing" is enforced. A rejected code (`Accepted = false`) stays selected and the next scan replaces it — do not clear it.
 - **Table status column**: `ApcLampColumn` (header "상태"). For short status words (가동·대기·전송됨) use `ApcLampValue` (lamp + word in one cell) and no separate text column; the column widens itself to the word (do not set `Width`). Otherwise the lamp must also be readable from a text column in the same row, headed "판정" or "내용".
 - **Row actions** (send, reset): no drawn buttons — `ApcIconColumn`. In `CellClick`, ignore when `ApcIconColumn.IsEnabled(cell)` is false.
 - **Out-of-spec cell**: `cell.Style.ForeColor = ApcTheme.StatusText(kind)` + bold.
 - **Two-value card** (temperature + humidity): main value `Value`, second value `Footer`. `Status` = the worse one; per-item colors `ValueStatus` / `FooterStatus` (omit them and a normal value shows in warning color). Two or more footer values → `SetFooterParts`. Side-by-side cards share one height.
 - Text values without a verdict (Lot ID, recipe) go in `ApcInfoStrip`, not `ApcValueCard` (the card bottom stays empty).
-- **No standard controls**: no `Button`/`TextBox`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`, and no `Control` subclasses drawing their own cards/tiles/charts. Standard ones allowed: `Label` and layout `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`. If an element is missing from the table, do not build it — tell the user.
+- **No standard controls**: no `Button`/`TextBox`/`CheckBox`/`RadioButton`/`ComboBox`/`NumericUpDown`/`DateTimePicker`/`DataGridView`/`TabControl`/`Form`, and no `Control` subclasses drawing their own cards/tiles/charts. Standard ones allowed: `Label` and layout `Panel`/`FlowLayoutPanel`/`TableLayoutPanel`. If an element is missing from the table, do not build it — tell the user.
 - **Confirm**: irreversible actions `ApcDialog.Confirm(this, "...")` (red); safe ones like save `ApcDialog.Confirm(this, "...", "저장", ApcButtonVariant.Primary)`.
 - **Warnings use the warning box**: input errors and operation warnings (reversed period, empty LOT, wrong/duplicate scan, job already running …) use `ApcDialog.Warn(FindForm(), "...")` even on the main screen (`this` inside a dialog). During a scan event, show it via `BeginInvoke` after handling (`ProductionView.WarnAfterScan`). Notices with nothing wrong (connection result, done) use `ApcDialog.Alert`. Equipment faults and NG show through on-screen lamps/tiles/judge panel (no bottom alarm strip).
 - State = `StatusKind` (Run/Warn/Alarm/Stop/Info). The theme owns the colors.
@@ -125,6 +127,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 **Screen hierarchy** (render cannot check these — verify yourself)
 - One fact, one place:
   - The most important verdict is one big `ApcJudgePanel` (one per screen; persistent states use `ApcNoticeBar`). If the requirement names "the most important information" (e.g. delivery deadline), put it in the panel's big text or `SubText` — not in a small card beside it.
+  - Monitoring several units (tiles + selected-unit cards): the panel speaks for the **whole line** — the worst unit, naming it ("CF-3 알람 / ...") — and does not change with tile selection. The selected unit shows in its tile, cards and charts. Several units at the same worst level → count + the first ones ("금형 교체 필요 2건", SubText lists them).
   - The judge panel sits in the **top row of `Body`** (the first `Columns()` under the title bar), never below tiles or tables.
   - A cause planted in the sample data (unit, Bin, item: "T04 only has high SB23") must be readable on screen as text: one cause in the panel `SubText` and a table column. A cause that exists only in the data source does not count.
   - Do not repeat its reason sentence in tiles, card footers or tables (tiles/cards follow by color only). Do not restate the limit sentence on the card of a value the panel already speaks about.
@@ -132,7 +135,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 - Status color on text = `ApcTheme.StatusText(kind)`. `ApcTheme.Status(kind)` is for fills/lines (yellow/green text is unreadable).
 - Buttons: one `Primary` main action per screen, same height as inputs (`Button(...)`). `Danger` only for irreversible or safety-bypassing actions (normal flow is `Primary`). A disabled button gets `Enabled = false` + its reason right beside it as `Caption` (default color; `StatusText(Alarm)` only if the reason is an alarm; `""` when there is none).
 - Text: judge `SubText` and card `Footer` have at most two parts (one " · "). No formulas or statistical constants (σ̂, d2). Guidance sentences only if they fit one line. No particle placeholders ("이(가)") — write "품번 불일치 · AB222 ≠ AB212".
-- Tiles show the name only. If the requirement wants a value, put it in `Text`: "T04  94.1 %".
+- Tiles show the name only. If the requirement names tile states (정상/주의/이탈, 생산/교체 중) or a value, put the state word or value after the name in `Text` (two spaces): "DC-02  교체 예정", "T04  94.1 %" — state words exactly as the requirement lists them, never a reason sentence.
 - Titles above tables/charts/input groups: `SectionTitle()`, `Titled()` or `ApcGroup` — never a bolded `Caption`.
 - Side-by-side tables keep the default row height. Never paint row backgrounds with status colors — use lamp + bold `StatusText` in the relevant cell.
 - No screen methods/helpers named like `Control` members (`Refresh`, `Text` → e.g. `Reload`). No `ShowLamp` on indicator cards without a verdict (counts, OEE).
@@ -183,8 +186,8 @@ Copy this list into your response and tick each item. On failure, fix and redo f
 3. **Report** (in Korean): PNG paths, last `점검 0건`, build warnings 0. Keep limits you chose as constants next to the judge function.
 4. **확인 질문** — after the first build, turn every part you decided yourself (not taken from the requirement) into a question for the user. Group them:
    - **정한 기준값**: limits, warning start, boundary inclusion, decimals the requirement did not give.
-   - **해석**: wording you could read two ways — e.g. a percent or ratio with no stated base ("경계 10% 안쪽": of the band width or of the nominal value?), "highlight X" when every row matches, what the judge panel speaks for (whole line or selected unit), which actions count as blocked.
-   - **배치**: where two rules conflicted or no example existed and you picked a layout (scan row above the judge panel, status words in tiles).
+   - **해석**: wording you could read two ways — e.g. a percent or ratio with no stated base ("경계 10% 안쪽": of the band width or of the nominal value?), "highlight X" when every row matches, which actions count as blocked.
+   - **배치**: where two rules conflicted or no example existed and you picked a layout (scan row above the judge panel).
    - **데이터 모양**: things you invented — barcode/label format, reason lists, approver IDs, which fields the data source supplies.
 
    - Every rule you found ambiguous or conflicting that changed the screen is also a 해석 or 배치 question here — not only a note on the skill. Reread your notes before writing the list.
