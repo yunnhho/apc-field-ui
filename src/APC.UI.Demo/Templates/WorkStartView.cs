@@ -16,7 +16,7 @@ namespace APC.UI.Demo.Templates
             new object[] { StatusKind.Alarm, "WO-24116-07", "커버 B-045", 600, "사출기 01" },
         };
 
-        private const int SampleExtraOrders = 28;
+        private const int SampleExtraOrders = 29;
         private readonly ApcGrid _grid = new ApcGrid { Dock = DockStyle.Fill, ReadOnly = true };
         private readonly Label _detail = Caption("작업 지시를 선택하세요");
 

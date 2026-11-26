@@ -7,7 +7,7 @@ namespace APC.UI.Demo.Templates
     /// <summary>불량 등록: 유형 + 수량 + LOT(스캔 또는 입력) → 등록.</summary>
     internal sealed class DefectView : ApcTemplateView
     {
-        private const int SampleRows = 33;
+        private const int SampleRows = 34;
         private static readonly string[] Types = { "미성형", "버(Burr)", "변색", "치수 불량", "이물" };
 
         private readonly ApcComboBox _type = new ApcComboBox();

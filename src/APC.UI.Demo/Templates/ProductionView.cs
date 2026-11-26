@@ -8,7 +8,7 @@ namespace APC.UI.Demo.Templates
     /// <summary>실적 입력: 스캔 → 그리드 행 추가 → F9 저장. 행 삭제는 확인창.</summary>
     internal sealed class ProductionView : ApcTemplateView
     {
-        private const int SampleRows = 31;
+        private const int SampleRows = 32;
         private const string LotPrefix = "LOT-";
 
         private readonly ApcScanBox _scan = new ApcScanBox();

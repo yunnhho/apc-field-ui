@@ -24,7 +24,7 @@ namespace APC.UI.Demo.Templates
         private readonly ApcValueCard _ng = Card("NG", "EA", "");
         private readonly ApcValueCard _rate = Card("불량률", "%", "NG / 생산");
         private readonly ApcGrid _grid = new ApcGrid { Dock = DockStyle.Fill, ReadOnly = true };
-        private const int SampleHistoryRows = 19;
+        private const int SampleHistoryRows = 21;
         private readonly Random _sample = new Random(7);
         private int _okCount = 405, _ngCount = 7;
 

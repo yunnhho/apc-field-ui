@@ -63,9 +63,10 @@ Layout is constructor code only (no designer files). Scale sizes: `S(px)` in a s
 - **Section title + table/chart** = one `Titled(title, content[, buttons…])` cell placed in a `Columns()` cell or as the `Body` Fill. Title-row buttons go here too — never put `SectionTitle` and a button together in `Row()`. Two list tables side by side filling the remaining height: `FillColumns(...)`. Do not hand-build a TableLayoutPanel.
 - **Fixed-height `Titled` cell**: `Columns(TitledHeight(ApcGrid.HeightForRows(n)), cells)` — `TitledHeight(content[, hasTools])` adds the title row and gap. Never measure the title row yourself.
 - **Several tables**: fixed-count tables (checklist, 12 cart slots, Bin top 5) get a fixed height via `ApcGrid.HeightForRows(n)`; only one list table fills the remaining height. Do not put a fixed table beside the Fill list table (the shorter one leaves a gap) — put it in a `Columns()` row above. Other cells in that row match its height.
+- **Fixed tables with different row counts in one row** (Hard Bin 8 beside Soft Bin 5): give every cell the taller table's `TitledHeight(ApcGrid.HeightForRows(max))` and leave the shorter table's empty rows — never fill the gap with a card or `ApcNoticeBar`. A table with few categories and short values can instead be transposed (categories as columns, 2–3 rows).
 - A fixed-height table/chart stacked in `Body` outside `Columns()` is still wrapped: `Columns(S(height), new Control[] { grid })` (a bare Add overlaps or loses the bottom gap).
 - **Selection**: when tapping a tile makes the cards/chart below show that unit, set `Selected = true` on that tile only. When a table row is chosen, `ClearInitialSelection = false` + select the row. A "selected row" button does nothing when `CurrentRow == null`.
-- **No settings button inside the screen.** Only a program with a settings screen calls `UseSettingsButton(...)` (title-bar gear). Open order: `AdminPasswordDialog` → `SettingsDialog` (`FailureAnalysisView.OpenSettings`). Buttons opening non-settings dialogs go in the related section's `Titled(..., Button(...))`.
+- **No settings button inside the screen.** Only a program with a settings screen calls `UseSettingsButton(...)` (title-bar gear). Open order: `AdminPasswordDialog` → `SettingsDialog` (`FailureAnalysisView.OpenSettings`). Buttons opening non-settings dialogs go in the related section's `Titled(..., Button(...))`; a disabled button's reason goes before it: `Titled(title, grid, reason = Caption(""), button)` (left of the button, vertically centered).
 
 ### 4b. Dialogs
 
@@ -137,6 +138,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 - No screen methods/helpers named like `Control` members (`Refresh`, `Text` → e.g. `Reload`). No `ShowLamp` on indicator cards without a verdict (counts, OEE).
 
 **Status colors** (process state → `StatusKind`)
+- Step tables (OCAP, approval flow): done = `Run`, the current step holding the flow = `Warn`, not started = `Stop`; the word column says which ("완료", "확인 중", "대기").
 - 대기·정지·통신 끊김 = `Stop` / running, in progress, normal finish (PASS·OK) = `Run` / near limit, needs check = `Warn` / NG·FAIL, equipment errors that stop work = `Alarm` / records like setting change or shift change = `Info`
 - Tile and table row = the worse of process state and value verdict. Row text "공정 상태 · 사유" (e.g. "시험중 · 저항 한계 근접"); tiles use color only. Several reasons → the worst one (tie: first in screen order).
 - Card `Status` = verdict of that card's value only:
