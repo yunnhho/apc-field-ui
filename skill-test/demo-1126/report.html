@@ -100,7 +100,7 @@ li { margin: 3px 0; }
 <tr><td class="num">6</td><td>레이아웃 마무리(겹침·빈 곳·과대 요소)</td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m t">△</span></td></tr>
 <tr><td class="num">7</td><td>빌드 0/0, render 점검 0건</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
 <tr><td class="num">8</td><td>요청 항목 누락 없음</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
-<tr><td class="num">9</td><td>샘플 정합성·경계값</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">9</td><td>경계값 샘플 (샘플 합계 정합성은 채점하지 않음)</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
 <tr><td class="num">10</td><td>지침 피드백의 쓸모</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
 <tr class="total"><td></td><td>합계</td><td class="c num">18</td><td class="c num">19</td><td class="c num">19</td></tr>
 </tbody></table></div>
@@ -269,7 +269,7 @@ dialog: FIFO 예외 출고 승인(원료·스캔한 Lot·앞 순위 Lot 읽기 �
 <tbody>
 <tr><td class="k">D1 도장 부스</td><td class="c num">18</td><td class="c num">19</td><td><span class="m o">✓</span> 온도 눈금 20/22/24/26, 겹침 없음</td><td>5 △ 영향 행거 열이 여전히 모든 행에서 굵음</td></tr>
 <tr><td class="k">D2 셀 X-ray</td><td class="c num">19</td><td class="c num">20</td><td><span class="m o">✓</span> 셀 타일이 낮아지고 상태 글자("09 NG")가 들어감. 이력 표가 남은 높이를 채움</td><td>없음</td></tr>
-<tr><td class="k">D3 FIFO 출고</td><td class="c num">19</td><td class="c num">19</td><td><span class="m o">✓</span> 숫자 하나짜리 카드 없이 판정판을 전체 폭으로 둠. 두 표의 행 수가 같아 빈 곳이 없음</td><td>9 △ 출고량과 이력이 맞지 않음(소맥분 200.0 vs 이력 합 115.0)</td></tr>
+<tr><td class="k">D3 FIFO 출고</td><td class="c num">19</td><td class="c num">20</td><td><span class="m o">✓</span> 숫자 하나짜리 카드 없이 판정판을 전체 폭으로 둠. 두 표의 행 수가 같아 빈 곳이 없음</td><td>없음 (출고량과 이력 합이 다르지만 샘플 정합성은 채점하지 않기로 함)</td></tr>
 </tbody></table></div>
 <div class="shots" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr))">
   <figure><img src="r2/D1-paintbooth/MainForm.png" alt="D1 재시연 메인 화면" loading="lazy"><figcaption>D1 재시연 — 눈금 간격이 넓어짐</figcaption></figure>
