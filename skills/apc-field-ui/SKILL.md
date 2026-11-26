@@ -168,6 +168,7 @@ Copy this list into your response and tick each item. On failure, fix and redo f
   - [ ] The cause (unit/Bin/item) readable as text on screen?
   - [ ] Every blocked action stays blocked — the user cannot unlock it by changing a combo/field on the screen or dialog?
   - [ ] No empty area below or beside a table/chart, no lopsided row?
+  - [ ] No box bigger than its content — a one-number card wider than ~1/4 of the screen, tiles taller than their default `S(96)`, a `Fill` column whose longest text uses under half its width? Fix: narrow it with `Columns(..., percents)` and give the space to the panel/table, keep tiles at a fixed row height and let the Fill table take the rest, set short-text columns to fixed width.
   - [ ] Sample values agree (step 5) and status readable as text, not color only?
 - [ ] Report: PNG paths, 점검 0건, build warnings 0, list of chosen limits
 ```

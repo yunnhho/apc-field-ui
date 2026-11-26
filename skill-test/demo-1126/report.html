@@ -1,0 +1,287 @@
+<title>APC 스킬 시연 1126</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 공장 문서 감각: 회청 금속 바탕 + 먹색 글자, 붉은색은 APCSOFT 표식에만. 점수는 램프 색 */
+:root {
+  --bg: #e9edf1; --panel: #fdfdfe; --panel-2: #f1f4f7; --ink: #1a1f26; --muted: #5d6b7a; --line: #b9c3cd;
+  --navy: #2a4058; --brand: #e60012; --run: #15803d; --warn: #a16207; --alarm: #c81e1e;
+  --run-bg: #dcf3e4; --warn-bg: #fbf0cf; --alarm-bg: #fbe0e0;
+  --font: "IBM Plex Sans KR", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161b21; --panel: #1f262e; --panel-2: #252d36; --ink: #e6ebf0; --muted: #9aa7b4; --line: #3a4652;
+  --navy: #8fb1d6; --brand: #ff4d5a; --run: #4ade80; --warn: #facc15; --alarm: #f87171;
+  --run-bg: #173324; --warn-bg: #3a3112; --alarm-bg: #3d1c1c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161b21; --panel: #1f262e; --panel-2: #252d36; --ink: #e6ebf0; --muted: #9aa7b4; --line: #3a4652;
+  --navy: #8fb1d6; --brand: #ff4d5a; --run: #4ade80; --warn: #facc15; --alarm: #f87171;
+  --run-bg: #173324; --warn-bg: #3a3112; --alarm-bg: #3d1c1c; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.35rem; padding-left: 12px; border-left: 3px solid var(--brand); margin-top: 52px; margin-bottom: 14px; }
+h3 { font-size: 1.05rem; margin: 26px 0 10px; }
+p { margin: 0 0 8px; }
+.head { display: grid; gap: 10px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); }
+.head .fn { color: var(--brand); font-weight: 700; font-size: .95rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: .9rem; }
+.facts b { color: var(--ink); font-weight: 600; }
+.num { font-variant-numeric: tabular-nums; }
+
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.scores a { background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; color: inherit; text-decoration: none; display: grid; gap: 2px; }
+.scores a:hover, .scores a:focus-visible { border-color: var(--navy); outline: none; }
+.scores .n { font-size: 2.2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--run); }
+.scores .n small { font-size: 1rem; color: var(--muted); font-weight: 500; }
+.scores span { color: var(--muted); font-size: .9rem; }
+
+.tbl { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.tbl.wide table { min-width: 760px; }
+th { text-align: left; font-weight: 700; padding: 9px 12px; background: var(--panel-2); border-bottom: 2px solid var(--ink); white-space: nowrap; }
+td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+td.c, th.c { text-align: center; }
+td.k { font-weight: 600; white-space: nowrap; }
+tr.total td { font-weight: 700; background: var(--panel-2); border-top: 2px solid var(--ink); }
+.m { display: inline-block; min-width: 1.6em; text-align: center; font-weight: 700; }
+.m.o { color: var(--run); } .m.t { color: var(--warn); } .m.x { color: var(--alarm); }
+
+details { background: var(--panel); border: 1px solid var(--line); }
+summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+summary:focus-visible { outline: 2px solid var(--navy); }
+pre { margin: 0; padding: 12px 16px 16px; white-space: pre-wrap; word-break: break-word; font: .88rem/1.65 var(--font); border-top: 1px solid var(--line); background: var(--panel-2); }
+
+.shots { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+figure { margin: 0; background: var(--panel); border: 1px solid var(--line); }
+figure img { display: block; width: 100%; height: auto; }
+figcaption { padding: 6px 10px; font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); }
+ul { margin: 0; padding-left: 20px; }
+li { margin: 3px 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.box { background: var(--panel); border: 1px solid var(--line); padding: 12px 16px; }
+.box h4 { margin: 0 0 6px; font-size: .95rem; }
+.meta { color: var(--muted); font-size: .88rem; margin-bottom: 10px; }
+@media (max-width: 760px) { .scores, .shots, .two { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+<header class="head">
+  <div class="fn">APC.UI · apc-field-ui 스킬 시연</div>
+  <h1>스킬 시연 1126 — 새 도메인 3종</h1>
+  <div class="facts">
+    <span>날짜 <b>2026-11-26</b></span>
+    <span>모델 <b>Sonnet 5.5 × 3 (병렬)</b></span>
+    <span>스킬 <b>main fc0f6f0 설치본</b></span>
+    <span>채점 <b>메인 세션(Opus), PNG와 보고 기준</b></span>
+  </div>
+  <p>이전 시연에 없던 도메인 3개(도장 부스 환경, 셀 X-ray 판정, 원료 FIFO 출고)를 새로 썼습니다. 세 에이전트 모두 빌드 경고·오류 0, render 점검 0건으로 끝났습니다.</p>
+</header>
+
+<div class="scores">
+  <a href="#d1"><span>D1 도장 부스 환경 모니터링</span><div class="n num">18<small> / 20</small></div><span>모니터링 · 4분 34초 · 도구 18회</span></a>
+  <a href="#d2"><span>D2 셀 X-ray 검사 판정 단말</span><div class="n num">19<small> / 20</small></div><span>설비 단말 · 4분 31초 · 도구 24회</span></a>
+  <a href="#d3"><span>D3 원료 창고 FIFO 출고 단말</span><div class="n num">19<small> / 20</small></div><span>설비 단말 · 5분 12초 · 도구 20회</span></a>
+</div>
+
+<h2>평가 기준</h2>
+<p>10항목 × 2점입니다. <span class="m o">✓</span> 2점, <span class="m t">△</span> 1점, <span class="m x">✗</span> 0점으로 매겼습니다.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>#</th><th>항목</th><th class="c">D1</th><th class="c">D2</th><th class="c">D3</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>3초 안에 알아야 할 것이 맨 위에 가장 크게</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">2</td><td>주 동작이 스캔과 큰 버튼(스킬 기준: Primary 1개, 입력칸과 같은 높이)</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">3</td><td>메인 화면이 막고 이유를 글로 보임</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">4</td><td>dialog 차단 규칙(요청의 "할 수 없다")</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">5</td><td>도메인 핵심 표시(영향 행거 / 셀 격자·측정값 / FIFO 재고 Lot)</td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">6</td><td>레이아웃 마무리(겹침·빈 곳·과대 요소)</td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m t">△</span></td></tr>
+<tr><td class="num">7</td><td>빌드 0/0, render 점검 0건</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">8</td><td>요청 항목 누락 없음</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">9</td><td>샘플 정합성·경계값</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td class="num">10</td><td>지침 피드백의 쓸모</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr class="total"><td></td><td>합계</td><td class="c num">18</td><td class="c num">19</td><td class="c num">19</td></tr>
+</tbody></table></div>
+
+<h3>공통 입력 프롬프트</h3>
+<details><summary>세 시연에 똑같이 들어간 앞부분 (작업 폴더·UX 기준·보고 형식)</summary><pre>apc-field-ui 스킬로 APCSOFT 현장 PC 프로그램 화면을 만든다. 먼저 Skill 도구로 apc-field-ui 스킬을 불러 그 지침을 끝까지 따른다(Skill 도구가 없을 때만 Read로 `C:\Users\rladb\.claude\skills\apc-field-ui\SKILL.md`를 읽는다). 앱 exe를 실행했으면 끝나기 전에 닫는다.
+
+- 작업 폴더: C:\00P_apc-field-ui\skill-test\demo-1126\&lt;시연&gt;\project (Git Bash: /c/00P_apc-field-ui/skill-test/demo-1126/&lt;시연&gt;/project)
+- render PNG: C:\00P_apc-field-ui\skill-test\demo-1126\&lt;시연&gt;\out\&lt;형식이름&gt;.png
+- 고객사 default. 사용자에게 질문할 수 없다 — 빠진 값은 아래 도메인 정보로 정하고 &quot;정한 기준값&quot;으로 보고한다.
+- 저장소의 다른 파일은 고치지 않는다. git 명령 금지.
+
+UI·UX 기준: 실제 현장에 설치할 화면이다.
+- 이 화면 사용자가 3초 안에 알아야 할 것이 가장 크게, 가장 위에 보이게 한다.
+- 작업자는 바코드 스캐너와 마우스를 쓴다. 주 동작은 스캔과 큰 버튼, 키보드 입력은 최소로.
+- 막아야 하는 동작(NG·인터락·조건 미충족)은 화면이 막고, 막은 이유를 글로 보여 준다.
+
+끝나면 보고: 1) 만든 화면·dialog와 PNG 경로 2) 마지막 render 점검 건수, 빌드 경고·오류 수 3) UX 결정 3~5줄 4) 정한 기준값 5) 스킬 지침에서 막히거나 모호했던 점.</pre></details>
+
+<!-- D1 -->
+<h2 id="d1">D1 도장 부스 환경 모니터링 · 18/20</h2>
+<div class="meta">BumperPaintBoothMonitor · 모니터링(도장 라인 전체) · 4분 34초, 도구 18회, 토큰 126k</div>
+<h3>입력 프롬프트</h3>
+<details><summary>화면 요청 + 도메인 정보</summary><pre>## 화면 요청
+자동차 범퍼 도장 라인 부스 환경 모니터링 프로그램. 프로젝트명 BumperPaintBoothMonitor.
+목적: 모니터링(도장 라인 전체). 사용자: 도장 반장·품질 담당 — 도장 사무실 PC에 상시 띄워 둔다.
+메인 화면: 부스 5곳(전처리, 프라이머, 베이스, 클리어, 오븐) 상태 타일(정상/주의/이탈/정지), 선택 부스의 온도·습도·풍속·차압 현재값 카드(관리 범위 표시), 선택 부스의 최근 8시간 온도·습도 추이, 현재 투입 중인 행거 번호·도료 Lot·색상 코드, 환경 이탈 이력 표(부스·항목·시작·종료·지속 시간·최대값·조치·확인자). 이탈 중인 동안 투입된 행거는 표에서 눈에 띄게 한다.
+dialog: 이탈 조치 등록(부스·항목·이탈 구간 읽기 전용, 영향 행거 범위 표시, 조치 구분 선택 — 재도장/추가 검사/영향 없음, 비고). 이탈이 아직 끝나지 않았으면 &quot;영향 없음&quot;으로 닫을 수 없다.
+
+## 도메인 정보
+- 관리 범위(베이스·클리어 부스): 온도 23.0±2.0℃, 습도 65±10 %RH, 하강 풍속 0.30~0.50 m/s, 부스 차압 +5~+15 Pa(외부 대비 양압). 오븐: 온도 140±5℃, 습도·풍속 관리 안 함.
+- 관리 범위 안이지만 경계 10% 안쪽이면 주의, 벗어나면 이탈. 이탈이 3분 이상 이어지면 라인 투입 정지 권고.
+- 습도가 높으면 클리어 백화(blushing), 풍속이 낮으면 먼지 부착 불량이 늘어난다.
+- 행거 1개 = 범퍼 2개, 컨베이어 1.5분 간격 투입.
+- 표시 형식: 온도 ℃ 0.0, 습도 %RH 정수, 풍속 m/s 0.00, 차압 Pa 정수, 시간 HH:mm:ss.</pre></details>
+<h3>결과물</h3>
+<div class="shots">
+  <figure><img src="D1-paintbooth/MainForm.png" alt="도장 라인 환경 모니터링 메인 화면" loading="lazy"><figcaption>MainForm — 판정판 "라인 투입 정지 권고", 부스 타일 5개, 클리어 부스 카드, 8시간 추이 2개, 이탈 이력 14행</figcaption></figure>
+  <figure><img src="D1-paintbooth/ExcursionActionDialog.png" alt="이탈 조치 등록 dialog" loading="lazy"><figcaption>ExcursionActionDialog — 이탈 중 "영향 없음" 선택 시 [등록] 꺼짐 + 이유</figcaption></figure>
+</div>
+<div class="two" style="margin-top:12px">
+  <div class="box"><h4>잘한 점</h4><ul>
+    <li>판정판 부제에 원인과 값이 바로 있습니다: "클리어 부스 습도 상한 초과 77 %RH (상한 75) · 이탈 4분 45초".</li>
+    <li>경계값을 샘플에 넣었습니다. 베이스 온도 25.0(상한과 같음)은 주의로 표시됩니다.</li>
+    <li>dialog에서 영향 행거를 "H-2044 ~ H-2047 · 4개 (범퍼 8개)"로 환산했습니다. 차단은 데이터 쪽 <code>RegisterAction</code>에도 있습니다.</li>
+  </ul></div>
+  <div class="box"><h4>감점</h4><ul>
+    <li>5 △ 영향 행거 열을 모든 행에서 굵게 칠해서 강조 효과가 없습니다. 빨강은 조치 대기 행에만 씁니다.</li>
+    <li>6 △ 온도 추이 그래프의 세로축 눈금(20~26)이 1℃ 간격으로 붙어 있어 글자가 겹쳐 보입니다.</li>
+  </ul></div>
+</div>
+<h3>평가 점수</h3>
+<div class="tbl"><table><thead><tr><th>항목</th><th class="c">점수</th><th>근거</th></tr></thead><tbody>
+<tr><td>3초 정보</td><td class="c"><span class="m o">✓</span></td><td>맨 위 빨간 판정판에 라인 전체의 최악 상태와 원인</td></tr>
+<tr><td>주 동작</td><td class="c"><span class="m o">✓</span></td><td>모니터링 화면이라 동작은 타일 클릭과 [이탈 조치 등록] 하나. 확인자는 사원증 스캔</td></tr>
+<tr><td>메인 막기</td><td class="c"><span class="m o">✓</span></td><td>이미 조치한 행은 버튼이 꺼지고 이유가 글로 나옴</td></tr>
+<tr><td>dialog 차단</td><td class="c"><span class="m o">✓</span></td><td>"이탈 진행 중 · 영향 없음으로 닫을 수 없음"</td></tr>
+<tr><td>도메인 핵심</td><td class="c"><span class="m t">△</span></td><td>영향 행거 열은 있지만 모든 행이 굵어서 눈에 띄지 않음</td></tr>
+<tr><td>레이아웃</td><td class="c"><span class="m t">△</span></td><td>온도 추이 세로축 눈금 혼잡</td></tr>
+<tr><td>빌드·점검 / 요청 항목 / 샘플 / 피드백</td><td class="c">✓×4</td><td>0/0·0건, 요청 항목 전부, 추이 끝점 = 현재값, 혼합 단위 열 기준이 없다는 지적</td></tr>
+</tbody></table></div>
+
+<!-- D2 -->
+<h2 id="d2">D2 셀 X-ray 검사 판정 단말 · 19/20</h2>
+<div class="meta">CellXrayJudgeStation · 설비 단말(검사기 1대) · 4분 31초, 도구 24회, 토큰 131k</div>
+<h3>입력 프롬프트</h3>
+<details><summary>화면 요청 + 도메인 정보</summary><pre>## 화면 요청
+2차전지 원통형 셀 X-ray 검사 판정 단말 프로그램. 프로젝트명 CellXrayJudgeStation.
+목적: 공정 설비 프로그램(X-ray 검사기 한 대 옆 단말). 사용자: 검사 작업자 — 자동 판정 NG 셀을 재판정하고, 트레이 단위로 다음 공정에 넘긴다.
+메인 화면: 트레이 바코드 스캔 → 트레이 셀 50개(5×10) 판정 격자(OK/NG/재판정 대기), 선택 셀의 측정값(양극-음극 오버행 최소값 4곳, 젤리롤 정렬 편차, 이물 유무), 트레이 최종 판정 큰 표시, [트레이 완료] 버튼(재판정 대기 셀이 하나라도 있으면 막는다), 금일 검사·OK·NG·재판정 수, 최근 트레이 이력 표.
+dialog: NG 셀 재판정(셀 ID·자동 판정 사유·측정값 읽기 전용, 판정 OK/NG 선택, NG 유형 선택, 사유). 오버행 측정값이 규격 하한 미만인 셀은 OK로 바꿀 수 없다.
+
+## 도메인 정보
+- 셀 규격 21700. 오버행(음극이 양극보다 튀어나온 길이) 규격: 0.50 mm 이상, 0.50~0.60 mm는 경계(자동 판정 &quot;재판정 대기&quot;), 0.50 미만은 NG 확정.
+- 젤리롤 정렬 편차 0.30 mm 이하 OK. 이물 검출 시 재판정 대기(사람이 이미지로 확인).
+- NG 유형: 오버행 부족, 정렬 불량, 이물, 탭 접힘, 기타.
+- 트레이 단위로 다음 공정(전해액 주입)에 넘긴다. NG 셀은 트레이에서 빼서 NG 박스로 보내고 트레이에는 빈칸으로 남긴다.
+- 셀 ID 예: C2611260001. 트레이 ID 예: TR-A0153.
+- 표시 형식: 길이 mm 0.00, 수량 #,0, 시각 HH:mm:ss.</pre></details>
+<h3>결과물</h3>
+<div class="shots">
+  <figure><img src="D2-cellxray/MainForm.png" alt="X-ray 셀 판정 메인 화면" loading="lazy"><figcaption>MainForm — 판정판 "재판정 4건 남음", 셀 5×10 격자, 선택 셀 측정값, 트레이 이력</figcaption></figure>
+  <figure><img src="D2-cellxray/RejudgeDialog.png" alt="NG 셀 재판정 dialog" loading="lazy"><figcaption>RejudgeDialog — 오버행 0.42 mm 셀은 판정 콤보에 OK가 없음</figcaption></figure>
+</div>
+<div class="two" style="margin-top:12px">
+  <div class="box"><h4>잘한 점</h4><ul>
+    <li>판정판 부제에 남은 칸 번호가 있습니다: "칸 14, 18, 26, 39 · 완료 불가".</li>
+    <li>카드 숫자가 맞습니다. OK 817 + NG 29 + 대기 4 = 금일 검사 850.</li>
+    <li>경계값 샘플이 있습니다. 오버행 0.50(칸 18)과 0.60(칸 39)은 재판정 대기, 정렬 0.30(칸 23)은 OK입니다.</li>
+    <li>dialog는 OK 선택지를 아예 빼고, 빨간 띠에 이유를 적었습니다.</li>
+  </ul></div>
+  <div class="box"><h4>감점</h4><ul>
+        <li>6 △ 셀 타일 50개가 번호 하나에 비해 너무 큽니다. 격자 제목줄에는 범례, 사유, 버튼이 몰려 있습니다.</li>
+  </ul></div>
+</div>
+<h3>평가 점수</h3>
+<div class="tbl"><table><thead><tr><th>항목</th><th class="c">점수</th><th>근거</th></tr></thead><tbody>
+<tr><td>3초 정보</td><td class="c"><span class="m o">✓</span></td><td>노란 판정판 "재판정 4건 남음"과 칸 번호</td></tr>
+<tr><td>주 동작</td><td class="c"><span class="m o">✓</span></td><td>스캔하면 첫 대기 셀까지 자동 선택. [트레이 완료]는 Primary 1개, 입력칸과 같은 높이(스킬 기준)</td></tr>
+<tr><td>메인 막기</td><td class="c"><span class="m o">✓</span></td><td>대기가 있으면 [트레이 완료]가 꺼지고 "대기 4건 · 완료 불가". 핸들러에서 다시 검사</td></tr>
+<tr><td>dialog 차단</td><td class="c"><span class="m o">✓</span></td><td>"OK 불가 · 오버행 최소 0.42 mm &lt; 하한 0.50"</td></tr>
+<tr><td>도메인 핵심</td><td class="c"><span class="m o">✓</span></td><td>격자, 범례, NG 칸 빨간 테두리, 측정값 표(항목별 램프·규격·판정)</td></tr>
+<tr><td>레이아웃</td><td class="c"><span class="m t">△</span></td><td>타일이 너무 크고 제목줄이 혼잡함</td></tr>
+<tr><td>빌드·점검 / 요청 항목 / 샘플 / 피드백</td><td class="c">✓×4</td><td>0/0·0건, 요청 항목 전부, 합계 일치·경계값, 격자 컨트롤이 없다는 지적과 타일 글자 폭 26px 지적</td></tr>
+</tbody></table></div>
+
+<!-- D3 -->
+<h2 id="d3">D3 원료 창고 FIFO 출고 단말 · 19/20</h2>
+<div class="meta">RawMaterialIssueTerminal · 설비 단말(출고장 1대) · 5분 12초, 도구 20회, 토큰 132k</div>
+<h3>입력 프롬프트</h3>
+<details><summary>화면 요청 + 도메인 정보</summary><pre>## 화면 요청
+식품 원료 창고 생산 투입 출고 단말 프로그램. 프로젝트명 RawMaterialIssueTerminal.
+목적: 공정 설비 프로그램(원료 창고 출고장 단말 한 대). 사용자: 창고 작업자 — 생산 지시서를 스캔하고, 원료 포대 라벨을 스캔해 출고한다.
+메인 화면: 작업지시 바코드 스캔 → 지시 정보(지시 번호·제품·배합 배치 수·투입 라인), 원료별 출고 목록(원료 코드·원료명·필요량·출고량·남은 양·상태), 원료 포대 스캔 판정 결과(OK/NG와 사유) 크게, 선택 원료의 재고 Lot 목록(Lot·입고일·유통기한·잔량·FIFO 순위), [출고 완료] 버튼(모든 원료 필요량 충족 시만), 금일 출고 이력 표.
+dialog: FIFO 예외 출고 승인(원료·스캔한 Lot·앞 순위 Lot 읽기 전용, 예외 사유 선택, 승인자 사번 스캔). 유통기한이 지난 Lot은 승인이 있어도 출고할 수 없다.
+
+## 도메인 정보
+- FIFO: 같은 원료는 유통기한이 빠른 Lot부터 출고. 앞 순위 Lot이 있는데 뒤 Lot을 스캔하면 NG &quot;FIFO 위반&quot;, 예외 승인으로만 출고.
+- 유통기한 지난 Lot: NG &quot;유통기한 경과&quot;, 출고 불가. 유통기한 7일 이내: 주의(출고는 가능, 노란 표시).
+- 알레르기 유발 원료(밀·대두·우유)는 지시서 라인과 원료의 알레르기 라인 구분이 다르면 NG &quot;알레르기 라인 불일치&quot;.
+- 필요량 허용 오차 ±0.5%. 넘게 스캔하면 &quot;초과&quot; 표시, 출고 완료는 가능.
+- 원료 코드 예: RM-1021 소맥분. Lot 예: L261120-03. 작업지시 예: WO-261126-007.
+- 표시 형식: 중량 kg 0.0, 날짜 yyyy-MM-dd, 수량 #,0.</pre></details>
+<h3>결과물</h3>
+<div class="shots">
+  <figure><img src="D3-fifo/MainForm.png" alt="원료 출고 단말 메인 화면" loading="lazy"><figcaption>MainForm — 판정판 "NG · FIFO 위반", 지시 정보 띠, 원료별 출고 목록, 재고 Lot, 금일 이력</figcaption></figure>
+  <figure><img src="D3-fifo/FifoExceptionDialog.png" alt="FIFO 예외 출고 승인 dialog" loading="lazy"><figcaption>FifoExceptionDialog — 사유를 고르기 전에는 [승인]이 꺼지고 "예외 사유를 선택하세요"가 나옴</figcaption></figure>
+</div>
+<div class="two" style="margin-top:12px">
+  <div class="box"><h4>잘한 점</h4><ul>
+    <li>판정판 부제가 할 일을 말합니다: "소맥분 L261120-03 · 앞 순위 L261108-01 먼저 출고".</li>
+    <li>재고 Lot 표에 FIFO 순위가 있고, 경과와 다른 라인 Lot은 순위에서 뺐습니다. D-6 주의도 표시됩니다.</li>
+    <li>샘플이 맞습니다. 소맥분 출고 150.0 kg은 이력 6건 × 25 kg과 같고, "미충족 3종"과 "충족 3종"도 목록과 맞습니다.</li>
+    <li>NG 사유마다 예외 승인 버튼 상태가 다릅니다. FIFO 위반일 때만 켜집니다.</li>
+  </ul></div>
+  <div class="box"><h4>감점</h4><ul>
+        <li>6 △ "충족 원료" 카드가 숫자 하나에 비해 큽니다. 이력 표의 판정 열은 짧은 글에 남은 폭을 다 씁니다. 재고 Lot 표는 6행 높이에 4행만 차 있습니다.</li>
+  </ul></div>
+</div>
+<h3>평가 점수</h3>
+<div class="tbl"><table><thead><tr><th>항목</th><th class="c">점수</th><th>근거</th></tr></thead><tbody>
+<tr><td>3초 정보</td><td class="c"><span class="m o">✓</span></td><td>빨간 판정판 "NG · FIFO 위반"과 해야 할 일</td></tr>
+<tr><td>주 동작</td><td class="c"><span class="m o">✓</span></td><td>스캔 칸 하나가 지시서와 포대를 구분. [출고 완료]는 Primary 1개, 입력칸과 같은 높이(스킬 기준)</td></tr>
+<tr><td>메인 막기</td><td class="c"><span class="m o">✓</span></td><td>NG면 출고하지 않음. [출고 완료]가 꺼지고 "필요량 미충족 3종"</td></tr>
+<tr><td>dialog 차단</td><td class="c"><span class="m o">✓</span></td><td>유통기한이 지난 Lot은 승인이 꺼진 채 "유통기한 경과 · 승인 불가". 사유·사번이 없으면 꺼짐</td></tr>
+<tr><td>도메인 핵심</td><td class="c"><span class="m o">✓</span></td><td>FIFO 순위, 경과·라인 다름 제외, 알레르기 라인 표시</td></tr>
+<tr><td>레이아웃</td><td class="c"><span class="m t">△</span></td><td>카드가 과대하고 판정 열이 넓으며 Lot 표 아래가 비어 있음</td></tr>
+<tr><td>빌드·점검 / 요청 항목 / 샘플 / 피드백</td><td class="c">✓×4</td><td>0/0·0건, 요청 항목 전부, 중량 합계 일치, ApcInfoStrip 폭과 샘플 반복 대 합계 충돌 지적</td></tr>
+</tbody></table></div>
+
+<h2>세 시연에 공통으로 나온 점</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>관찰</th><th>나온 곳</th><th>제안</th></tr></thead>
+<tbody>
+<tr><td class="k"><code>ApcInfoStrip</code> 폭이 자동으로 정해지지 않음</td><td>D1, D3 (에이전트 보고)</td><td><code>AddContent</code>와 <code>Row()</code> 안에서 폭을 채우게 하거나, 지침에 폭 지정 방법을 적기</td></tr>
+<tr><td class="k">타일 글자: 이름만 쓸지 상태를 붙일지</td><td>D1, D2</td><td>상태 글자는 범례로 보이고, 타일 글자 폭에 한도가 있다는 점을 적기</td></tr>
+<tr><td class="k">판정판 "Body 첫 줄" 규칙과 스캔 줄 순서가 충돌</td><td>D2, D3</td><td>설비 단말에서는 스캔 줄을 판정판 위에 둘 수 있다고 적기</td></tr>
+<tr><td class="k"><code>Titled</code> 제목줄에 범례·글·버튼이 몰리면 제목이 잘림</td><td>D2, D3</td><td>제목줄 도구 개수 한도나 배치 예시</td></tr>
+<tr><td class="k">빈 곳·과대 요소(숫자 하나짜리 카드, 큰 타일, 넓은 Fill 열)</td><td>D2, D3 (채점)</td><td>render 점검이 잡지 못하는 부분이라 PNG 검토 질문에 추가 후보</td></tr>
+</tbody></table></div>
+
+<h2 id="r2">재시연 — 6번 수정 확인 (APC.UI 1.26.2.0)</h2>
+<p>6번 감점을 잡으려고 두 가지를 고친 뒤 같은 프롬프트 3개로 Sonnet을 다시 돌렸습니다. 그래프는 높이에 들어가는 만큼만 눈금을 그리게 했고(<code>ApcTrendChart</code>), SKILL.md 6장 PNG 검토에 "내용보다 큰 박스가 없는가" 질문과 고치는 방법을 넣었습니다. 세 시연 모두 빌드 0/0, render 점검 0건입니다.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>시연</th><th class="c">1차</th><th class="c">재시연</th><th>6번 레이아웃</th><th>남은 감점</th></tr></thead>
+<tbody>
+<tr><td class="k">D1 도장 부스</td><td class="c num">18</td><td class="c num">19</td><td><span class="m o">✓</span> 온도 눈금 20/22/24/26, 겹침 없음</td><td>5 △ 영향 행거 열이 여전히 모든 행에서 굵음</td></tr>
+<tr><td class="k">D2 셀 X-ray</td><td class="c num">19</td><td class="c num">20</td><td><span class="m o">✓</span> 셀 타일이 낮아지고 상태 글자("09 NG")가 들어감. 이력 표가 남은 높이를 채움</td><td>없음</td></tr>
+<tr><td class="k">D3 FIFO 출고</td><td class="c num">19</td><td class="c num">19</td><td><span class="m o">✓</span> 숫자 하나짜리 카드 없이 판정판을 전체 폭으로 둠. 두 표의 행 수가 같아 빈 곳이 없음</td><td>9 △ 출고량과 이력이 맞지 않음(소맥분 200.0 vs 이력 합 115.0)</td></tr>
+</tbody></table></div>
+<div class="shots" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr))">
+  <figure><img src="r2/D1-paintbooth/MainForm.png" alt="D1 재시연 메인 화면" loading="lazy"><figcaption>D1 재시연 — 눈금 간격이 넓어짐</figcaption></figure>
+  <figure><img src="r2/D2-cellxray/MainForm.png" alt="D2 재시연 메인 화면" loading="lazy"><figcaption>D2 재시연 — 낮은 셀 타일, 이력 표 확대</figcaption></figure>
+  <figure><img src="r2/D3-fifo/MainForm.png" alt="D3 재시연 메인 화면" loading="lazy"><figcaption>D3 재시연 — 전체 폭 판정판, 행 수 맞춤</figcaption></figure>
+</div>
+
+<h2>한계</h2>
+<ul>
+  <li>처음 판에서는 D2·D3의 주 동작 항목을 △로 매겼습니다. 스킬 기준(Primary 1개, 입력칸과 같은 높이)을 확인하지 않고 판단한 것이라 사용자 지적에 따라 ✓로 고쳤습니다(18 → 19).</li>
+  <li>도메인마다 한 번씩만 실행했습니다. 채점은 메인 세션(Opus) 한 명이 PNG와 에이전트 보고를 보고 했습니다.</li>
+  <li>앱을 띄워 조작하지 않았습니다. 막기 동작은 render 상태, 보고, 코드 위치 설명으로 판단했습니다.</li>
+  <li>결과물 위치: <code>skill-test/demo-1126/&lt;시연&gt;/</code> (PROMPT.md, REPORT.md, project, out). 재시연은 <code>skill-test/demo-1126-r2/</code>에 있습니다.</li>
+</ul>
+</div>

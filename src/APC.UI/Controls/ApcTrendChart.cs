@@ -54,12 +54,24 @@ namespace APC.UI.Controls
         /// <summary>min~max를 담는 보기 좋은 눈금 범위(1·2·5×10ⁿ 간격).</summary>
         internal static void NiceRange(double min, double max, int ticks, out double lo, out double hi, out double step)
         {
+            NiceRange(min, max, ticks, int.MaxValue, out lo, out hi, out step);
+        }
+
+        /// <summary>maxLabels: 세로 높이에 들어가는 눈금 글자 수. 넘으면 간격을 한 단계씩 넓힌다(1→2→5→10).</summary>
+        internal static void NiceRange(double min, double max, int ticks, int maxLabels, out double lo, out double hi, out double step)
+        {
             if (max < min) { var t = min; min = max; max = t; }
             if (max - min < 1e-9) { min -= 1; max += 1; }
             double range = Nice(max - min, false);
             step = Nice(range / (ticks - 1), true);
             lo = Math.Floor(min / step) * step;
             hi = Math.Ceiling(max / step) * step;
+            while (Math.Round((hi - lo) / step) + 1 > Math.Max(2, maxLabels))
+            {
+                step = Nice(step * 1.5, true);
+                lo = Math.Floor(min / step) * step;
+                hi = Math.Ceiling(max / step) * step;
+            }
         }
 
         private static double Nice(double x, bool round)
@@ -89,13 +101,14 @@ namespace APC.UI.Controls
             }
             double lo, hi, step;
             double min = Min(all), max = Max(all), margin = (max - min) * 0.05;   // 기준선이 테두리에 겹치지 않게 여유
-            NiceRange(min - margin, max + margin, Ticks, out lo, out hi, out step);
+            int textH = font.Height;
+            int fitLabels = (Height - textH - S(20)) / (textH * 3 / 2) + 1;   // 눈금 글자 사이 반 줄 이상 띄움
+            NiceRange(min - margin, max + margin, Ticks, fitLabels, out lo, out hi, out step);
             string fmt = "F" + Math.Max(0, (int)Math.Ceiling(-Math.Log10(step)));
 
             int labelW = 0;
             for (double v = lo; v <= hi + step / 2; v += step)
                 labelW = Math.Max(labelW, TextRenderer.MeasureText(v.ToString(fmt, CultureInfo.CurrentCulture), font).Width);
-            int textH = font.Height;
             var plot = Rectangle.FromLTRB(S(8) + labelW, S(10), Width - S(12), Height - textH - S(10));
             if (plot.Width < 10 || plot.Height < 10) return;
 
