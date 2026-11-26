@@ -119,7 +119,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
   - Text: limits "5.0 이하 OK", "기준 50.0 이하 · 경고 45.0 이상"; alarms "상한 초과 65.4 ℃ (상한 65.0)". Never "초과" or "도달 알람" for an equal value. Never show rule explanations like "같으면 OK".
   - One judge function per measured item, used by status text, lamp, card color, main tile/card, alarm history and detail dialog table alike.
 - **Font**: theme font and size as is. No `new Font(...)` or size multipliers — only `ApcTheme.GetFont()` (bold `GetFont(FontStyle.Bold)`). Bold only for section/group titles and value emphasis — field labels (`Caption`, `AddFieldRow`) are regular.
-- **Units**: input labels `하중 상한 (kN)`; display via `ApcValueCard.Unit` or column header `최대 하중(kN)`. Never put the unit inside a value cell.
+- **Units**: input labels `하중 상한 (kN)`; display via `ApcValueCard.Unit` or column header `최대 하중(kN)`. Never put the unit inside a value cell. A column mixing items (최대값 of 온도·습도·풍속) → unit in the item cell of the same row (`습도 (%RH)`).
 - **Spacing**: never by number. Screens use `Columns()`/`Row()`, dialogs the `ApcForm` helpers.
 
 **Screen hierarchy** (render cannot check these — verify yourself)
@@ -169,6 +169,7 @@ Copy this list into your response and tick each item. On failure, fix and redo f
   - [ ] No empty area below or beside a table/chart, no lopsided row?
   - [ ] No box bigger than its content — a one-number card wider than ~1/4 of the screen, tiles taller than their default `S(96)`, a `Fill` column whose longest text uses under half its width? Fix: narrow it with `Columns(..., percents)` and give the space to the panel/table, keep tiles at a fixed row height and let the Fill table take the rest, set short-text columns to fixed width.
   - [ ] Sample values agree (step 5)?
+  - [ ] Every number's unit readable on screen — card unit, column header, or the row's item cell for a mixed column?
   - [ ] Every table lamp column readable as text — `ApcLampValue` word, or a "판정"/"내용" text column in the same row? Color-only tiles have their status said by the judge panel or a table row?
 - [ ] Report: PNG paths, 점검 0건, build warnings 0
 - [ ] 확인 질문: own report section with the 4 group headings (step 4), every item "A로 했습니다. B로 할까요?"; top ones asked if the user can answer
@@ -182,13 +183,13 @@ Copy this list into your response and tick each item. On failure, fix and redo f
 3. **Report** (in Korean): PNG paths, last `점검 0건`, build warnings 0. Keep limits you chose as constants next to the judge function.
 4. **확인 질문** — after the first build, turn every part you decided yourself (not taken from the requirement) into a question for the user. Group them:
    - **정한 기준값**: limits, warning start, boundary inclusion, decimals the requirement did not give.
-   - **해석**: wording you could read two ways — e.g. "highlight X" when every row matches, what the judge panel speaks for (whole line or selected unit), which actions count as blocked.
+   - **해석**: wording you could read two ways — e.g. a percent or ratio with no stated base ("경계 10% 안쪽": of the band width or of the nominal value?), "highlight X" when every row matches, what the judge panel speaks for (whole line or selected unit), which actions count as blocked.
    - **배치**: where two rules conflicted or no example existed and you picked a layout (scan row above the judge panel, status words in tiles).
    - **데이터 모양**: things you invented — barcode/label format, reason lists, approver IDs, which fields the data source supplies.
 
    - Every rule you found ambiguous or conflicting that changed the screen is also a 해석 or 배치 question here — not only a note on the skill. Reread your notes before writing the list.
    - Each question states what you built and one alternative, in the form "A로 했습니다. B로 할까요?", so the user can answer "yes" or pick B: "전처리·프라이머 관리 범위를 베이스·클리어와 같게(21.0~25.0 ℃) 했습니다. 부스별 범위를 따로 둘까요?" No statements without a question, no open questions without B.
-   - Order by impact (blocking and verdict rules first); at most 8, merge minor ones. Keep at least one 해석 or 배치 question if you made any such call.
+   - Order by impact (blocking and verdict rules first). Count before writing: at most 8 — with 9 or more, merge minor ones (e.g. all invented ID formats into one) or move the least important into one closing line. Keep at least one 해석 or 배치 question if you made any such call.
    - In the report this is its own section "확인 질문" with the group names as sub-headings — separate from any "정한 기준값" list the request asks for.
    - If you can ask the user now (an ask-user tool is available and the request did not say questions are impossible), ask the top 4 with it — first option = what you built — and list the rest in the report. Otherwise list all of them in the report under "확인 질문".
    - Apply the answers (constants, layout, texts) and go back to step 1.
