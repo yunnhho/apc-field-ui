@@ -21,6 +21,8 @@ namespace APC.UI.Controls
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+            // ButtonBase는 Opaque를 켜 배경을 안 칠한다 → 네모·글자 밖에 이전 화면이 남는다(실행 화면만, render는 정상)
+            SetStyle(ControlStyles.Opaque, false);
             BackColor = Color.Transparent;
             AutoSize = false;
             ApcTheme.Changed += OnThemeChanged;

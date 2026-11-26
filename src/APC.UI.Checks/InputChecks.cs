@@ -62,6 +62,8 @@ namespace APC.UI.Checks
                 chk.Text = "예열 온도 180~220 ℃ 확인";
                 Check(chk.Width > w, "checkbox: width grows with text");
                 Check(!chk.Checked, "checkbox: starts unchecked");
+                var getStyle = typeof(Control).GetMethod("GetStyle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                Check(!(bool)getStyle.Invoke(chk, new object[] { ControlStyles.Opaque }), "checkbox: paints background (not Opaque, no ghosting in live app)");
                 int changed = 0;
                 chk.CheckedChanged += (s, e) => changed++;
                 chk.Checked = true;
