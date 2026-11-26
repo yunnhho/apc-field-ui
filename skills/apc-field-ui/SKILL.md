@@ -151,7 +151,6 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 - Variety: no repeated text or intervals (mix units, texts, values, time gaps).
 - States: mostly normal with meaningful faults. Monitoring: at least one each of Warn, Alarm, Stop (no Warn if the requirement has no warning stage). Judging: a few NG (no unfounded Warn).
 - Limits: at least one row **equal** to a limit (upper 5.0 Pa → a 5.0 Pa OK row; with a warning band, a row at the warning start).
-- Totals: today's output/OK/NG/defect rate agree with each other and are ≥ history rows.
 
 ## 5. Data interface
 
