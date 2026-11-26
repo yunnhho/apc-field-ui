@@ -168,9 +168,10 @@ Copy this list into your response and tick each item. On failure, fix and redo f
   - [ ] Every blocked action stays blocked — the user cannot unlock it by changing a combo/field on the screen or dialog?
   - [ ] No empty area below or beside a table/chart, no lopsided row?
   - [ ] No box bigger than its content — a one-number card wider than ~1/4 of the screen, tiles taller than their default `S(96)`, a `Fill` column whose longest text uses under half its width? Fix: narrow it with `Columns(..., percents)` and give the space to the panel/table, keep tiles at a fixed row height and let the Fill table take the rest, set short-text columns to fixed width.
-  - [ ] Sample values agree (step 5) and status readable as text, not color only?
+  - [ ] Sample values agree (step 5)?
+  - [ ] Every table lamp column readable as text — `ApcLampValue` word, or a "판정"/"내용" text column in the same row? Color-only tiles have their status said by the judge panel or a table row?
 - [ ] Report: PNG paths, 점검 0건, build warnings 0
-- [ ] 확인 질문: every guessed part listed as a question (step 4); top ones asked if the user can answer
+- [ ] 확인 질문: own report section with the 4 group headings (step 4), every item "A로 했습니다. B로 할까요?"; top ones asked if the user can answer
 ```
 
 1. **Build + render + checks** in one command:
@@ -185,7 +186,10 @@ Copy this list into your response and tick each item. On failure, fix and redo f
    - **배치**: where two rules conflicted or no example existed and you picked a layout (scan row above the judge panel, status words in tiles).
    - **데이터 모양**: things you invented — barcode/label format, reason lists, approver IDs, which fields the data source supplies.
 
-   Each question states what you built and one alternative, so the user can answer "yes" or pick the other: "전처리·프라이머 관리 범위를 베이스·클리어와 같게(21.0~25.0 ℃) 했습니다. 부스별 범위가 따로 있나요?" Order by impact (blocking and verdict rules first); at most 8, merge minor ones.
+   - Every rule you found ambiguous or conflicting that changed the screen is also a 해석 or 배치 question here — not only a note on the skill. Reread your notes before writing the list.
+   - Each question states what you built and one alternative, in the form "A로 했습니다. B로 할까요?", so the user can answer "yes" or pick B: "전처리·프라이머 관리 범위를 베이스·클리어와 같게(21.0~25.0 ℃) 했습니다. 부스별 범위를 따로 둘까요?" No statements without a question, no open questions without B.
+   - Order by impact (blocking and verdict rules first); at most 8, merge minor ones. Keep at least one 해석 or 배치 question if you made any such call.
+   - In the report this is its own section "확인 질문" with the group names as sub-headings — separate from any "정한 기준값" list the request asks for.
    - If you can ask the user now (an ask-user tool is available and the request did not say questions are impossible), ask the top 4 with it — first option = what you built — and list the rest in the report. Otherwise list all of them in the report under "확인 질문".
    - Apply the answers (constants, layout, texts) and go back to step 1.
 
