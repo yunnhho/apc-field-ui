@@ -1,0 +1,5 @@
+R1=sonnet
+R2=opus
+R3=haiku
+R4=sonnet (1126 재실행, SKILL.md db3b334)
+R5=opus (1126 재실행, SKILL.md db3b334)
