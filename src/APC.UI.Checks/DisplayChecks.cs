@@ -16,6 +16,10 @@ namespace APC.UI.Checks
             Check(lo < 5 && hi > 5 && step > 0, "trend: flat data still gets a range");
             ApcTrendChart.NiceRange(0, 0.37, 5, out lo, out hi, out step);
             Check(lo == 0 && hi >= 0.37 && step < 0.2, "trend: small values get fractional steps");
+            ApcTrendChart.NiceRange(20.4, 25.6, 5, 4, out lo, out hi, out step);
+            Check((hi - lo) / step + 1 <= 4 && lo <= 20.4 && hi >= 25.6, "trend: short chart widens step to fit labels (was " + lo + "~" + hi + " / " + step + ")");
+            ApcTrendChart.NiceRange(20.4, 25.6, 5, 1, out lo, out hi, out step);
+            Check((hi - lo) / step + 1 <= 2 && lo <= 20.4 && hi >= 25.6, "trend: at least 2 labels (low~high) on a tiny chart");
             using (var chart = new ApcTrendChart())
             {
                 chart.SetValues(new[] { 1.0, double.NaN, 2.0 });
