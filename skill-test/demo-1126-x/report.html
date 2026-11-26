@@ -1,0 +1,177 @@
+<title>APC 스킬 시연 1126-X</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 공장 문서 감각: 회청 금속 바탕 + 먹색 글자, 붉은색은 APCSOFT 표식에만. 점수는 램프 색 */
+:root {
+  --bg: #e9edf1; --panel: #fdfdfe; --panel-2: #f1f4f7; --ink: #1a1f26; --muted: #5d6b7a; --line: #b9c3cd;
+  --navy: #2a4058; --brand: #e60012; --run: #15803d; --warn: #a16207; --alarm: #c81e1e;
+  --run-bg: #dcf3e4; --warn-bg: #fbf0cf; --alarm-bg: #fbe0e0;
+  --font: "IBM Plex Sans KR", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161b21; --panel: #1f262e; --panel-2: #252d36; --ink: #e6ebf0; --muted: #9aa7b4; --line: #3a4652;
+  --navy: #8fb1d6; --brand: #ff4d5a; --run: #4ade80; --warn: #facc15; --alarm: #f87171;
+  --run-bg: #173324; --warn-bg: #3a3112; --alarm-bg: #3d1c1c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161b21; --panel: #1f262e; --panel-2: #252d36; --ink: #e6ebf0; --muted: #9aa7b4; --line: #3a4652;
+  --navy: #8fb1d6; --brand: #ff4d5a; --run: #4ade80; --warn: #facc15; --alarm: #f87171;
+  --run-bg: #173324; --warn-bg: #3a3112; --alarm-bg: #3d1c1c; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.35rem; padding-left: 12px; border-left: 3px solid var(--brand); margin-top: 52px; margin-bottom: 14px; }
+h3 { font-size: 1.05rem; margin: 26px 0 10px; }
+p { margin: 0 0 8px; }
+.head { display: grid; gap: 10px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); }
+.head .fn { color: var(--brand); font-weight: 700; font-size: .95rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: .9rem; }
+.facts b { color: var(--ink); font-weight: 600; }
+.num { font-variant-numeric: tabular-nums; }
+
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.scores a { background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; color: inherit; text-decoration: none; display: grid; gap: 2px; }
+.scores a:hover, .scores a:focus-visible { border-color: var(--navy); outline: none; }
+.scores .n { font-size: 2.2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--run); }
+.scores .n small { font-size: 1rem; color: var(--muted); font-weight: 500; }
+.scores span { color: var(--muted); font-size: .9rem; }
+
+.tbl { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.tbl.wide table { min-width: 760px; }
+th { text-align: left; font-weight: 700; padding: 9px 12px; background: var(--panel-2); border-bottom: 2px solid var(--ink); white-space: nowrap; }
+td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+td.c, th.c { text-align: center; }
+td.k { font-weight: 600; white-space: nowrap; }
+tr.total td { font-weight: 700; background: var(--panel-2); border-top: 2px solid var(--ink); }
+.m { display: inline-block; min-width: 1.6em; text-align: center; font-weight: 700; }
+.m.o { color: var(--run); } .m.t { color: var(--warn); } .m.x { color: var(--alarm); }
+
+details { background: var(--panel); border: 1px solid var(--line); }
+summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+summary:focus-visible { outline: 2px solid var(--navy); }
+pre { margin: 0; padding: 12px 16px 16px; white-space: pre-wrap; word-break: break-word; font: .88rem/1.65 var(--font); border-top: 1px solid var(--line); background: var(--panel-2); }
+
+.shots { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+figure { margin: 0; background: var(--panel); border: 1px solid var(--line); }
+figure img { display: block; width: 100%; height: auto; }
+figcaption { padding: 6px 10px; font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); }
+ul { margin: 0; padding-left: 20px; }
+li { margin: 3px 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.box { background: var(--panel); border: 1px solid var(--line); padding: 12px 16px; }
+.box h4 { margin: 0 0 6px; font-size: .95rem; }
+.meta { color: var(--muted); font-size: .88rem; margin-bottom: 10px; }
+@media (max-width: 760px) { .scores, .shots, .two { grid-template-columns: 1fr; } }
+</style>
+<div class="wrap">
+<header class="head">
+  <div class="fn">APC.UI · apc-field-ui 스킬 시연</div>
+  <h1>요구사항 엑셀만 준 시연 1126-X</h1>
+  <div class="facts">
+    <span>날짜 <b>2026-11-26</b></span>
+    <span>모델 <b>Sonnet 5.5 × 2 (같은 프롬프트, 병렬)</b></span>
+    <span>입력 <b>연마공정 바코드 시스템 구축 정보_R2.xlsx + 짧은 프롬프트</b></span>
+    <span>채점 <b>메인 세션(Opus), 1126-E와 같은 10항목 × 2점</b></span>
+  </div>
+  <p>지금까지는 화면 요청·도메인 정보·UX 기준을 프롬프트에 자세히 적었습니다. 이번에는 고객사 요구사항 엑셀 경로와 작업 폴더·보고 형식만 주고, 화면 구성·기준값·UX 기준은 하나도 적지 않았습니다. 같은 프롬프트로 두 번 돌려 결과가 얼마나 갈리는지도 봤습니다.</p>
+  <div class="scores">
+    <a href="#x1"><span class="n num">18<small> / 20</small></span><span>X1 · 4분 57초, 도구 33회, 153k</span></a>
+    <a href="#x2"><span class="n num">18<small> / 20</small></span><span>X2 · 15분 8초, 도구 44회, 158k</span></a>
+    <a href="#base"><span class="n num" style="color:var(--navy)">18~19<small> / 20</small></span><span>비교: 1126-E 자세한 프롬프트 3건</span></a>
+  </div>
+</header>
+
+<h2>결론</h2>
+<div class="two">
+  <div class="box"><h4>점수는 같은 수준</h4>
+  <ul>
+    <li>두 결과 모두 빌드 0/0, render 점검 0건, 확인 질문 형식 준수.</li>
+    <li>프롬프트에서 뺀 UX 기준(3초 정보를 맨 위에, 막고 이유를 글로)도 스킬만으로 지켜졌습니다. 둘 다 빨간 판정판과 "가동 중 · 전송 불가" 류의 차단 문구를 만들었습니다.</li>
+    <li>엑셀의 화면 요구(저속 2·고속 4 스캔, 조건 다르면·레시피 없으면 미전송, 가동 중 전송 불가)는 둘 다 반영했습니다.</li>
+  </ul></div>
+  <div class="box"><h4>다른 점은 해석이 갈린다는 것</h4>
+  <ul>
+    <li><b>"고속 8대 저속 6대 * 8줄 = 56대"</b>를 X1은 14대로, X2는 14호기 × 4칸으로 읽었습니다. X2는 칸마다 LOT 2/4개를 다시 둬서 고속 1대에 바렐 16개가 되는 구조입니다.</li>
+    <li>엑셀에 적힌 <b>담당자 비밀번호 강제 입력</b>을 X1은 빼먹었고 X2는 만들었습니다.</li>
+    <li>X2가 3배 오래 걸렸습니다. 표 셀 편집 중 경고창 때문에 render가 멈춰 고치느라 시간을 썼습니다.</li>
+    <li>두 에이전트 모두 이 갈림(56대 구성, 강제 입력)을 확인 질문으로 되물었습니다. 답 한 번이면 맞출 수 있는 수준입니다.</li>
+  </ul></div>
+</div>
+
+<h3>실제 FA 프로젝트 결정과 비교</h3>
+<p class="meta">C:\00W_FA\구현계획.md에 사용자와 대화로 정한 결정이 있습니다. 엑셀만으로는 알 수 없는 것이라 채점에는 넣지 않았습니다.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>실제 결정</th><th>X1</th><th>X2</th></tr></thead>
+<tbody>
+<tr><td>메인 리스트에 바렐 칸을 나눠 표시(저속 B1·B2, 고속 2칸 × 2줄)</td><td>"LOT 외 1"로 접음</td><td>바렐번호를 한 칸에 "08, 13"으로 모음</td></tr>
+<tr><td>바렐 1개 = LOT 1개, 같은 LOT을 두 칸에 넣으면 경고</td><td>조건 비교만</td><td>조건 비교만</td></tr>
+<tr><td>"담당자 비밀번호"는 조건 강제 입력이 아니라 시스템 설정 진입</td><td>미구현</td><td>엑셀 문구대로 강제 조건 입력</td></tr>
+<tr><td>가동 클릭 자동 시작은 보류</td><td>구현 안 함</td><td>구현 안 함</td></tr>
+<tr><td>스캐너 Enter가 경고창을 닫는 문제 해결</td><td>언급 없음</td><td>render 멈춤으로 비슷한 함정을 겪음</td></tr>
+</tbody></table></div>
+<p style="margin-top:10px">엑셀 문구를 그대로 따르면 실제 결정과 다른 해석이 나옵니다(비밀번호). 이건 모델 탓이 아니라 엑셀에 없는 정보입니다. 엑셀만 줄 때는 확인 질문에 답하는 단계가 꼭 필요합니다.</p>
+
+<h2>평가</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>#</th><th>항목</th><th class="c">X1</th><th class="c">X2</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="k">3초 정보 맨 위</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>X1 "알람 3건", X2 "RPM 이탈 · 352 rpm (기준 370 ± 10)"</td></tr>
+<tr><td>2</td><td class="k">주 동작 스캔·큰 버튼</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>설비 선택 → 스캔 dialog</td></tr>
+<tr><td>3</td><td class="k">메인이 막고 이유를 글로</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>X1 버튼 왼쪽 상시 문구, X2 회색 아이콘 + 누르면 Warn</td></tr>
+<tr><td>4</td><td class="k">dialog 차단</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>X1 경고창·미전송, X2 [전송] 꺼짐 + 하단 이유</td></tr>
+<tr><td>5</td><td class="k">도메인 핵심</td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m t">△</span></td><td>X1 메인에 바렐 칸 구조 없음 / X2 위치 × LOT 이중 구조</td></tr>
+<tr><td>6</td><td class="k">레이아웃 마무리</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m t">△</span></td><td>X2 표 아래 1/5 빔, 전송 열이 아이콘뿐</td></tr>
+<tr><td>7</td><td class="k">빌드 0/0, 점검 0건</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td></td></tr>
+<tr><td>8</td><td class="k">요구 항목 누락 없음</td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m o">✓</span></td><td>X1 비밀번호 강제 입력 누락</td></tr>
+<tr><td>9</td><td class="k">경계값 샘플</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>둘 다 시작 3분 제외 구간 샘플, X2는 상한 380 = 정상</td></tr>
+<tr><td>10</td><td class="k">지침 피드백</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>아래 표</td></tr>
+<tr class="total"><td></td><td>합계</td><td class="c num">18</td><td class="c num">18</td><td></td></tr>
+</tbody></table></div>
+
+<h2>지침·라이브러리 빈 곳</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>나온 곳</th><th>내용</th></tr></thead>
+<tbody>
+<tr><td>X1</td><td>"한국어 .cs heredoc 금지"가 Python heredoc에도 해당하는지 없음. 실제로 치환이 실패했습니다.</td></tr>
+<tr><td>X1</td><td>render "표 아래 빔" 참고와 "정해진 목록은 그대로" 지침이 충돌. 탭마다 행 수가 다를 때 고정 높이 기준도 없음.</td></tr>
+<tr><td>X2</td><td>JudgeView와 FailureAnalysisView 중 고르는 기준 없음. 많은 설비(56)를 탭과 타일 중 어떻게 보일지 없음.</td></tr>
+<tr><td>X2</td><td>스캔 dialog를 표 셀 입력(LotInputDialog)으로 할지 <code>ApcScanBox</code>로 할지 불분명.</td></tr>
+<tr><td>X2</td><td>CellEndEdit에서 모달 Warn을 BeginInvoke로 띄우면 render가 간헐적으로 멈춤. "스캔 중 경고는 BeginInvoke" 지침이 셀 편집 경로에서는 함정입니다.</td></tr>
+</tbody></table></div>
+
+<h2 id="x1">X1 · 18/20</h2>
+<p class="meta">Polishing · 설비 14대(고속 8, 저속 6) · 판정판 + 카드 2 / 탭 / 설비 표 8행 + [작업 시작] / SAP 전송 이력</p>
+<div class="shots">
+  <figure><img src="X1/out/MainForm.png" alt="X1 메인 화면: 빨간 판정판 알람 3건, 고속 연마 설비 표, SAP 전송 이력 표"><figcaption>MainForm</figcaption></figure>
+  <figure><img src="X1/out/WorkStartDialog.png" alt="X1 작업 시작 dialog: LOT 스캔 4칸, 바렐번호, 자재코드, 칩 구분 정보 띠"><figcaption>WorkStartDialog</figcaption></figure>
+</div>
+
+<h2 id="x2">X2 · 18/20</h2>
+<p class="meta">Polish · 56칸(14호기 × 4) · 판정판 + 카드 3 / 탭 4 / 설비 표 12행 / dialog 3개(스캔, 담당자 확인, 조건 강제 입력)</p>
+<div class="shots">
+  <figure><img src="X2/out/MainForm.png" alt="X2 메인 화면: 빨간 판정판 RPM 이탈, 저속연마 1~3호기 설비 표"><figcaption>MainForm</figcaption></figure>
+  <div style="display:grid;gap:12px">
+    <figure><img src="X2/out/WorkStartDialog.png" alt="X2 작업 조건 전송 dialog: 조건 불일치로 전송 꺼짐"><figcaption>WorkStartDialog</figcaption></figure>
+    <figure><img src="X2/out/AdminPasswordDialog.png" alt="X2 담당자 비밀번호 확인 dialog"><figcaption>AdminPasswordDialog</figcaption></figure>
+    <figure><img src="X2/out/ForceConditionDialog.png" alt="X2 조건 강제 입력 dialog"><figcaption>ForceConditionDialog</figcaption></figure>
+  </div>
+</div>
+
+<h2 id="base">입력 프롬프트</h2>
+<details open><summary>X1·X2 공통 (작업 폴더만 다름)</summary><pre>
+apc-field-ui 스킬로 고객사 요구사항 파일에 맞는 APCSOFT 현장 PC 프로그램을 만든다. 먼저 Skill 도구로 apc-field-ui 스킬을 불러 그 지침을 끝까지 따른다(Skill 도구가 없을 때만 Read로 `C:\Users\rladb\.claude\skills\apc-field-ui\SKILL.md`를 읽는다). 앱 exe를 실행했으면 끝나기 전에 닫는다.
+
+- 고객사 요구사항: C:\00W_FA\연마공정 바코드 시스템 구축 정보_R2.xlsx (읽기만 한다. C:\00W_FA의 다른 파일·폴더는 열지 않는다)
+- 작업 폴더: C:\00P_apc-field-ui\skill-test\demo-1126-x\X1\project (Git Bash: /c/00P_apc-field-ui/skill-test/demo-1126-x/X1/project)
+- render PNG: C:\00P_apc-field-ui\skill-test\demo-1126-x\X1\out\&lt;형식이름&gt;.png
+- 고객사 default. 사용자에게 질문할 수 없다.
+- 저장소의 다른 파일은 고치지 않는다. git 명령 금지.
+
+끝나면 보고: 1) 만든 화면·dialog와 PNG 경로 2) 마지막 render 점검 건수, 빌드 경고·오류 수 3) UX 결정 3~5줄 4) 정한 기준값 5) 요구사항 파일에서 읽은 것과 화면에 반영하지 않은 것 6) 스킬 지침에서 막히거나 모호했던 점. 스킬이 확인 질문을 요구하면 그 형식대로 함께 보고한다.
+</pre></details>
+<p class="meta" style="margin-top:10px">비교 기준 1126-E(E1 침탄로 18, E2 출하 포장 18, E3 금형 교체 19)는 화면 요청·도메인 정보·UX 기준 3줄을 프롬프트에 모두 적었습니다. 각 시연의 에이전트 보고 원문은 <code>X1/REPORT.md</code>, <code>X2/REPORT.md</code>에 있습니다.</p>
+</div>
