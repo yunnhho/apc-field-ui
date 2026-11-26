@@ -169,7 +169,8 @@ Copy this list into your response and tick each item. On failure, fix and redo f
   - [ ] No empty area below or beside a table/chart, no lopsided row?
   - [ ] No box bigger than its content — a one-number card wider than ~1/4 of the screen, tiles taller than their default `S(96)`, a `Fill` column whose longest text uses under half its width? Fix: narrow it with `Columns(..., percents)` and give the space to the panel/table, keep tiles at a fixed row height and let the Fill table take the rest, set short-text columns to fixed width.
   - [ ] Sample values agree (step 5) and status readable as text, not color only?
-- [ ] Report: PNG paths, 점검 0건, build warnings 0, list of chosen limits
+- [ ] Report: PNG paths, 점검 0건, build warnings 0
+- [ ] 확인 질문: every guessed part listed as a question (step 4); top ones asked if the user can answer
 ```
 
 1. **Build + render + checks** in one command:
@@ -177,7 +178,16 @@ Copy this list into your response and tick each item. On failure, fix and redo f
    - Type names are class names only. With a capture, append `--compare <capture.png>` (shown beside the first type).
    - Fix every `점검:` line and build warning, rerun until the `== 완료` line. `참고:` lines do not count but are judged by 4-1 "Sample data". Render owns the check list.
 2. **Open the PNGs** and check what the tool cannot: all of 4-1 (hierarchy, status colors, sample data), step 5 consistency, status readable as text not just color, no big gaps or lopsided layout. Fix and go back to 1.
-3. **Report** (in Korean): PNG paths, last `점검 0건`, build warnings 0. Limits you chose because the requirement lacked them (limits, warning start, decimals) go in a "정한 기준값" list — keep them as constants next to the judge function.
+3. **Report** (in Korean): PNG paths, last `점검 0건`, build warnings 0. Keep limits you chose as constants next to the judge function.
+4. **확인 질문** — after the first build, turn every part you decided yourself (not taken from the requirement) into a question for the user. Group them:
+   - **정한 기준값**: limits, warning start, boundary inclusion, decimals the requirement did not give.
+   - **해석**: wording you could read two ways — e.g. "highlight X" when every row matches, what the judge panel speaks for (whole line or selected unit), which actions count as blocked.
+   - **배치**: where two rules conflicted or no example existed and you picked a layout (scan row above the judge panel, status words in tiles).
+   - **데이터 모양**: things you invented — barcode/label format, reason lists, approver IDs, which fields the data source supplies.
+
+   Each question states what you built and one alternative, so the user can answer "yes" or pick the other: "전처리·프라이머 관리 범위를 베이스·클리어와 같게(21.0~25.0 ℃) 했습니다. 부스별 범위가 따로 있나요?" Order by impact (blocking and verdict rules first); at most 8, merge minor ones.
+   - If you can ask the user now (an ask-user tool is available and the request did not say questions are impossible), ask the top 4 with it — first option = what you built — and list the rest in the report. Otherwise list all of them in the report under "확인 질문".
+   - Apply the answers (constants, layout, texts) and go back to step 1.
 
 ## Never
 
