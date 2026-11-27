@@ -182,11 +182,16 @@ namespace APC.UI.Tools
         }
 
         private const int LineMaxPx = 6;
+        private const int PipeMaxPx = 24;
+        private const int PipeMinRatio = 5;
 
-        /// <summary>글자 없는 얇은 선(Label 조립의 현재 시각선·눈금선·알람선) — 막대·칸 위를 가로지르는 겹침은 의도한 것이다.</summary>
+        /// <summary>글자 없는 선(Label 조립의 현재 시각선·눈금선·알람선·배관) — 막대·칸·밸브 위를 가로지르는 겹침은 의도한 것이다.</summary>
         private static bool IsLine(Control c)
         {
-            return c is Label && string.IsNullOrEmpty(c.Text) && Math.Min(c.Width, c.Height) <= LineMaxPx;
+            if (!(c is Label) || !string.IsNullOrEmpty(c.Text)) return false;
+            int thin = Math.Min(c.Width, c.Height), length = Math.Max(c.Width, c.Height);
+            // 6 px 이하 선, 또는 배관처럼 가늘고 긴 막대(두께 24 px 이하, 길이가 두께의 5배 이상) — 밸브·상자 밑을 지나는 겹침은 의도한 것
+            return thin <= LineMaxPx || (thin <= PipeMaxPx && length >= thin * PipeMinRatio);
         }
 
         private static void CheckSiblings(Control parent, List<Control> kids, string path, List<string> issues)

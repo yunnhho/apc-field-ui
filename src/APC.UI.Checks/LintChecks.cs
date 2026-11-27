@@ -56,6 +56,16 @@ namespace APC.UI.Checks
                 p.Controls.Add(new Label { Text = "", Left = 10, Top = 10, Width = 200, Height = 30 });
                 p.Controls.Add(new Label { Text = "", Left = 100, Top = 0, Width = 20, Height = 60 });
             }).Any(i => i.Contains("겹침")), "lint: thick blocks overlapping are still reported");
+            Check(!Lint(p =>
+            {
+                p.Controls.Add(new Label { Text = "", Left = 0, Top = 40, Width = 400, Height = 22, BackColor = Color.Green });   // 배관
+                p.Controls.Add(new Label { Text = "V1 열림", Left = 150, Top = 35, Width = 90, Height = 32 });                   // 밸브
+            }).Any(i => i.Contains("겹침")), "lint: textless pipe (long, up to 24 px thick) under a valve is an intended overlap");
+            Check(Lint(p =>
+            {
+                p.Controls.Add(new Label { Text = "", Left = 0, Top = 40, Width = 400, Height = 40 });
+                p.Controls.Add(new Label { Text = "V1 열림", Left = 150, Top = 35, Width = 90, Height = 32 });
+            }).Any(i => i.Contains("겹침")), "lint: a 40 px textless bar over a box is still reported");
             Check(Lint(p => { p.Controls.Add(new ApcTextBox { Top = 3, Width = 100 }); p.Controls.Add(new ApcButton { Text = "B", Left = 120, Width = 60, Height = 34 }); }).Any(i => i.Contains("어긋남")), "lint: misaligned row");
             Check(Lint(p => p.Controls.Add(new TextBox())).Any(i => i.Contains("표준 TextBox")), "lint: standard control");
             Check(Lint(p => { var t = new ApcTextBox { Text = "6205-2RS", Width = 150 }; p.Controls.Add(t); t.HideSelection = false; t.SelectAll(); }).Any(i => i.Contains("선택된 채")), "lint: fully selected text reported");
