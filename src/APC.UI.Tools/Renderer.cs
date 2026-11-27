@@ -139,6 +139,35 @@ namespace APC.UI.Tools
             return d[a.Length, b.Length];
         }
 
+        // DrawToBitmap draws siblings in reverse z-order (the back control lands on top), so the PNG
+        // disagreed with the running app wherever controls overlap. Reverse every child list, draw,
+        // then reverse back. Layout is suspended so the swap never re-docks anything.
+        private static void DrawInZOrder(Control host, Bitmap bmp, Size size)
+        {
+            var containers = Descendants(host).Where(c => c.Controls.Count > 1).ToList();
+            foreach (var c in containers) c.SuspendLayout();
+            try
+            {
+                foreach (var c in containers) ReverseChildren(c);
+                try { host.DrawToBitmap(bmp, new Rectangle(Point.Empty, size)); }
+                finally { foreach (var c in containers) ReverseChildren(c); }
+            }
+            finally { foreach (var c in containers) c.ResumeLayout(false); }
+        }
+
+        private static void ReverseChildren(Control parent)
+        {
+            var kids = parent.Controls.Cast<Control>().ToArray();
+            for (int i = 0; i < kids.Length; i++) parent.Controls.SetChildIndex(kids[i], kids.Length - 1 - i);
+        }
+
+        private static IEnumerable<Control> Descendants(Control c)
+        {
+            yield return c;
+            foreach (Control k in c.Controls)
+                foreach (var d in Descendants(k)) yield return d;
+        }
+
         // ponytail: 화면 밖에 잠깐 띄워서 그린다. 창 크기는 OS 최대 창 크기(대개 화면 크기)로 잘릴 수 있다; 더 큰 캡처가 필요하면 PrintWindow 방식으로 바꾼다.
         private static Bitmap Draw(Control view, Size? requested, List<string> issues)
         {
@@ -168,7 +197,7 @@ namespace APC.UI.Tools
                 }
 
                 var bmp = new Bitmap(size.Width, size.Height);
-                host.DrawToBitmap(bmp, new Rectangle(Point.Empty, size));
+                DrawInZOrder(host, bmp, size);
                 return bmp;
             }
             finally

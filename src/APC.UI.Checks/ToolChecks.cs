@@ -35,6 +35,8 @@ namespace APC.UI.Checks
                 Check(bmp.Width == 1920 && bmp.Height == 1080, "render: requested size");
                 Check(bmp.GetPixel(10, 10) != bmp.GetPixel(960, 540), "render: not a blank image");
             }
+            using (var bmp = Renderer.Render(typeof(Program).Assembly.Location, "ZOrderFixture", theme, new Size(400, 300)))
+                Check(bmp.GetPixel(ZOrderFixture.Overlap.X, ZOrderFixture.Overlap.Y).ToArgb() == Color.Blue.ToArgb(), "render: front control drawn over back control (z-order)");
             Check(Throws<RenderException>(() => Renderer.Render(demo, "ProductonView", theme, new Size(800, 600)), "ProductionView"), "render: typo lists candidates");
             Check(Throws<RenderException>(() => Renderer.Render(demo, "ProductionView", Path.Combine(Root, "nope"), new Size(800, 600)), "nope"), "render: bad theme path reported");
             using (var a = new Bitmap(100, 50))
