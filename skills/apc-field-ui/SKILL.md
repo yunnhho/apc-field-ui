@@ -88,7 +88,7 @@ Read [references/dialog.md](references/dialog.md). Gist: inherit `ApcForm`, cons
 | Equipment state cell, tap for detail | `ApcStatusTile` (no subtitle — the reason lives in one place: judge panel or table) |
 | Large OK/NG verdict | `ApcJudgePanel` (OK=Run, NG=Alarm, waiting=Stop). Monitoring screens also put the one "act now" item here |
 | Persistent state (interlock bypassed, test mode, manual run) | `ApcNoticeBar` (not a judge panel). In `Body`: `Columns(bar.Height, new Control[] { bar })` |
-| Name-value of the current target (process, unit, Lot ID, product, recipe) | `ApcInfoStrip`. Inside `Row()`: `Dock = None` + `Width` |
+| Name-value of the current target (process, unit, Lot ID, product, recipe) | `ApcInfoStrip`. Inside `Row()`: `Dock = None` + `Width` ≥ `PreferredWidth` (set values first) |
 | Trend chart / status lamp | `ApcTrendChart` / `ApcLamp` |
 | Settings group (instead of GroupBox) | `ApcGroup` |
 | Tabs (unit group / line switch, instead of TabControl) | `ApcTabStrip` — never fake it with several `ApcButton`s. Top row of body `Row(tabs, ...)` (`FailureAnalysisView`) |

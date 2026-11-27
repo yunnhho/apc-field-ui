@@ -53,6 +53,25 @@ namespace APC.UI.Controls
 
         private static int Px(int px) { return (int)Math.Round(px * ApcTheme.Scale); }
 
+        /// <summary>
+        /// 이름과 값이 모두 잘리지 않는 폭(배율 적용 px). dialog의 AddContent(strip)는 이 폭에 맞춰 dialog를 넓힌다.
+        /// 화면에서 Row() 안에 둘 때는 Width를 이 값 이상으로.
+        /// </summary>
+        public int PreferredWidth
+        {
+            get
+            {
+                if (ApcTheme.Current == null) return 0;
+                var nameFont = ApcTheme.GetFont();
+                var valueFont = ApcTheme.GetFont(FontStyle.Bold);
+                int w = 0;
+                for (int i = 0; i < _names.Length; i++)
+                    w += TextRenderer.MeasureText(_names[i], nameFont).Width + Px(BaseNamePad) * 2
+                       + TextRenderer.MeasureText(_values[i] ?? "", valueFont).Width + Px(BaseValuePad) * 2 + Px(2);   // +2: 표시 측정과의 반올림 차
+                return w;
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;

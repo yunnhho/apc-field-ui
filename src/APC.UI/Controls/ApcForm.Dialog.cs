@@ -244,6 +244,15 @@ namespace APC.UI.Controls
             int btnW = ApcTheme.Px(ApcLayout.FooterButtonWidth), btnH = ApcTheme.Px(ApcLayout.FooterButtonHeight);
             bool hasFooter = _footerConfirm != null;
 
+            // 정보판 값이 잘리지 않게 dialog를 넓힌다(SetupDialog 폭은 최소값) — 폭을 추측하고 render로 맞추지 않게.
+            foreach (var b in _blocks)
+            {
+                var strip = b.Content as ApcInfoStrip;
+                if (strip == null) continue;
+                int need = strip.PreferredWidth + pad * 2 + Padding.Left + Padding.Right;
+                if (ClientSize.Width < need) ClientSize = new Size(need, ClientSize.Height);
+            }
+
             // 이름표 열: 묶음 안 이름표는 묶음 안쪽 여백만큼 좁게 → 입력칸 왼쪽 끝이 dialog 전체에서 같다.
             // 열 제목 줄이 있는 묶음(표처럼 쓰는 묶음)은 제 이름표 열만 쓴다 — 긴 행 이름(블럭명 등)이 다른 묶음의 이름표·입력칸을 벌리지 않게.
             int labelW = 0;

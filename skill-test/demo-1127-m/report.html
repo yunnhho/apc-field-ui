@@ -253,6 +253,40 @@ dialog: 밸브 조작(선택한 밸브 정보 읽기 전용, 열기/닫기, 작�
 </tbody></table></div>
 <p style="margin-top:10px">R-M1의 △: <code>FillRows</code>를 5행 표에 써서 행 높이가 130 px로 과대해졌습니다. 남은 것: 주 동작(스캔 칸·주 버튼이 작은 한 줄)이 M1·M2에서 4회째 △, <code>ApcInfoStrip</code> 짧은 값 말줄임이 2회 나왔습니다. 다음 손볼 곳입니다.</p>
 
+<h2>2·3차 재시연</h2>
+<p>1차 재시연에서 남은 문제를 고친 뒤 같은 화면 3종을 두 번 더 돌렸습니다(<code>demo-1127-r2</code>, <code>demo-1127-r3</code>). 채점 기준 두 가지를 바로잡고 모든 회차를 다시 채점했습니다.</p>
+<ul>
+  <li><b>2번 주 동작</b>: "큰 버튼" → "스캔 + Primary 버튼 하나, 판정판 바로 아래 찾기 쉬운 곳". 스킬 기준(버튼 = 입력칸 높이)을 유지하기로 정했습니다. M1·M2가 네 번 연속 △였던 원인이 채점 기준과 스킬의 어긋남이었습니다.</li>
+  <li><b>9번 경계값</b>: 경계가 사람 입력값에만 있으면(M1 총중량) 판정 코드의 경계 포함 여부로 봅니다. M1은 네 회차 모두 경계 포함으로 맞았습니다.</li>
+</ul>
+<div class="tbl wide"><table><thead><tr><th>회차</th><th>APC.UI</th><th class="c">M1 팔레트</th><th class="c">M2 체결</th><th class="c">M3 탱크</th><th class="c">합</th></tr></thead><tbody>
+<tr><td class="k">1127-M</td><td>1.27</td><td class="c num">19</td><td class="c num">19</td><td class="c num">19</td><td class="c num">57</td></tr>
+<tr><td class="k">R</td><td>1.28.0</td><td class="c num">19</td><td class="c num">20</td><td class="c num">19</td><td class="c num">58</td></tr>
+<tr><td class="k">R2</td><td>1.28.1</td><td class="c num">20</td><td class="c num">19</td><td class="c num">19</td><td class="c num">58</td></tr>
+<tr><td class="k">R3</td><td>1.29.0</td><td class="c num">19</td><td class="c num">19</td><td class="c num">19</td><td class="c num">57</td></tr>
+</tbody></table></div>
+<p style="margin-top:10px">점수는 19점대에서 멈췄습니다. 남은 감점은 거의 모두 6번(조립 도식의 마무리)입니다. 다만 매 회차 에이전트가 만든 우회와 지침 혼란은 줄었고, 새로 나온 문제는 바로 다음 회차에서 사라졌습니다.</p>
+
+<h3>회차마다 고친 근본 원인</h3>
+<div class="tbl wide"><table><thead><tr><th>회차 뒤</th><th>결과</th><th>근본 원인</th><th>수정</th></tr></thead><tbody>
+<tr><td class="k">R</td><td><code>ApcInfoStrip</code> 짧은 값 말줄임</td><td>폭이 모자라면 모든 값을 같은 비율로 줄여, 10 px만 모자라도 "V2"까지 잘림</td><td>긴 값부터 줄임</td></tr>
+<tr><td class="k">R</td><td><code>FillRows</code> 5행 과대</td><td>새 문구가 "짧은 표는 눕히기" 예외를 말하지 않음</td><td>"8행 이상만" 문구</td></tr>
+<tr><td class="k">R2</td><td>스캔 칸 손 수정</td><td>ReadOnly면 회색 표시칸처럼 보여 아무도 안 씀</td><td><code>ApcScanBox.ScanOnly</code></td></tr>
+<tr><td class="k">R2</td><td>채움 위 글자색</td><td>지난 수정에서 쓴 지침 문구 "text colors StatusText"</td><td>채움 위 = 테마 글자색</td></tr>
+<tr><td class="k">R2</td><td>판정값 둘을 한 색으로</td><td>조립 Label 하나에 두 값</td><td>값마다 Label</td></tr>
+<tr><td class="k">R2</td><td>생성자 이벤트 순서(3회)</td><td><code>Clear()</code>·<code>Titled</code>·<code>Rows.Add</code>가 생성자 안에서 이벤트를 냄</td><td>이벤트 구독은 생성자 마지막</td></tr>
+<tr><td class="k">R2</td><td>판정판 위 스캔 줄</td><td>지침과 <code>JudgeView</code>가 어긋나 보임</td><td>스캔·입력 줄 하나만 위 허용 명시</td></tr>
+<tr><td class="k">R3</td><td>정보판 폭 추측(3회)</td><td>필요한 폭을 알 수단이 없음</td><td><code>PreferredWidth</code> + dialog 자동 넓힘(1.30.0.0)</td></tr>
+</tbody></table></div>
+
+<h3>R3에서 남은 것</h3>
+<ul>
+  <li>5행 표에 <code>FillRows</code>(R-M1 · R3-M1): 지침을 읽고도 "도식과 같은 높이"를 위해 씁니다. 문서로는 안 되므로 행 높이 상한 같은 라이브러리 쪽 결정이 필요합니다.</li>
+  <li>M2 도식 가운데가 큼(네 회차 모두): 볼트 크기를 칸에 맞출 기준이 없습니다.</li>
+  <li><code>ApcGrid.CurrentRow</code>가 <code>Rows.Add</code> 뒤 첫 행으로 잡힘(R3-M3, 11/25에도 추적): 두 번째입니다.</li>
+</ul>
+<p>1.30.0.0 수정(정보판 폭)은 아직 재시연하지 않았습니다.</p>
+
 <h2>한계</h2>
 <ul>
   <li>시연마다 1회 실행입니다. 1~2점 차이는 시연 편차 범위로 봅니다.</li>

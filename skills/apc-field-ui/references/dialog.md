@@ -51,7 +51,7 @@ Per type:
   - Groups using `AddCaptionRow` keep their own label column (a long block name does not push other groups).
   - No trailing → the field fills the width. With trailing (`FieldCaption("신호")`, fields, buttons…) each uses its own `Width`, left to right.
 - **`AddCaptionRow`**: captions sit over the next `AddFieldRow(group, ...)` row's [label, field, trailing...] in order (`""` = none). When rows share columns (port, signal, logic per block), use this once instead of repeating `FieldCaption` per row.
-- **`ApcInfoStrip` in a dialog**: `AddContent(strip)` fills the dialog width (no `Width`). At most 4 name-value pairs per strip; more → a second strip below (`AddContent` twice). Short names ("최종(%)"). Render reports "말줄임(…)으로 잘림" on a strip → widen the `SetupDialog` width, or move pairs to a second strip.
+- **`ApcInfoStrip` in a dialog**: `AddContent(strip)` fills the dialog width (no `Width`). At most 4 name-value pairs per strip; more → a second strip below (`AddContent` twice). Short names ("최종(%)"). The dialog widens itself to the strip's `PreferredWidth` (the `SetupDialog` width is a minimum) — never guess the width or widen it by trial.
 - **Scan fields in a dialog**: `scan.Attach(this)` in the constructor (several: attach all, see SKILL.md 4c "Scan fields"). A confirm check is `ApcCheckBox` in `AddFieldRow("예열 온도", check)`.
 - **`AddContentRow`**: never build card grids with `TableLayoutPanel` (default child `Margin` 3px triggers the render empty-space check).
 - **`SetFooter`**

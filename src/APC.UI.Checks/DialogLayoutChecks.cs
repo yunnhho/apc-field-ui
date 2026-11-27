@@ -25,6 +25,35 @@ namespace APC.UI.Checks
             CheckHelperGuards();
             CheckContentRow();
             CheckCaptionRow();
+            CheckInfoStripWidth();
+        }
+
+        /// <summary>정보판이 든 dialog: 값이 잘리지 않을 만큼 dialog가 스스로 넓어진다(폭을 추측하고 render로 맞추지 않게).</summary>
+        private static void CheckInfoStripWidth()
+        {
+            using (var d = new StripDialog())
+            {
+                ShowOffscreen(d);
+                Check(d.Strip.PreferredWidth > ApcTheme.Px(400), "info strip: preferred width covers names and values (" + d.Strip.PreferredWidth + ")");
+                Check(d.Strip.Width >= d.Strip.PreferredWidth, "dialog: widens to fit its info strip (" + d.Strip.Width + "/" + d.Strip.PreferredWidth + ")");
+                Check(!LayoutLint.Inspect(d).Any(i => i.Contains("말줄임")), "dialog: info strip values not ellipsized after widening");
+            }
+        }
+
+        private sealed class StripDialog : ApcForm
+        {
+            public readonly ApcInfoStrip Strip = new ApcInfoStrip();
+            public StripDialog()
+            {
+                SetupDialog("재체결 승인", 400);
+                Strip.SetItems("부품 시리얼", "포인트", "토크(N·m)", "NG 횟수");
+                Strip.SetValue("부품 시리얼", "HC-261127-0042");
+                Strip.SetValue("포인트", "7번");
+                Strip.SetValue("토크(N·m)", "11.4");
+                Strip.SetValue("NG 횟수", "2회");
+                AddContent(Strip);
+                SetFooter(new ApcButton { Text = "취소" }, new ApcButton { Text = "확인", Variant = ApcButtonVariant.Primary });
+            }
         }
 
         private static void CheckCaptionRow()

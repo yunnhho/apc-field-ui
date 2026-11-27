@@ -1,4 +1,4 @@
-# APC.UI API (v1.29.0.0)
+# APC.UI API (v1.30.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -137,6 +137,7 @@
 
 이름-값 정보판 한 줄: [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time]처럼 진한 이름 칸과 흰 값 칸이 번갈아 나온다. 화면 헤더 아래 "지금 무엇을 보는가"(공정·설비·LOT·SPEC 등)를 적는 줄. 이름 칸은 글자 폭, 값 칸은 제 글자 폭 + 남은 폭을 똑같이 나눠 받는다(긴 값이 먼저 잘리지 않게). 값이 없으면 빈칸. 입력칸이 아니다(읽기 전용 표시).
 - `ApcInfoStrip()`
+- `int PreferredWidth { get; }` — 이름과 값이 모두 잘리지 않는 폭(배율 적용 px). dialog의 AddContent(strip)는 이 폭에 맞춰 dialog를 넓힌다. 화면에서 Row() 안에 둘 때는 Width를 이 값 이상으로.
 - `string GetValue(string name)`
 - `void SetItems(params string[] names)` — 이름 칸들(왼→오). 값은 모두 빈칸으로 시작한다.
 - `void SetValue(string name, string value)` — 이름 칸 name 옆 값. 없는 이름이면 ArgumentException.
