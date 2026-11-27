@@ -218,7 +218,9 @@ namespace APC.UI.Checks
             var w = ApcInfoStrip.ValueWidths(600, new[] { 100, 300, 100 });
             Check(w[1] >= 300 && w[0] >= 100 && w[0] + w[1] + w[2] <= 600, "info strip: long value keeps its width when space remains");
             w = ApcInfoStrip.ValueWidths(300, new[] { 100, 300, 200 });
-            Check(w[1] > w[0] && w[0] + w[1] + w[2] <= 300, "info strip: shrinks by text ratio when short");
+            Check(w[0] == 100 && w[1] < 300 && w[0] + w[1] + w[2] <= 300, "info strip: short value kept whole, longer ones give way (" + string.Join(",", w) + ")");
+            w = ApcInfoStrip.ValueWidths(260, new[] { 50, 90, 65, 65 });   // 밸브 V2 · 위치 T2 출구 · 현재 상태 닫힘 · 동작 열기 (R-M3 dialog)
+            Check(w[0] == 50 && w[2] == 65 && w[3] == 65 && w[1] == 80, "info strip: 10px short cuts only the longest value, not all (" + string.Join(",", w) + ")");
             Check(System.Linq.Enumerable.All(ApcInfoStrip.ValueWidths(-50, new[] { 100, 0 }), x => x == 0), "info strip: no negative value width when names fill the line");
         }
 

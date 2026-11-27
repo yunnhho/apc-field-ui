@@ -97,16 +97,32 @@ namespace APC.UI.Controls
             }
         }
 
-        /// <summary>값 칸 폭: 자리가 남으면 제 글자 폭 + 남는 폭 균등, 모자라면 글자 폭 비율로 줄인다.</summary>
+        /// <summary>
+        /// 값 칸 폭: 자리가 남으면 제 글자 폭 + 남는 폭 균등. 모자라면 긴 값부터 줄인다 — 모든 칸의 상한을 같이 낮춰
+        /// 그 상한보다 짧은 값(V2·닫힘)은 다 보이고 긴 값만 말줄임이 된다(비율로 모두 줄이면 몇 px 모자라도 전부 잘린다).
+        /// </summary>
         internal static int[] ValueWidths(int available, int[] need)
         {
             available = Math.Max(0, available);   // 이름 칸만으로 꽉 찬 좁은 줄: 값 칸 0(음수 폭으로 겹치지 않게)
             int n = need.Length, total = 0;
             foreach (int w in need) total += w;
             var widths = new int[n];
-            for (int i = 0; i < n; i++)
-                widths[i] = total <= available ? need[i] + (available - total) / n
-                          : total == 0 ? available / n : (int)((long)available * need[i] / total);
+            if (total <= available)
+            {
+                for (int i = 0; i < n; i++) widths[i] = need[i] + (available - total) / n;
+                return widths;
+            }
+            // 상한 cap: sum(min(need, cap)) <= available인 가장 큰 값. 짧은 값부터 다 주고 남는 폭을 긴 값들이 나눈다.
+            var sorted = (int[])need.Clone();
+            Array.Sort(sorted);
+            int left = available, rest = n, cap = 0;
+            foreach (int w in sorted)
+            {
+                if (w * rest <= left) { left -= w; rest--; cap = w; continue; }
+                cap = left / rest;
+                break;
+            }
+            for (int i = 0; i < n; i++) widths[i] = Math.Min(need[i], cap);
             return widths;
         }
 
