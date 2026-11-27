@@ -1,0 +1,15 @@
+== 빌드 (/c/00P_apc-field-ui/skill-test/demo-1127-r5/M3-tank/project/build.log)
+﻿  TankFlow -> C:\00P_apc-field-ui\skill-test\demo-1127-r5\M3-tank\project\bin\Debug\TankFlow.exe
+
+빌드했습니다.
+    경고 0개
+    오류 0개
+
+경과 시간: 00:00:00.48
+== render MainForm
+render -> C:\00P_apc-field-ui\skill-test\demo-1127-r5\M3-tank\out\MainForm.png (1920x1080)
+점검 0건
+== render ValveDialog
+render -> C:\00P_apc-field-ui\skill-test\demo-1127-r5\M3-tank\out\ValveDialog.png (560x340)
+점검 0건
+== 완료: 빌드 경고 0 · 오류 0, 모든 형식 점검 0건
