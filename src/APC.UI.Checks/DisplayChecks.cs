@@ -9,6 +9,7 @@ namespace APC.UI.Checks
     {
         private static void RunDisplayChecks()
         {
+            CheckSlots();
             double lo, hi, step;
             ApcTrendChart.NiceRange(157.6, 176.4, 5, out lo, out hi, out step);
             Check(lo == 155 && hi == 180 && step == 5, "trend: nice range 155~180 step 5 (was " + lo + "~" + hi + " / " + step + ")");
@@ -261,6 +262,21 @@ namespace APC.UI.Checks
         {
             public readonly System.Windows.Forms.Label Title = SectionTitle("최근 알람 이력");
             public SectionProbe() : base("probe") { }
+        }
+
+        private static void CheckSlots()
+        {
+            var area = new Rectangle(0, 0, 1000, 400);
+            var r = ApcLayout.Slots(area, 5, 2, 0.6, true);
+            Check(r.Length == 10, "slots: cols x rows rectangles");
+            Check(r[0] == new Rectangle(40, 40, 120, 120), "slots: square item = 60 % of the smaller cell side, centered (was " + r[0] + ")");
+            Check(r[9].Right == 960 && r[9].Bottom == 360, "slots: last item centered in the last cell (was " + r[9] + ")");
+            Check(r[1].Left - r[0].Left == 200 && r[5].Top - r[0].Top == 200, "slots: items evenly spaced");
+            var t = ApcLayout.Slots(new Rectangle(10, 20, 800, 300), 4, 1, 0.5, false);
+            Check(t[0] == new Rectangle(60, 95, 100, 150) && t[3].Left == 660, "slots: non-square item = fill of each cell side, offset by area (was " + t[0] + ")");
+            var big = ApcLayout.Slots(area, 2, 1, 5, false);
+            Check(big[0].Width == 500 && big[0].Height == 400, "slots: fill above 1 is clamped to the cell");
+            Check(ApcLayout.Slots(area, 0, 1, 0.6, false).Length == 0, "slots: zero columns gives no slots");
         }
 
         private static bool Near(Color a, Color b, int tol)

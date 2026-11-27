@@ -1,0 +1,196 @@
+<title>APC 스킬 시연 1127-R4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 공장 문서 감각: 회청 금속 바탕 + 먹색 글자, 붉은색은 APCSOFT 표식에만. 점수는 램프 색 */
+:root {
+  --bg: #e9edf1; --panel: #fdfdfe; --panel-2: #f1f4f7; --ink: #1a1f26; --muted: #5d6b7a; --line: #b9c3cd;
+  --navy: #2a4058; --brand: #e60012; --run: #15803d; --warn: #a16207; --alarm: #c81e1e;
+  --run-bg: #dcf3e4; --warn-bg: #fbf0cf; --alarm-bg: #fbe0e0;
+  --font: "IBM Plex Sans KR", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161b21; --panel: #1f262e; --panel-2: #252d36; --ink: #e6ebf0; --muted: #9aa7b4; --line: #3a4652;
+  --navy: #8fb1d6; --brand: #ff4d5a; --run: #4ade80; --warn: #facc15; --alarm: #f87171;
+  --run-bg: #173324; --warn-bg: #3a3112; --alarm-bg: #3d1c1c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161b21; --panel: #1f262e; --panel-2: #252d36; --ink: #e6ebf0; --muted: #9aa7b4; --line: #3a4652;
+  --navy: #8fb1d6; --brand: #ff4d5a; --run: #4ade80; --warn: #facc15; --alarm: #f87171;
+  --run-bg: #173324; --warn-bg: #3a3112; --alarm-bg: #3d1c1c; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.35rem; padding-left: 12px; border-left: 3px solid var(--brand); margin-top: 52px; margin-bottom: 14px; }
+h3 { font-size: 1.05rem; margin: 26px 0 10px; }
+p { margin: 0 0 8px; }
+.head { display: grid; gap: 10px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); }
+.head .fn { color: var(--brand); font-weight: 700; font-size: .95rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: .9rem; }
+.facts b { color: var(--ink); font-weight: 600; }
+.num { font-variant-numeric: tabular-nums; }
+
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.scores a { background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; color: inherit; text-decoration: none; display: grid; gap: 2px; }
+.scores a:hover, .scores a:focus-visible { border-color: var(--navy); outline: none; }
+.scores .n { font-size: 2.2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--run); }
+.scores .n small { font-size: 1rem; color: var(--muted); font-weight: 500; }
+.scores span { color: var(--muted); font-size: .9rem; }
+
+.tbl { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.tbl.wide table { min-width: 760px; }
+th { text-align: left; font-weight: 700; padding: 9px 12px; background: var(--panel-2); border-bottom: 2px solid var(--ink); white-space: nowrap; }
+td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+td.c, th.c { text-align: center; }
+td.k { font-weight: 600; white-space: nowrap; }
+tr.total td { font-weight: 700; background: var(--panel-2); border-top: 2px solid var(--ink); }
+.m { display: inline-block; min-width: 1.6em; text-align: center; font-weight: 700; }
+.m.o { color: var(--run); } .m.t { color: var(--warn); } .m.x { color: var(--alarm); }
+
+details { background: var(--panel); border: 1px solid var(--line); }
+summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+summary:focus-visible { outline: 2px solid var(--navy); }
+pre { margin: 0; padding: 12px 16px 16px; white-space: pre-wrap; word-break: break-word; font: .88rem/1.65 var(--font); border-top: 1px solid var(--line); background: var(--panel-2); }
+
+.shots { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+figure { margin: 0; background: var(--panel); border: 1px solid var(--line); }
+figure img { display: block; width: 100%; height: auto; }
+figcaption { padding: 6px 10px; font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); }
+ul { margin: 0; padding-left: 20px; }
+li { margin: 3px 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.box { background: var(--panel); border: 1px solid var(--line); padding: 12px 16px; }
+.box h4 { margin: 0 0 6px; font-size: .95rem; }
+.meta { color: var(--muted); font-size: .88rem; margin-bottom: 10px; }
+@media (max-width: 760px) { .scores, .shots, .two { grid-template-columns: 1fr; } }
+.delta { font-size: .85rem; color: var(--muted); }
+code { font-family: var(--mono); font-size: .86em; }
+</style>
+
+<div class="wrap">
+<header class="head">
+  <div class="fn">APC.UI · apc-field-ui 스킬 시연</div>
+  <h1>스킬 시연 1127-R4 — 1.30.0.0 수정 확인</h1>
+  <div class="facts">
+    <span>날짜 <b>2026-11-27</b></span>
+    <span>모델 <b>Sonnet × 3 (병렬)</b></span>
+    <span>라이브러리 <b>APC.UI 1.30.0.0</b></span>
+    <span>스킬 <b>main 1c10542 설치본 (지침 영문 번역 후)</b></span>
+    <span>채점 <b>메인 세션(Opus), PNG·보고·코드 기준</b></span>
+  </div>
+  <p>R3 뒤에 고친 것은 두 가지입니다. <code>ApcInfoStrip.PreferredWidth</code>를 추가했고, dialog가 정보판 폭에 맞춰 스스로 넓어지게 했습니다(1.30.0.0). 그 사이 스킬 지침·XML 설명·api.md를 영문으로 바꿨습니다. 같은 화면 3종(팔레트 적재 · 체결 순서 · 탱크 흐름도)을 R3와 같은 프롬프트로 다시 시연했습니다. 세 시연 모두 빌드 경고·오류 0, render 점검 0건으로 끝났습니다. dialog 폭을 손으로 넓히는 우회는 한 건도 없었습니다.</p>
+</header>
+<div class="scores">
+  <a href="#m1"><span>M1 포장 팔레트 적재</span><div class="n num">19<small> / 20</small></div><span>R3 19 · 3분 25초, 도구 18회, 토큰 117k</span></a>
+  <a href="#m2"><span>M2 체결 순서·토크 판정</span><div class="n num">19<small> / 20</small></div><span>R3 19 · 4분 47초, 도구 19회, 토큰 125k</span></a>
+  <a href="#m3"><span>M3 배합 탱크 공정 흐름</span><div class="n num">19<small> / 20</small></div><span>R3 19 · 5분 25초, 도구 22회, 토큰 132k</span></a>
+</div>
+
+<h2>수정 확인</h2>
+<div class="tbl wide"><table><thead><tr><th>수정</th><th class="c">M1</th><th class="c">M2</th><th class="c">M3</th><th>결과</th></tr></thead><tbody>
+<tr><td class="k">1.30 <code>PreferredWidth</code> + dialog 자동 넓힘</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>세 dialog 모두 폭 지정 코드가 없는데도 정보판 2~4쌍이 잘리지 않음(M2·M3 4쌍). M1은 메인 작업 지시 줄에 <code>PreferredWidth</code>를 직접 씀. R3-M2의 폭 넓히기 우회 사라짐</td></tr>
+<tr><td class="k">1.29 <code>ScanOnly</code></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>스캔 칸 전부 <code>ScanOnly</code>. 스캔값과 칸 글자를 비교하는 직접 구현 없음</td></tr>
+<tr><td class="k">1.29 채움 위 글자색 · 값마다 Label</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>칸·볼트 위 글자는 테마 Text. M3 탱크 제목 레벨·온도를 값마다 판정색으로(T3 87 % 노랑, 55.0 ℃ 초록)</td></tr>
+<tr><td class="k">1.28 <code>Accepts</code> · <code>Clear</code>/<code>HasValue</code></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c">—</td><td>M2 스캔 두 칸 <code>Accepts</code>, M1 총중량·M2 수동 토크 빈칸 시작</td></tr>
+<tr><td class="k">지침 영문 번역</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td>번역 뒤 첫 시연. 점수·도구 횟수가 R3와 같은 수준이고 지침을 잘못 읽은 흔적 없음. 토큰 합 415k → 374k</td></tr>
+</tbody></table></div>
+
+<h2>점수 추이</h2>
+<div class="tbl"><table><thead><tr><th>회차</th><th>APC.UI</th><th class="c">M1</th><th class="c">M2</th><th class="c">M3</th><th class="c">합</th><th class="c">토큰 합</th></tr></thead><tbody>
+<tr><td>1127-M</td><td class="num">1.27</td><td class="c num">19</td><td class="c num">19</td><td class="c num">19</td><td class="c num">57</td><td class="c num">413k</td></tr>
+<tr><td>R</td><td class="num">1.28.0</td><td class="c num">19</td><td class="c num">20</td><td class="c num">19</td><td class="c num">58</td><td class="c num">389k</td></tr>
+<tr><td>R2</td><td class="num">1.28.1</td><td class="c num">20</td><td class="c num">19</td><td class="c num">19</td><td class="c num">58</td><td class="c num">376k</td></tr>
+<tr><td>R3</td><td class="num">1.29.0</td><td class="c num">19</td><td class="c num">19</td><td class="c num">19</td><td class="c num">57</td><td class="c num">415k</td></tr>
+<tr class="total"><td>R4</td><td class="num">1.30.0</td><td class="c num">19</td><td class="c num">19</td><td class="c num">19</td><td class="c num">57</td><td class="c num">374k</td></tr>
+</tbody></table></div>
+<p class="delta">10항목 × 2점(✓ 2, △ 1). 2번은 스캔과 Primary 하나가 판정판 바로 아래에 있는지를 봅니다. 9번은 경계가 입력값에만 있으면 판정 코드로 확인합니다. 샘플 값끼리의 정합성은 보지 않습니다.</p>
+
+<h2>사용 토큰량</h2>
+<div class="tbl"><table><thead><tr><th>시연</th><th class="c">시간</th><th class="c">도구</th><th class="c">토큰</th><th class="c">R3 대비</th></tr></thead><tbody>
+<tr><td>M1 팔레트</td><td class="c num">3분 25초</td><td class="c num">18</td><td class="c num">117k</td><td class="c num">+1k</td></tr>
+<tr><td>M2 체결</td><td class="c num">4분 47초</td><td class="c num">19</td><td class="c num">125k</td><td class="c num">−7k</td></tr>
+<tr><td>M3 탱크</td><td class="c num">5분 25초</td><td class="c num">22</td><td class="c num">132k</td><td class="c num">−35k</td></tr>
+<tr class="total"><td>합</td><td class="c num">13분 37초</td><td class="c num">59</td><td class="c num">374k</td><td class="c num">−41k</td></tr>
+</tbody></table></div>
+<p class="delta">시연 에이전트 3개의 토큰만 셌습니다(하네스 집계). 채점·보고서를 만든 메인 세션 토큰은 집계할 수단이 없어 넣지 않았습니다. M3는 R3에서 도구를 47회 썼는데, 화살표 잘림·CurrentRow 우회가 없어지면서 22회로 줄었습니다.</p>
+
+<h2>추가로 발견한 문제</h2>
+<p>두 번 이상 나온 것만 손볼 곳으로 올립니다. <code>docs/1128.md</code>의 기존 할 일과 겹치는 것은 번호를 붙였습니다.</p>
+<div class="tbl wide"><table><thead><tr><th>결과</th><th>나온 시연</th><th>판단</th><th>메모</th></tr></thead><tbody>
+<tr><td class="k">체결 도식 가운데가 크게 빔 (1128 #2)</td><td>M2 · R-M2 · R2-M2 · R3-M2 · R4-M2</td><td><span class="m x">손볼 곳</span></td><td>5회 연속 6번 △. 이번에도 볼트 크기 상한이 64 px(<code>Math.Min(Px(64), w/12, h/5)</code>)이고 위아래 두 줄에만 놓음. 지침에 "요소 크기는 영역에 비례"하라는 기준이 없음</td></tr>
+<tr><td class="k">선·상자 겹침이 점검에 걸려 배관을 토막으로 끊음</td><td>R3-M3 · R4-M3</td><td><span class="m x">손볼 곳 (새로 2회)</span></td><td>처음 render 36건 중 다수. 6 px 이하 선만 예외라 22 px 배관이 밸브·펌프와 겹침으로 잡힘. 그래서 밸브 자리를 비운 토막 Label로 나누고 Resize마다 좌표를 다시 계산함. 그 결과 닫힌 V2의 회색 토막이 초록 본관을 끊는 것처럼 보임. M2도 볼트를 윤곽의 형제로 두었다가 10건 걸려 자식으로 옮김. "틀 안 채움 = 자식" 규칙이 점 요소에도 해당하는지 지침이 불분명함</td></tr>
+<tr><td class="k">상태별 dialog를 render할 방법 없음</td><td>R2-M2 · R3-M2 · R4-M2</td><td><span class="m t">관찰</span></td><td>같은 화면에서만 3회. 이번에는 NG 2회째 막힌 상태만 PNG로 보고 정상 승인 상태는 확인하지 못함. 다른 화면에서도 나오면 손볼 곳으로</td></tr>
+<tr><td class="k">고정 행 표 옆 표의 높이 맞추기</td><td>R4-M3 (R-M1 · R3-M1과 같은 뿌리)</td><td><span class="m t">관찰</span></td><td>1128 #1(5행 <code>FillRows</code> 과대)은 이번에 나오지 않음. M1이 층별 요약을 눕혀 Fill 아래 <code>Dock = Bottom</code>으로 둠. 대신 M3는 6행 밸브 표 옆 알람 이력을 6행으로 줄여 높이를 맞춤(실사용에서는 스크롤바가 생김). M1은 도식 옆 빈 칸을 채우려고 요청에 없는 스캔 이력 표를 추가함</td></tr>
+<tr><td class="k">자동 모드 Primary 필요 여부</td><td>R3-M2 · R4-M2</td><td><span class="m t">관찰</span></td><td>두 번 다 프롬프트의 "Primary 하나" 문장 때문에 자동 모드에도 [체결값 판정] 버튼을 둠. 지침보다 프롬프트 쪽 문제에 가까움</td></tr>
+<tr><td class="k">조립 도식 요소 간격이 들쭉날쭉</td><td>R3-M3 · R4-M3</td><td><span class="m t">관찰</span></td><td>둘 다 탱크 사이 가로 간격이 고르지 않아 6번 △. 1128 #2(요소 크기를 영역에 비례)와 같은 기준으로 함께 다룰 수 있음</td></tr>
+<tr><td class="k">판정판 번호와 도식 칸 번호가 다름</td><td>R4-M1</td><td><span class="m t">편차</span></td><td>판정판은 "다음 3층 6번"(층 안 순번)인데 칸은 전체 순번 "22 다음". R3는 "22번 칸"으로 맞았음. 이 때문에 1번 △</td></tr>
+<tr><td class="k">기타 1회</td><td>R4</td><td><span class="m t">편차</span></td><td>판정판을 <code>Columns</code> 셀에 넣을 때 아래 버튼을 넣는 예시 없음(M2) · 모드 전환에 탭과 콤보 중 무엇을 쓸지 기준 없음(M2) · 탱크 채움 색 규칙 없음(M3) · Bottom 줄 도우미 없음(M3)</td></tr>
+</tbody></table></div>
+<p class="delta">1128 #3 <code>ApcGrid.CurrentRow</code>는 이번에 재현할 기회가 없었습니다. M3가 샘플에서 V5 행을 직접 선택한 상태로 시작했기 때문입니다.</p>
+
+<h2 id="m1">M1 포장 팔레트 적재</h2>
+<div class="shots"><figure><img src="M1-pallet/out/MainForm.png" alt="MainForm" loading="lazy"><figcaption>MainForm</figcaption></figure><figure><img src="M1-pallet/out/PalletCloseDialog.png" alt="PalletCloseDialog" loading="lazy"><figcaption>PalletCloseDialog</figcaption></figure></div>
+<h3>채점</h3>
+<div class="tbl"><table><thead><tr><th>#</th><th>항목</th><th class="c">점수</th><th>근거</th></tr></thead><tbody>
+<tr><td class="num">1</td><td>3초 정보</td><td class="c"><span class="m t">△</span></td><td>판정판 "다음 3층 6번"(층 안 순번)인데 도식 칸은 전체 순번 "22 다음" — 같은 칸을 두 번호 체계로 부름(R3는 "22번 칸"으로 일치)</td></tr>
+<tr><td class="num">2</td><td>주 동작</td><td class="c"><span class="m o">✓</span></td><td>판정판 바로 아래 Primary 하나 + 이유</td></tr>
+<tr><td class="num">3</td><td>메인 막기</td><td class="c"><span class="m o">✓</span></td><td>마감 꺼짐 + 이유, 거부 스캔 NG + 경고창</td></tr>
+<tr><td class="num">4</td><td>dialog 차단</td><td class="c"><span class="m o">✓</span></td><td>"박스 부족 · 21/40" + [마감] 꺼짐, <code>ScanOnly</code></td></tr>
+<tr><td class="num">5</td><td>새 레이아웃</td><td class="c"><span class="m o">✓</span></td><td>2×4 칸 + 범례, 제목 진행</td></tr>
+<tr><td class="num">6</td><td>레이아웃 마무리</td><td class="c"><span class="m o">✓</span></td><td>5행 <code>FillRows</code> 사라짐(눕혀 아래 줄), dialog 정보판 잘림 없음</td></tr>
+<tr><td class="num">7</td><td>빌드·점검</td><td class="c"><span class="m o">✓</span></td><td>0/0, 0건</td></tr>
+<tr><td class="num">8</td><td>요청 항목</td><td class="c"><span class="m o">✓</span></td><td>전부(+스캔 이력)</td></tr>
+<tr><td class="num">9</td><td>경계값</td><td class="c"><span class="m o">✓</span></td><td><code>WeightInRange</code> <code>&gt;=</code>/<code>&lt;=</code></td></tr>
+<tr><td class="num">10</td><td>지침 피드백</td><td class="c"><span class="m o">✓</span></td><td>Fill 옆 빈 칸, 막는 위치, 대기 판정판 색</td></tr>
+</tbody></table></div>
+<h3>에이전트 보고 요약</h3>
+<div class="box"><p>3분 25초, 도구 18회, 토큰 117k.</p>
+<p><b>1) 화면</b> — MainForm(out\MainForm.png), PalletCloseDialog(out\PalletCloseDialog.png). <code>Views/PalletBoard.cs</code>(Panel + Label 8개), 기준값 <code>Data/PalletRules.cs</code>. 빌드 0/0, 점검 0건(첫 render 스캔 이력 스크롤바 1건 → 샘플 줄여 해결).</p>
+<p><b>3) UX 결정</b> — 스캔 줄(+ 작업 지시 <code>ApcInfoStrip</code>, <code>PreferredWidth</code> 사용) → 판정판 "다음 3층 6번" → Primary [팔레트 마감](꺼짐 + "마감 불가 · 박스 19개 부족 (21/40)"). 도식 2×4, 범례. 층별 요약은 층을 열로 눕혀 Fill 아래 <code>Dock = Bottom</code>. 요청에 없는 스캔 이력 표를 도식 옆에 추가. dialog 라벨·사원증 <code>ScanOnly</code>, 총중량 빈칸 시작, 폭 수동 조정 없음.</p>
+<p><b>5) 모호했던 점</b> — 도식 옆 Fill 칸에 둘 것이 지침에 없어 스캔 이력 표 추가. 요청 "dialog에서 막기" vs 지침 "화면이 막기" → 둘 다. 대기 판정판 Run vs Stop.</p></div>
+
+<h2 id="m2">M2 체결 순서·토크 판정</h2>
+<div class="shots"><figure><img src="M2-torque/out/MainForm.png" alt="MainForm" loading="lazy"><figcaption>MainForm</figcaption></figure><figure><img src="M2-torque/out/ReapproveDialog.png" alt="ReapproveDialog" loading="lazy"><figcaption>ReapproveDialog</figcaption></figure></div>
+<h3>채점</h3>
+<div class="tbl"><table><thead><tr><th>#</th><th>항목</th><th class="c">점수</th><th>근거</th></tr></thead><tbody>
+<tr><td class="num">1</td><td>3초 정보</td><td class="c"><span class="m o">✓</span></td><td>판정판 "NG" + 7번 상한 초과 사유</td></tr>
+<tr><td class="num">2</td><td>주 동작</td><td class="c"><span class="m o">✓</span></td><td>판정판 바로 아래 Primary 하나 + 이유</td></tr>
+<tr><td class="num">3</td><td>메인 막기</td><td class="c"><span class="m o">✓</span></td><td>스캔 전 꺼짐, 순서 오류 거부, 승인 전 체결 불가</td></tr>
+<tr><td class="num">4</td><td>dialog 차단</td><td class="c"><span class="m o">✓</span></td><td>NG 2회째 승인 꺼짐 + 불량 처리 안내, 정보판 잘림 없음</td></tr>
+<tr><td class="num">5</td><td>새 레이아웃</td><td class="c"><span class="m o">✓</span></td><td>윤곽 안 볼트 10개 + 범례</td></tr>
+<tr><td class="num">6</td><td>레이아웃 마무리</td><td class="c"><span class="m t">△</span></td><td>볼트 상한 64 px · 위아래 두 줄 → 윤곽 가운데가 크게 빔 (5회 연속)</td></tr>
+<tr><td class="num">7</td><td>빌드·점검</td><td class="c"><span class="m o">✓</span></td><td>0/0, 0건</td></tr>
+<tr><td class="num">8</td><td>요청 항목</td><td class="c"><span class="m o">✓</span></td><td>전부</td></tr>
+<tr><td class="num">9</td><td>경계값 샘플</td><td class="c"><span class="m o">✓</span></td><td>9.0/30, 11.0/60</td></tr>
+<tr><td class="num">10</td><td>지침 피드백</td><td class="c"><span class="m o">✓</span></td><td>자식 배치 범위, 판정판+버튼 셀, 상태별 dialog render</td></tr>
+</tbody></table></div>
+<h3>에이전트 보고 요약</h3>
+<div class="box"><p>4분 47초, 도구 19회, 토큰 125k.</p>
+<p><b>1) 화면</b> — MainForm(out\MainForm.png), ReapproveDialog(out\ReapproveDialog.png). <code>Views/BoltBoard.cs</code>(Panel + 윤곽 Panel + Label 10개), 판정 <code>TorqueRules</code>. 빌드 0/0, 점검 0건(중간 겹침 10건 → 볼트를 윤곽 Panel의 자식으로 옮겨 해결).</p>
+<p><b>3) UX 결정</b> — 스캔 두 칸(<code>ScanOnly</code> + <code>Accepts</code>) + 모드 콤보 → 판정판 "NG / 7번 · 토크 11.4 상한 초과" + 토크·각도 카드 → 판정판 아래 Primary 하나(상태에 따라 체결값 판정 / 재체결 승인 / 불량 처리 / 새 부품 시작) + 왼쪽 이유. 수동 입력 칸은 수동 모드에서만. 다음 볼트 1.3배. dialog는 NG 2회째 막힘 상태로 render, 정보판 4쌍 잘림 없음(폭 수동 조정 없음).</p>
+<p><b>5) 모호했던 점</b> — "틀 안 채움은 틀의 자식"이 볼트 같은 점 요소에도 해당하는지 불명확. 판정판을 <code>Columns</code> 셀에 넣을 때 아래 버튼 넣는 예시 없음. 모드 전환 탭 vs 콤보 기준 없음. 자동 모드 Primary 필요 여부. NG 볼트가 다음 차례일 때 색(빨강 유지 + 크기). 상태별 dialog render 방법(정상 승인 상태 PNG 못 봄).</p></div>
+
+<h2 id="m3">M3 배합 탱크 공정 흐름</h2>
+<div class="shots"><figure><img src="M3-tank/out/MainForm.png" alt="MainForm" loading="lazy"><figcaption>MainForm</figcaption></figure><figure><img src="M3-tank/out/ValveDialog.png" alt="ValveDialog" loading="lazy"><figcaption>ValveDialog</figcaption></figure></div>
+<h3>채점</h3>
+<div class="tbl"><table><thead><tr><th>#</th><th>항목</th><th class="c">점수</th><th>근거</th></tr></thead><tbody>
+<tr><td class="num">1</td><td>3초 정보</td><td class="c"><span class="m o">✓</span></td><td>판정판 "T4 레벨 알람" + V5 열기 차단</td></tr>
+<tr><td class="num">2</td><td>주 동작</td><td class="c"><span class="m o">✓</span></td><td>판정판 바로 아래 Primary 하나 + 선택 밸브</td></tr>
+<tr><td class="num">3</td><td>메인 막기</td><td class="c"><span class="m o">✓</span></td><td>막는 조작은 dialog에서 이유와 함께</td></tr>
+<tr><td class="num">4</td><td>dialog 차단</td><td class="c"><span class="m o">✓</span></td><td>열기 차단 이유 + 확정 꺼짐, 정보판 4쌍 잘림 없음</td></tr>
+<tr><td class="num">5</td><td>새 레이아웃</td><td class="c"><span class="m o">✓</span></td><td>탱크 틀·채움·기준선, 배관·밸브·펌프, 흐름 화살표(잘림 사라짐)</td></tr>
+<tr><td class="num">6</td><td>레이아웃 마무리</td><td class="c"><span class="m t">△</span></td><td>탱크 사이 가로 간격이 들쭉날쭉(T2–T3·T3–T4 큰 빈 곳), 닫힌 V2 회색 토막이 초록 본관을 끊어 보임</td></tr>
+<tr><td class="num">7</td><td>빌드·점검</td><td class="c"><span class="m o">✓</span></td><td>0/0, 0건</td></tr>
+<tr><td class="num">8</td><td>요청 항목</td><td class="c"><span class="m o">✓</span></td><td>전부</td></tr>
+<tr><td class="num">9</td><td>경계값 샘플</td><td class="c"><span class="m o">✓</span></td><td>T3 55.0 ℃ OK, T4 90 % 경고(초과 아님), T2 8 % 하한</td></tr>
+<tr><td class="num">10</td><td>지침 피드백</td><td class="c"><span class="m o">✓</span></td><td>선·상자 겹침, 채움 색, 고정 행 표 옆 표</td></tr>
+</tbody></table></div>
+<h3>에이전트 보고 요약</h3>
+<div class="box"><p>5분 25초, 도구 22회, 토큰 132k.</p>
+<p><b>1) 화면</b> — MainForm(out\MainForm.png): 판정판 → Primary [밸브 조작] + "선택 밸브 V5 · 닫힘" → 흐름도(Fill) → 아래 줄 밸브 표 6행 · 알람 이력 6행. ValveDialog(out\ValveDialog.png, V5 열기가 T4 92 %로 막힘). <code>Views/FlowBoard.cs</code>, 규칙 <code>Data/ProcessRules.cs</code>. 빌드 0/0, 점검 0건(처음 36건 → 배관·밸브 겹침, 탱크 안 선 넘침, 알람 표 스크롤바).</p>
+<p><b>3) UX 결정</b> — 판정판은 공정 전체에서 가장 나쁜 항목(알람 둘 이상이면 "알람 N건"). dialog 조작은 현재 상태의 반대 하나, 사원증 <code>ScanOnly</code>, 막힌 이유 빨강 + 확인 꺼짐. 탱크 틀 Panel + 채움 Label 자식, 85/90/10 % 선 3 px, 배관 22 px Label + <code>▶▲▼</code>. 탱크 제목 값마다 판정색.</p>
+<p><b>5) 모호했던 점</b> — 배관과 밸브·펌프 겹침이 점검에 걸려 배관을 토막으로 끊고 Resize마다 좌표 재계산(R3-M3 z-order 문제와 같은 원인). 탱크 채움 색 규칙 없음. 고정 6행 밸브 표 옆 알람 이력 높이 맞추기 → 이력을 6행으로 줄임. Bottom 줄 도우미 없음(안내대로 <code>Columns</code> 결과 <code>Dock</code> 변경).</p></div>
+</div>
