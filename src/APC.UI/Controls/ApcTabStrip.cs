@@ -8,10 +8,10 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 전환 버튼 줄(설비군·라인 전환 등). 탭 하나하나가 보통 버튼(btn_normal)이고, 선택된 것은 눌린 버튼 + 굵은 글자 + 아래 남색 막대.
-    /// 실행 버튼(남색 Primary)과 겹치지 않게 선택도 Primary 색을 쓰지 않는다. 본문 맨 위 줄에 둔다(창 제목 줄·헤더 띠가 아니다).
-    /// 버튼 폭은 글자에 맞춰 자동(잘리지 않음), 버튼 사이 4px. 내용 전환은 <see cref="SelectedIndexChanged"/>에서 화면이 한다.
-    /// 클릭 또는 포커스 상태에서 ←/→로 바꾼다. 높이는 테마 입력칸 높이.
+    /// Switch button row (equipment group or line switching, etc.). Each tab is a normal button (btn_normal); the selected one is a pressed button + bold text + navy bar below.
+    /// The selection does not use the Primary color so it is not confused with action buttons (navy Primary). Place it on the top row of the body (not the window title row or a header band).
+    /// Button width fits the text automatically (never clipped), 4px between buttons. The screen switches content in <see cref="SelectedIndexChanged"/>.
+    /// Changed by click, or ←/→ while focused. Height is the theme input-field height.
     /// </summary>
     public class ApcTabStrip : Control
     {
@@ -29,10 +29,10 @@ namespace APC.UI.Controls
             ApcTheme.Changed += OnThemeChanged;
         }
 
-        /// <summary>선택이 바뀌면(클릭·←/→·SelectedIndex 대입) 발생.</summary>
+        /// <summary>Raised when the selection changes (click, ←/→, SelectedIndex assignment).</summary>
         public event EventHandler SelectedIndexChanged;
 
-        /// <summary>탭 글자 목록을 한 번에 정한다. 탭이 있으면 첫 탭이 선택된다(이벤트 발생).</summary>
+        /// <summary>Sets all tab texts at once. If there are tabs, the first is selected (raises the event).</summary>
         public void SetTabs(params string[] tabs)
         {
             if (tabs == null) throw new ArgumentNullException("tabs");
@@ -47,7 +47,7 @@ namespace APC.UI.Controls
 
         public string GetTabText(int index) { return _tabs[index]; }
 
-        /// <summary>선택된 탭 번호(없으면 -1). 범위 밖이면 ArgumentOutOfRangeException.</summary>
+        /// <summary>Selected tab index (-1 if none). ArgumentOutOfRangeException when out of range.</summary>
         public int SelectedIndex
         {
             get { return _selected; }
@@ -62,7 +62,7 @@ namespace APC.UI.Controls
             }
         }
 
-        /// <summary>모든 탭을 담는 데 필요한 폭(배치용). 탭 폭 합.</summary>
+        /// <summary>Width needed to hold all tabs (for layout). Sum of tab widths.</summary>
         public int PreferredTabsWidth
         {
             get { int w = 0; for (int i = 0; i < _tabs.Count; i++) w += TabWidth(i) + (i > 0 ? ApcTheme.Px(BaseGap) : 0); return w; }

@@ -2,7 +2,7 @@ using System;
 
 namespace APC.UI.Theming
 {
-    /// <summary>theme.json을 읽을 수 없거나 규칙 위반. 메시지에 파일 경로와 필드명을 담는다.</summary>
+    /// <summary>theme.json cannot be read or breaks a rule. The message includes the file path and field name.</summary>
     [Serializable]
     public sealed class ThemeException : Exception
     {

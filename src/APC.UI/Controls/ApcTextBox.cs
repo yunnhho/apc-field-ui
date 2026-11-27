@@ -8,9 +8,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 테마 입력칸. 오목한 테두리·포커스 테두리는 비클라이언트 영역에 직접 그리고, 글자는 높이 가운데에 온다.
-    /// 높이를 자유롭게 줄 수 있다(기본 34px×배율, 최소 28px×배율). TextBox를 상속하므로 Text·ReadOnly·MaxLength 등은 그대로.
-    /// Multiline이면 스크롤바 자리가 필요해 Windows 기본 한 줄 테두리로 돌아간다.
+    /// Themed input field. The inset border and focus border are drawn in the non-client area; text is vertically centered.
+    /// Height is free (default 34px × scale, minimum 28px × scale). Inherits TextBox, so Text, ReadOnly, MaxLength etc. work as usual.
+    /// Multiline needs room for a scrollbar, so it falls back to the standard Windows single-line border.
     /// </summary>
     public class ApcTextBox : TextBox
     {
@@ -43,7 +43,7 @@ namespace APC.UI.Controls
             Height = (int)Math.Round(BaseHeight * ApcTheme.Scale);
         }
 
-        /// <summary>테두리 없이 바탕만(숫자칸·날짜칸처럼 바깥 컨트롤이 테두리를 그릴 때).</summary>
+        /// <summary>Background only, no border (when an outer control draws the border, as in numeric and date fields).</summary>
         internal bool Borderless { get; set; }
 
         protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
@@ -51,7 +51,7 @@ namespace APC.UI.Controls
             base.SetBoundsCore(x, y, width, Multiline || Borderless ? height : Math.Max(height, ApcTheme.MinHeight), specified);
         }
 
-        /// <summary>창 크기 h일 때 테두리+여백 두께. 한 줄이면 글자 줄이 세로 가운데에 오도록 위아래를 나눈다.</summary>
+        /// <summary>Border + padding thickness for window height h. For single line, splits top/bottom so the text line is vertically centered.</summary>
         internal Padding FrameInsets(int windowHeight)
         {
             int padX = (int)Math.Round(BasePadX * ApcTheme.Scale) + 1;
@@ -61,13 +61,13 @@ namespace APC.UI.Controls
             return new Padding(padX, top, padX, bottom);
         }
 
-        /// <summary>바탕색을 상태(사용 가능·읽기 전용)에 맞춘다. 스캔 플래시 등으로 바꾼 색을 되돌릴 때도 쓴다.</summary>
+        /// <summary>Sets the background for the state (enabled, read-only). Also used to restore the color after a scan flash.</summary>
         protected void ResetFieldColor()
         {
             BackColor = FieldFrame.Fill(Enabled, LooksReadOnly, Focused);
         }
 
-        /// <summary>읽기 전용 모양(회색 바탕)으로 그릴지. 스캔 전용 칸은 ReadOnly여도 입력칸 모양이다.</summary>
+        /// <summary>Whether to draw the read-only look (gray background). A scan-only field keeps the input look even when ReadOnly.</summary>
         internal virtual bool LooksReadOnly { get { return ReadOnly; } }
 
         protected override void WndProc(ref Message m)

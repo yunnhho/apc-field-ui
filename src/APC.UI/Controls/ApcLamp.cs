@@ -7,7 +7,7 @@ using APC.UI.Theming;
 
 namespace APC.UI.Controls
 {
-    /// <summary>상태 램프. 이미지: lamp_{run|warn|alarm|stop|info}. Blink는 Alarm일 때만 동작.</summary>
+    /// <summary>Status lamp. Images: lamp_{run|warn|alarm|stop|info}. Blink works only for Alarm.</summary>
     public class ApcLamp : Control
     {
         public const int BlinkIntervalMs = 500;

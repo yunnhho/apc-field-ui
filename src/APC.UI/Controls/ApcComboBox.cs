@@ -7,8 +7,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 테마 선택 목록(드롭다운 전용, 직접 입력 없음). 닫힌 상태는 입력칸 모양 + 오른쪽 그라데이션 화살표 버튼으로 직접 그리고,
-    /// 펼친 목록은 항목 높이 28px×배율 이상(마우스·펜으로 누르기 쉽게). 높이는 ItemHeight로 정해진다.
+    /// Themed selection list (drop-down only, no free typing). The closed state is drawn as an input field + gradient arrow button on the right;
+    /// the open list has items at least 28px × scale tall (easy to hit with mouse or pen). Height is set by ItemHeight.
     /// </summary>
     public class ApcComboBox : ComboBox
     {

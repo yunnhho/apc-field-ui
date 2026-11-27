@@ -3,7 +3,7 @@ using APC.UI.Theming;
 
 namespace APC.UI.Drawing
 {
-    /// <summary>입력칸 공통 모양: 흰 바탕 + 테두리 + 안쪽 위 그림자(버튼은 볼록, 입력칸은 오목). 입력 중인 칸은 파란 2px 테두리 + 연한 파랑 바탕(1~2m에서 어느 칸인지 보이게).</summary>
+    /// <summary>Common input field look: white background + border + inner top shadow (buttons raised, fields inset). The field being edited gets a 2px blue border + light blue background (visible from 1–2 m).</summary>
     internal static class FieldFrame
     {
         internal static readonly Color FocusColor = Color.FromArgb(0x3F, 0x67, 0xA6);   // 확인 버튼과 같은 파랑
@@ -43,13 +43,13 @@ namespace APC.UI.Drawing
             using (var pen = new Pen(InsetShadow)) g.DrawLine(pen, r.X + 1, r.Y + 1, r.Right - 2, r.Y + 1);
         }
 
-        /// <summary>칸 안 오른쪽 버튼 영역 폭(콤보 화살표·숫자 ▲▼·날짜 ▼ 공통).</summary>
+        /// <summary>Width of the button area inside the right edge (shared by combo arrow, numeric ▲▼, date ▼).</summary>
         internal static int ButtonWidth(int height)
         {
             return System.Math.Max(height - 2, (int)System.Math.Round(24 * ApcTheme.Scale));
         }
 
-        /// <summary>칸 안 버튼 영역: 그라데이션 + 왼쪽 구분선. pressed면 살짝 어둡게.</summary>
+        /// <summary>In-field button area: gradient + left divider. Slightly darker when pressed.</summary>
         internal static void DrawButtonArea(Graphics g, Rectangle area, bool pressed)
         {
             if (ApcTheme.Current == null) { g.FillRectangle(SystemBrushes.Control, area); return; }
@@ -59,7 +59,7 @@ namespace APC.UI.Drawing
             using (var pen = new Pen(ApcTheme.C(c.Border))) g.DrawLine(pen, area.Left, area.Top, area.Left, area.Bottom);
         }
 
-        /// <summary>버튼 영역 가운데 삼각형(▲ up / ▼ down).</summary>
+        /// <summary>Triangle centered in the button area (▲ up / ▼ down).</summary>
         internal static void DrawTriangle(Graphics g, Rectangle r, Color color, bool up)
         {
             int w = ApcTheme.Px(TriangleWidth), h = ApcTheme.Px(TriangleWidth / 2);   // 고정 크기: 콤보·날짜 ▼와 숫자칸 ▲▼가 칸 높이와 상관없이 같다

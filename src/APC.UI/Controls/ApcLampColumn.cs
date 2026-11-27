@@ -9,7 +9,7 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 상태 램프 컬럼. 셀 값 StatusKind = 램프만(가운데), ApcLampValue = 램프 + 문구("전송됨", "대기") 한 칸(램프는 왼쪽 고정, 문구는 바로 옆 — 행마다 램프 위치가 같게), 그 외(null 등) = 빈 셀.
+    /// Status lamp column. Cell value StatusKind = lamp only (centered); ApcLampValue = lamp + word ("전송됨", "대기") in one cell (lamp fixed at the left, word right next to it — same lamp position in every row); anything else (null etc.) = empty cell.
     /// </summary>
     public class ApcLampColumn : DataGridViewColumn
     {
@@ -21,7 +21,7 @@ namespace APC.UI.Controls
             DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
-        /// <summary>램프 + 문구(ApcLampValue)가 다 보이는 폭. ApcGrid가 행을 넣을 때 이 폭보다 좁으면 넓힌다(기본 56px에선 "가동"도 잘린다).</summary>
+        /// <summary>Width that fits lamp + word (ApcLampValue). ApcGrid widens the column to this when adding rows (at the default 56px even "가동" is clipped).</summary>
         internal static int WidthFor(string text, Font font)
         {
             if (string.IsNullOrEmpty(text)) return 0;
@@ -78,7 +78,7 @@ namespace APC.UI.Controls
         }
     }
 
-    /// <summary>램프 + 문구 셀 값(ApcLampColumn). 정렬은 상태 → 문구 순.</summary>
+    /// <summary>Lamp + word cell value (ApcLampColumn). Sorts by status, then word.</summary>
     public sealed class ApcLampValue : IComparable
     {
         public ApcLampValue(StatusKind status, string text) { Status = status; Text = text ?? string.Empty; }

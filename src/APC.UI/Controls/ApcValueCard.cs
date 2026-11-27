@@ -10,9 +10,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 현재값 카드: 제목 띠(그리드 헤더 그라데이션, ShowLamp면 오른쪽에 램프) + 큰 값·단위 + 아래 한 줄(기준·범위·수신 시각 등).
-    /// 값 색은 Status로: 경고/알람만 상태색, 정지는 흐리게. 알람이면 굵은 알람색 테두리. Value가 비면 값·단위 모두 빈칸.
-    /// 값이 두 개인 카드는 ValueStatus/FooterStatus로 값·Footer 글자색을 그 항목 판정대로 따로 준다(램프·테두리는 Status).
+    /// Current-value card: title band (grid header gradient, lamp on the right with ShowLamp) + big value and unit + one line below (reference, range, received time, etc.).
+    /// Value color follows Status: status color only for warning/alarm, dimmed for stop. Thick alarm-color border on alarm. Empty Value = value and unit both blank.
+    /// A card with two values sets the value and Footer text colors separately with ValueStatus/FooterStatus, by each item's verdict (lamp and border follow Status).
     /// </summary>
     public class ApcValueCard : Control
     {
@@ -38,12 +38,12 @@ namespace APC.UI.Controls
         [DefaultValue("")] public string Value { get { return _value; } set { _value = value ?? ""; Invalidate(); } }
         [DefaultValue("")] public string Unit { get { return _unit; } set { _unit = value ?? ""; Invalidate(); } }
 
-        /// <summary>아래 한 줄. 비우면 줄이 없다.</summary>
+        /// <summary>The line below. Empty = no line.</summary>
         [DefaultValue("")] public string Footer { get { return _footer; } set { _footer = value ?? ""; _parts = null; Invalidate(); } }
 
         /// <summary>
-        /// Footer에 보조 값이 여러 개일 때(습도 · 파티클) 항목마다 제 판정 색으로 그린다. " · "로 이어 붙이고, Footer는 이은 글이 된다.
-        /// FooterStatus 하나로는 정상인 항목까지 알람색이 되므로 이걸 쓴다. Footer를 다시 대입하면 항목 색은 지워진다.
+        /// When the Footer holds several secondary values (humidity · particles), draws each item in its own verdict color. Joined with " · "; Footer becomes the joined text.
+        /// Use this because a single FooterStatus would paint normal items in the alarm color too. Assigning Footer again clears the item colors.
         /// </summary>
         public void SetFooterParts(string[] texts, StatusKind[] statuses)
         {
@@ -60,10 +60,10 @@ namespace APC.UI.Controls
 
         [DefaultValue(StatusKind.Run)] public StatusKind Status { get { return _status; } set { _status = value; Invalidate(); } }
 
-        /// <summary>큰 값 글자색만 따로 정할 때(값이 두 개인 카드: 카드는 습도 경고인데 온도 값은 정상). null이면 Status.</summary>
+        /// <summary>Sets only the big value's text color (two-value card: the card warns on humidity but the temperature value is normal). null = Status.</summary>
         [DefaultValue(null)] public StatusKind? ValueStatus { get { return _valueStatus; } set { _valueStatus = value; Invalidate(); } }
 
-        /// <summary>Footer 글자색만 따로 정할 때(Footer에 적은 보조 값이 정상인데 카드는 알람). null이면 Status.</summary>
+        /// <summary>Sets only the Footer text color (the secondary value in the Footer is normal but the card is in alarm). null = Status.</summary>
         [DefaultValue(null)] public StatusKind? FooterStatus { get { return _footerStatus; } set { _footerStatus = value; Invalidate(); } }
         [DefaultValue(false)] public bool ShowLamp { get { return _showLamp; } set { _showLamp = value; Invalidate(); } }
         [DefaultValue(HorizontalAlignment.Left)] public HorizontalAlignment ValueAlign { get { return _valueAlign; } set { _valueAlign = value; Invalidate(); } }

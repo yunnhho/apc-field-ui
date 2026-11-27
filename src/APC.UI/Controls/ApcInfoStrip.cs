@@ -7,9 +7,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 이름-값 정보판 한 줄: [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time]처럼 진한 이름 칸과 흰 값 칸이 번갈아 나온다.
-    /// 화면 헤더 아래 "지금 무엇을 보는가"(공정·설비·LOT·SPEC 등)를 적는 줄. 이름 칸은 글자 폭, 값 칸은 제 글자 폭 + 남은 폭을 똑같이 나눠 받는다(긴 값이 먼저 잘리지 않게).
-    /// 값이 없으면 빈칸. 입력칸이 아니다(읽기 전용 표시).
+    /// One-line name-value strip: dark name cells and white value cells alternate, e.g. [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time].
+    /// The line below the screen header that says "what you are looking at" (process, equipment, LOT, SPEC, etc.). Name cells take their text width; value cells take their text width + an equal share of the rest (so long values are not clipped first).
+    /// No value = empty. Not an input field (read-only display).
     /// </summary>
     public class ApcInfoStrip : Control
     {
@@ -28,7 +28,7 @@ namespace APC.UI.Controls
             ApcTheme.Changed += OnThemeChanged;
         }
 
-        /// <summary>이름 칸들(왼→오). 값은 모두 빈칸으로 시작한다.</summary>
+        /// <summary>Name cells (left to right). All values start empty.</summary>
         public void SetItems(params string[] names)
         {
             _names = names ?? new string[0];
@@ -36,7 +36,7 @@ namespace APC.UI.Controls
             Invalidate();
         }
 
-        /// <summary>이름 칸 name 옆 값. 없는 이름이면 ArgumentException.</summary>
+        /// <summary>Value next to name cell name. ArgumentException for an unknown name.</summary>
         public void SetValue(string name, string value)
         {
             int i = Array.IndexOf(_names, name);
@@ -54,8 +54,8 @@ namespace APC.UI.Controls
         private static int Px(int px) { return (int)Math.Round(px * ApcTheme.Scale); }
 
         /// <summary>
-        /// 이름과 값이 모두 잘리지 않는 폭(배율 적용 px). dialog의 AddContent(strip)는 이 폭에 맞춰 dialog를 넓힌다.
-        /// 화면에서 Row() 안에 둘 때는 Width를 이 값 이상으로.
+        /// Width at which no name or value is clipped (scaled px). A dialog's AddContent(strip) widens the dialog to this width.
+        /// On a screen inside Row(), set Width to at least this value.
         /// </summary>
         public int PreferredWidth
         {
@@ -117,8 +117,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 값 칸 폭: 자리가 남으면 제 글자 폭 + 남는 폭 균등. 모자라면 긴 값부터 줄인다 — 모든 칸의 상한을 같이 낮춰
-        /// 그 상한보다 짧은 값(V2·닫힘)은 다 보이고 긴 값만 말줄임이 된다(비율로 모두 줄이면 몇 px 모자라도 전부 잘린다).
+        /// Value cell widths: with spare room, text width + an equal share of the rest. When short, the longest values shrink first — a common cap is lowered for all cells
+        /// so values shorter than the cap (V2, 닫힘) stay fully visible and only long values get an ellipsis (shrinking all proportionally clips every value even when only a few px are missing).
         /// </summary>
         internal static int[] ValueWidths(int available, int[] need)
         {

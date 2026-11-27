@@ -8,9 +8,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 숫자 입력: 칸 안 오른쪽에 ▲(위)/▼(아래) 버튼 영역(콤보 화살표와 같은 모양). 버튼·↑↓ 키·마우스 휠은 Increment만큼, 직접 입력은 Enter 또는 칸을 떠날 때 확정.
-    /// 범위 밖은 Minimum/Maximum으로 잘리고, 숫자가 아니면 이전 값으로 되돌린다. 소수 자릿수는 DecimalPlaces.
-    /// 측정값처럼 "아직 입력 안 함"이 있는 칸은 Clear()로 비우고 HasValue로 입력 여부를 본다(빈칸에서 ▲는 Minimum부터 한 칸).
+    /// Numeric input: ▲(up)/▼(down) button area inside the right edge (same look as the combo arrow). Buttons, ↑↓ keys and mouse wheel step by Increment; typed input commits on Enter or on leaving the field.
+    /// Out-of-range values are clamped to Minimum/Maximum; non-numbers revert to the previous value. Decimal places: DecimalPlaces.
+    /// For fields that can be "not entered yet" such as measurements, empty them with Clear() and check HasValue (▲ on an empty field goes to Minimum plus one step).
     /// </summary>
     public class ApcNumericBox : ApcButtonField
     {
@@ -34,7 +34,7 @@ namespace APC.UI.Controls
             ShowValue();
         }
 
-        /// <summary>입력값. HasValue가 false(Clear 뒤 빈칸)이면 의미 없는 값이다 — 판정 전에 HasValue를 먼저 본다.</summary>
+        /// <summary>Entered value. Meaningless while HasValue is false (empty after Clear) — check HasValue before judging.</summary>
         [DefaultValue(typeof(decimal), "0")]
         public decimal Value
         {
@@ -50,13 +50,13 @@ namespace APC.UI.Controls
             }
         }
 
-        /// <summary>값이 입력됐는지. Clear() 뒤에는 false(칸이 비어 있다), Value를 넣거나 입력을 확정하면 true. 기본 true.</summary>
+        /// <summary>Whether a value has been entered. false after Clear() (field is empty); true after setting Value or committing input. Default true.</summary>
         [Browsable(false)]
         public bool HasValue { get { return _hasValue; } }
 
         /// <summary>
-        /// 칸을 비운다(아직 입력 안 함). 측정값 입력 칸의 처음 상태, 다음 부품·다음 포인트로 넘어갈 때.
-        /// 값이 있던 칸이면 ValueChanged가 난다 — 생성자에서는 ValueChanged를 구독하기 전에 부른다.
+        /// Empties the field (not entered yet). Initial state of a measurement field, and when moving to the next part or point.
+        /// Raises ValueChanged if the field had a value — in a constructor call it before subscribing to ValueChanged.
         /// </summary>
         public void Clear()
         {
@@ -94,7 +94,7 @@ namespace APC.UI.Controls
             set { _decimalPlaces = Math.Max(0, Math.Min(10, value)); Reclamp(); }
         }
 
-        /// <summary>입력 글자를 값으로. 숫자가 아니면 false. 범위·자릿수는 맞춰서 돌려준다.</summary>
+        /// <summary>Parses typed text into a value; false if not a number. The result is clamped to range and rounded to the decimal places.</summary>
         internal static bool TryParse(string text, decimal min, decimal max, int decimals, out decimal value)
         {
             value = 0;
@@ -104,7 +104,7 @@ namespace APC.UI.Controls
             return true;
         }
 
-        /// <summary>범위·자릿수가 바뀌면 값을 다시 맞춘다. 빈칸은 빈칸으로 둔다.</summary>
+        /// <summary>Re-fits the value when range or decimals change. An empty field stays empty.</summary>
         private void Reclamp()
         {
             if (_hasValue) { Value = _value; return; }
@@ -116,7 +116,7 @@ namespace APC.UI.Controls
             return v < min ? min : v > max ? max : v;
         }
 
-        /// <summary>입력칸 글자를 확정한다. 숫자가 아니면 이전 값을 다시 보여 준다.</summary>
+        /// <summary>Commits the typed text. If it is not a number, shows the previous value again.</summary>
         public void Commit()
         {
             decimal v;

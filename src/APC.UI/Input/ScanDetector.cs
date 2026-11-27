@@ -3,8 +3,8 @@ using System.Text;
 namespace APC.UI.Input
 {
     /// <summary>
-    /// 바코드 스캐너 입력 판별. 스캐너는 키를 사람보다 훨씬 빠르게 연달아 보내고 Enter로 끝낸다.
-    /// 모든 키 간격(Enter 포함)이 maxKeyIntervalMs 이하이고 길이가 minLength 이상이면 스캔.
+    /// Barcode scanner input detection. A scanner sends keys much faster than a person and ends with Enter.
+    /// A scan = every key interval (including Enter) at most maxKeyIntervalMs and length at least minLength.
     /// </summary>
     public sealed class ScanDetector
     {
@@ -21,7 +21,7 @@ namespace APC.UI.Input
             _minLength = minLength;
         }
 
-        /// <summary>글자 하나를 넣는다. Enter에서 스캔으로 판정되면 코드, 아니면 null.</summary>
+        /// <summary>Feeds one character. On Enter returns the code if detected as a scan, otherwise null.</summary>
         public string Feed(char c, long timestampMs)
         {
             long gap = timestampMs - _lastTime;   // 음수 = 시계 되감김(TickCount 순환) → 버스트 아님
@@ -40,7 +40,7 @@ namespace APC.UI.Input
             return null;
         }
 
-        /// <summary>현재 쌓인 버스트 길이. Feed 직후 1이면 새 버스트가 시작된 것.</summary>
+        /// <summary>Current burst length. 1 right after Feed means a new burst started.</summary>
         public int Length { get { return _buffer.Length; } }
 
         public void Reset()

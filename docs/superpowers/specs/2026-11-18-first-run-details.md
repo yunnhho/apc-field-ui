@@ -1,33 +1,33 @@
-# 첫 실행 디테일 기준 (2026-11-18)
+# First-Run Detail Standards (2026-11-18)
 
-목표: `apc-field-ui` 스킬 첫 실행 결과가 사용자의 추가 수정 요청 없이 나오게 한다.
-근거: 시뮬레이션 1~6회차 보고서와 사용자 UI 피드백(모서리·정렬·버튼 순서·숫자칸·상한선·첫 행 선택·콤보 폭·행 넘침·표 스크롤바). 시각 문제는 모두 render PNG에 보였지만 에이전트가 넘어갔다.
+Goal: the `apc-field-ui` skill's first run produces a result with no further fix requests from the user.
+Basis: simulation rounds 1–6 reports and the user's UI feedback (corners, alignment, button order, numeric fields, upper-limit line, first-row selection, combo width, row overflow, table scrollbar). Every visual problem was visible in the render PNG, but the agent let it pass.
 
-## 사용자 결정
+## User decisions
 
-| 항목 | 결정 |
+| Item | Decision |
 |---|---|
-| render 후 자가 점검 | SKILL.md 체크리스트 + `APC.UI.Tools render`에 자동 점검 |
-| 자동 점검 항목 | 글자 잘림, 넘침·겹침, 같은 줄 정렬, 표준 컨트롤·표 스크롤바·dialog 버튼 순서 |
-| 날짜·시각 | 날짜 `yyyy-MM-dd`, 당일 이력 시각 `HH:mm:ss`, 여러 날 `yyyy-MM-dd HH:mm:ss` |
-| 표 열 정렬 | 전부 가운데. 긴 글(알람 문구·비고)만 왼쪽 |
-| 값 없음(대기·통신 전) | 빈칸 |
-| 창 제목 | 화면 이름만 |
-| 소수 자리 | 단위별 기본표(아래). 요구서에 있으면 요구서 우선 |
-| 글자 크기 | theme `fontSize` 10 유지 |
-| 샘플 데이터 | 표는 보이는 행을 채우되 스크롤바가 생기지 않게, 정상 위주에 Warn·Alarm·Stop을 하나 이상 섞는다 |
+| Self-check after render | SKILL.md checklist + automatic checks in `APC.UI.Tools render` |
+| Automatic check items | Clipped text, overflow/overlap, alignment on the same row, standard controls, table scrollbar, dialog button order |
+| Date and time | Date `yyyy-MM-dd`, same-day history time `HH:mm:ss`, multi-day `yyyy-MM-dd HH:mm:ss` |
+| Table column alignment | All centered. Only long text (alarm messages, remarks) left aligned |
+| No value (waiting, before communication) | Empty |
+| Window title | Screen name only |
+| Decimal places | Default table per unit (below). The requirement document wins if it specifies |
+| Font size | Keep theme `fontSize` 10 |
+| Sample data | Tables fill the visible rows without a scrollbar; mostly normal, with at least one Warn, Alarm and Stop mixed in |
 
-## 소수 자리 기본표
+## Default decimal places
 
-| 단위 | 형식 |
+| Unit | Format |
 |---|---|
 | ℃, %RH, kN, bar, kPa, m/min, A, V | `0.0` |
 | mm | `0.00` |
-| 불량률·가동률 % | `0.0` |
-| 수량(EA) | `#,0` |
+| Defect rate, utilization % | `0.0` |
+| Quantity (EA) | `#,0` |
 
-## 함께 처리(편의)
+## Handled along the way (convenience)
 
-- `Columns()` 헬퍼를 `ApcTemplateView` protected static으로(현재 `EquipmentView`·`JudgeView`에 복사본).
-- render `--size` 생략 시 Form이면 폼 자체 크기를 쓴다.
-- SKILL.md: 템플릿 복사 안내(네임스페이스·`internal`·상수 → `IMainViewSource`), 작업 폴더 `mkdir -p`, 빌드 경고 수 확인.
+- Make the `Columns()` helper protected static on `ApcTemplateView` (currently copied in `EquipmentView` and `JudgeView`).
+- When render `--size` is omitted for a Form, use the form's own size.
+- SKILL.md: template copy guidance (namespace, `internal`, constants → `IMainViewSource`), `mkdir -p` the work folder, check the build warning count.

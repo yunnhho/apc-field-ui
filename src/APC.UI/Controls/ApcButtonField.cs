@@ -7,8 +7,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 입력칸 + 칸 안 오른쪽 버튼 영역(콤보 화살표와 같은 모양). 테두리·포커스 테두리는 이 컨트롤이 그리고,
-    /// 안쪽 입력칸은 테두리 없이 들어간다. 버튼 영역은 위아래로 나눌 수 있다(숫자칸 ▲▼). ApcNumericBox·ApcDateBox의 바탕.
+    /// Input field + a button area inside its right edge (same look as the combo arrow). This control draws the border and focus border;
+    /// the inner text box has no border. The button area can be split top/bottom (numeric ▲▼). Base of ApcNumericBox and ApcDateBox.
     /// </summary>
     public abstract class ApcButtonField : UserControl
     {
@@ -28,10 +28,10 @@ namespace APC.UI.Controls
             Size = new Size(ApcTheme.Px(150), ApcTheme.Px(ApcTextBox.BaseHeight));
         }
 
-        /// <summary>안쪽 입력칸(포커스 지정·스캔 복원 대상).</summary>
+        /// <summary>Inner text box (focus target, restored after a scan).</summary>
         public ApcTextBox TextBox { get { return _text; } }
 
-        /// <summary>버튼 영역을 위아래로 몇 칸으로 나누는지.</summary>
+        /// <summary>Number of stacked cells the button area is split into.</summary>
         internal abstract int SegmentCount { get; }
         internal abstract bool SegmentPointsUp(int index);
         internal abstract void OnSegmentClick(int index);
@@ -41,7 +41,7 @@ namespace APC.UI.Controls
             get { int w = FieldFrame.ButtonWidth(Height); return new Rectangle(Width - w, 0, w, Height); }
         }
 
-        /// <summary>점이 몇 번째 버튼 칸인지. 버튼 영역 밖이면 -1.</summary>
+        /// <summary>Index of the button cell under the point; -1 outside the button area.</summary>
         internal int SegmentAt(Point p)
         {
             var area = ButtonArea;

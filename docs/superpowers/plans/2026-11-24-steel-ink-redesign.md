@@ -1,65 +1,65 @@
-# Steel + Ink 리디자인 Implementation Plan
+# Steel + Ink Redesign Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** APC.UI 기본 테마와 컨트롤 그리기를 시안 `visual-direction-v2.html`(B Steel + C 글자)로 다시 입힌다. API와 화면 구성은 거의 그대로 둔다.
+**Goal:** reskin the APC.UI default theme and control drawing to the mockup `visual-direction-v2.html` (B Steel + C type). API and screen composition stay mostly unchanged.
 
-**Architecture:** 새 색 토큰 3개(`panel`, `borderStrong`, `brand`)를 `ThemeColors`에 추가한다. 키가 없는 예전 theme.json은 기존 값에서 유도한 기본값으로 읽는다. 이어서 `ApcForm`(2단 제목), `ApcGroup`, `Cards`, `FieldFrame`, `ApcHeaderBar`, `ApcGrid`의 OnPaint를 고치고, 버튼 SVG를 다시 그린다.
+**Architecture:** add 3 new color tokens (`panel`, `borderStrong`, `brand`) to `ThemeColors`. An older theme.json without the keys loads with defaults derived from existing values. Then fix OnPaint of `ApcForm` (two-line title), `ApcGroup`, `Cards`, `FieldFrame`, `ApcHeaderBar`, `ApcGrid`, and redraw the button SVGs.
 
-**Tech Stack:** .NET Framework 4.0 / C# 7.3 WinForms, `APC.UI.Checks`(자체 Check 러너), `tools/render-assets.mjs`(resvg).
+**Tech Stack:** .NET Framework 4.0 / C# 7.3 WinForms, `APC.UI.Checks` (own Check runner), `tools/render-assets.mjs` (resvg).
 
 **Spec:** `docs/superpowers/specs/2026-11-24-steel-ink-redesign-design.md`
 
 ## Global Constraints
 
-- C# 7.3, NuGet 추가 금지. 빌드와 점검은 `./build.sh`로 하고, 결과는 `ALL PASSED`여야 한다.
-- 상태색 5개(`#16A34A`, `#EAB308`, `#DC2626`, `#9CA3AF`, `#2563EB`)는 바꾸지 않는다.
-- 글꼴은 맑은 고딕(Regular/Bold)만 쓴다.
-- `themes/*/assets/*.png`는 직접 편집하지 않는다. `assets-src/*.svg`를 고친 뒤 `node tools/render-assets.mjs`로 만든다.
-- **`brand` 색(`#E60012`, 로고 PNG에서 측정)은 `ApcForm`의 기능명 한 곳에서만 참조한다.**
-- 위험 버튼(`btn_danger_*`), 포커스 파랑(`FieldFrame.FocusColor`), 선택 행 파랑 계열은 유지한다.
-- public API가 바뀌므로 `AssemblyVersion`을 `1.19.0.0` → `1.20.0.0`으로 올린다.
+- C# 7.3, no NuGet additions. Build and checks via `./build.sh`; the result must be `ALL PASSED`.
+- Do not change the 5 status colors (`#16A34A`, `#EAB308`, `#DC2626`, `#9CA3AF`, `#2563EB`).
+- Font: 맑은 고딕 (Regular/Bold) only.
+- Never edit `themes/*/assets/*.png` directly. Edit `assets-src/*.svg`, then generate with `node tools/render-assets.mjs`.
+- **The `brand` color (`#E60012`, measured from the logo PNG) is referenced in exactly one place: the function name in `ApcForm`.**
+- Keep the danger button (`btn_danger_*`), focus blue (`FieldFrame.FocusColor`) and the blue selected-row family.
+- The public API changes, so bump `AssemblyVersion` from `1.19.0.0` → `1.20.0.0`.
 
-## 색 값 (spec 6.1 확정판)
+## Color values (final version of spec 6.1)
 
-| 키 | 값 |
+| Key | Value |
 |---|---|
 | `background` | `["#E9EDF1","#DDE3E9"]` |
 | `titleBar` | `["#FBFCFD","#E8EDF2"]` |
-| `header` | `["#3F5A78","#2A4058"]` (탭 강조·InfoStrip 이름 칸용 남색. HeaderBar는 더 이상 쓰지 않음) |
+| `header` | `["#3F5A78","#2A4058"]` (navy for tab emphasis and InfoStrip name cells. HeaderBar no longer uses it) |
 | `gridHeader` | `["#F7F9FB","#E4E9EE"]` |
-| `panel` *(신규)* | `["#FDFDFE","#F1F4F7"]` |
+| `panel` *(new)* | `["#FDFDFE","#F1F4F7"]` |
 | `border` | `#B9C3CD` |
-| `borderStrong` *(신규)* | `#9AA7B4` |
+| `borderStrong` *(new)* | `#9AA7B4` |
 | `text` | `#1A1F26` |
 | `textMuted` | `#5D6B7A` |
 | `textInverse` | `#FFFFFF` |
 | `gridLine` | `#E3E8ED` |
-| `gridSelected` | `#CFE0F5` (유지) |
-| `brand` *(신규)* | `#E60012` |
+| `gridSelected` | `#CFE0F5` (unchanged) |
+| `brand` *(new)* | `#E60012` |
 
 ## Review Focus
 
-1. **예전 theme.json**(`themes/sample`, 고객사 폴더)에 새 키가 없을 때: 로드가 성공하고 예전 모습(흰 카드, 기존 테두리, 브랜드 = 글자색)으로 보여야 한다. → Task 1 점검.
-2. **`FunctionText`를 빈 문자열이나 null로 되돌릴 때**: 타이틀바 높이와 `Padding`이 한 줄 높이로 돌아와야 한다. 이게 안 되면 화면 내용이 위로 겹친다. → Task 2 점검.
-3. **dialog(`ShowLogo=false`)에 `FunctionText`를 넣을 때**: 붉은 줄이 나오면 안 된다(spec 6.2). → Task 2 점검.
-4. **알람 카드 테두리**: 새 패널 그라데이션 위에서도 3px 알람 테두리 픽셀이 알람색이어야 한다. 기존 점검 `card: alarm draws thick alarm border`가 계속 통과해야 한다. → Task 3.
-5. **좁은 창(1024폭)에서 긴 프로그램 이름과 기능명**: 버튼과 겹치지 않고 말줄임(…)으로 처리되어야 한다. → Task 2에서 render로 확인.
+1. **Older theme.json** (`themes/sample`, customer folders) without the new keys: loading succeeds and it looks as before (white cards, existing border, brand = text color). → Task 1 checks.
+2. **Setting `FunctionText` back to empty or null**: title bar height and `Padding` return to the one-line height. Otherwise screen content overlaps upward. → Task 2 checks.
+3. **`FunctionText` on a dialog (`ShowLogo=false`)**: no red line may appear (spec 6.2). → Task 2 checks.
+4. **Alarm card border**: on the new panel gradient the 3px alarm border pixels must still be the alarm color. The existing check `card: alarm draws thick alarm border` must keep passing. → Task 3.
+5. **Long program name and function name in a narrow window (1024 wide)**: no overlap with the buttons; ellipsized (…). → verified with render in Task 2.
 
 ---
 
-### Task 1: 색 토큰 추가와 기본 테마 값 교체
+### Task 1: Add color tokens and replace default theme values
 
 **Files:**
 - Modify: `src/APC.UI/Theming/ThemeData.cs` (`ThemeColors`)
-- Modify: `src/APC.UI/Theming/ThemeLoader.cs` (`Validate` 끝에 기본값 채우기)
-- Modify: `themes/default/theme.json` (위 표의 값)
+- Modify: `src/APC.UI/Theming/ThemeLoader.cs` (fill defaults at the end of `Validate`)
+- Modify: `themes/default/theme.json` (values from the table above)
 - Test: `src/APC.UI.Checks/Program.cs` (`RunThemeChecks`)
 
 **Interfaces:**
-- Produces: `ThemeColors.Panel : string[]` (`"panel"`), `ThemeColors.BorderStrong : string` (`"borderStrong"`), `ThemeColors.Brand : string` (`"brand"`). Load 뒤에는 항상 null이 아니다.
+- Produces: `ThemeColors.Panel : string[]` (`"panel"`), `ThemeColors.BorderStrong : string` (`"borderStrong"`), `ThemeColors.Brand : string` (`"brand"`). Never null after Load.
 
-- [ ] **Step 1: 실패하는 점검 작성** — `RunThemeChecks`에 추가:
+- [ ] **Step 1: Write failing checks** — add to `RunThemeChecks`:
 ```csharp
 Check(t.Colors.Brand == "#E60012" && t.Colors.BorderStrong == "#9AA7B4" && t.Colors.Panel[0] == "#FDFDFE", "theme: steel-ink tokens");
 var old = ThemeLoader.Load(Path.Combine(Root, Path.Combine("themes", "sample")));
@@ -67,24 +67,24 @@ Check(old.Colors.Panel[0] == "#FFFFFF" && old.Colors.Panel[1] == "#FFFFFF", "the
 Check(old.Colors.BorderStrong == old.Colors.Border, "theme: missing borderStrong = border");
 Check(old.Colors.Brand == old.Colors.Text, "theme: missing brand = text (no red)");
 ```
-(`themes/sample/theme.json`에 새 키가 없는지 먼저 확인한다. 있으면 `fixtures/`에 새 키가 없는 사본을 만들어 쓴다.)
-- [ ] **Step 2:** `./build.sh` → 위 점검 FAIL(컴파일 에러 포함).
-- [ ] **Step 3: 구현** — `ThemeColors`에 `[DataMember(Name = "panel")]` 등 3개 속성을 추가한다. `ThemeLoader.Validate` 끝에 private `ApplyDefaults(ThemeColors c)`를 둔다. 값이 null이면 위 기본값을 넣고, 값이 있으면 `Pair`/`ColorField`로 형식을 검사한다. `themes/default/theme.json`을 위 표대로 고친다.
-- [ ] **Step 4:** `./build.sh` → `ALL PASSED`. 이 시점에는 화면이 반쯤 바뀐 상태여도 된다.
-- [ ] **Step 5:** 커밋 `feat: theme에 panel·borderStrong·brand 토큰, 기본 테마 Steel 색`
+(First confirm `themes/sample/theme.json` lacks the new keys. If it has them, make a copy without them under `fixtures/` and use that.)
+- [ ] **Step 2:** `./build.sh` → the checks above FAIL (including compile errors).
+- [ ] **Step 3: Implement** — add 3 properties such as `[DataMember(Name = "panel")]` to `ThemeColors`. Add a private `ApplyDefaults(ThemeColors c)` at the end of `ThemeLoader.Validate`: null → the defaults above; present → validate format with `Pair`/`ColorField`. Update `themes/default/theme.json` per the table.
+- [ ] **Step 4:** `./build.sh` → `ALL PASSED`. The screens may look half-changed at this point.
+- [ ] **Step 5:** Commit `feat: panel, borderStrong, brand theme tokens; Steel colors in the default theme`
 
-### Task 2: 창 제목 2단 (`ApcForm.FunctionText`)
+### Task 2: Two-line window title (`ApcForm.FunctionText`)
 
 **Files:**
-- Modify: `src/APC.UI/Controls/ApcForm.cs` (`TitleBarHeight`, `OnPaint` 제목 부분, `Padding` 설정 지점 325행)
-- Modify: `src/APC.UI.Demo/GalleryForm.cs`, `tools/project-template/MainForm.cs` (예시 값 넣기)
+- Modify: `src/APC.UI/Controls/ApcForm.cs` (`TitleBarHeight`, the title part of `OnPaint`, where `Padding` is set at line 325)
+- Modify: `src/APC.UI.Demo/GalleryForm.cs`, `tools/project-template/MainForm.cs` (example values)
 - Test: `src/APC.UI.Checks/FormChecks.cs`
 
 **Interfaces:**
 - Consumes: `ThemeColors.Brand` (Task 1)
-- Produces: `public string FunctionText { get; set; }` (기본 `""`, null → `""`, set 시 높이·Padding 갱신 + Invalidate)
+- Produces: `public string FunctionText { get; set; }` (default `""`, null → `""`; setting it updates height and Padding + Invalidate)
 
-- [ ] **Step 1: 실패하는 점검** — `RunFormChecks`에 추가:
+- [ ] **Step 1: Failing checks** — add to `RunFormChecks`:
 ```csharp
 using (var f = new ApcForm())
 {
@@ -98,65 +98,65 @@ using (var f = new ApcForm())
 }
 ```
 - [ ] **Step 2:** `./build.sh` → FAIL.
-- [ ] **Step 3: 구현**
-  - 높이: `ShowLogo && FunctionText != ""`이면 기준값 54, 아니면 40(`BaseTitleHeight`). 높이가 바뀔 때마다 `Padding = new Padding(1, TitleBarHeight + 1, 1, 1)`을 다시 설정한다(기존 325행 로직을 메서드로 묶는다).
-  - 로고 모드 그리기: 로고 → 12px 간격 → 1px 세로선(`#C4CCD5`, 높이 28) → 12px 간격 → 제목을 **왼쪽 정렬**한다(가운데 정렬 로직 삭제). 기능명이 있으면 2단으로 그린다. 윗줄은 `TitleFont()`(Bold ×1.5) + `text`, 아랫줄은 Bold, 테마 크기 −1pt + `brand`. 두 줄 모두 `TextClip.Draw` + `EndEllipsis`로 오른쪽 버튼 앞에서 자른다.
-  - `ShowLogo=false`는 지금 그대로 둔다.
+- [ ] **Step 3: Implement**
+  - Height: base 54 when `ShowLogo && FunctionText != ""`, otherwise 40 (`BaseTitleHeight`). Whenever the height changes, reset `Padding = new Padding(1, TitleBarHeight + 1, 1, 1)` (wrap the existing line-325 logic in a method).
+  - Logo mode drawing: logo → 12px gap → 1px vertical line (`#C4CCD5`, height 28) → 12px gap → title **left aligned** (delete the centering logic). With a function name, draw two lines: top `TitleFont()` (Bold ×1.5) + `text`, bottom Bold, theme size −1pt + `brand`. Both lines use `TextClip.Draw` + `EndEllipsis` to clip before the right-side buttons.
+  - Leave `ShowLogo=false` as is.
 - [ ] **Step 4:** `./build.sh` → `ALL PASSED`.
-- [ ] **Step 5:** `GalleryForm`에 `FunctionText = "컨트롤 갤러리"`를, `tools/project-template/MainForm.cs`에 주석과 함께 `FunctionText = ""`(화면 기능명)를 넣는다. 갤러리를 1024×768로 띄워 긴 제목이 말줄임 되는지 눈으로 확인한다(Review Focus 5).
-- [ ] **Step 6:** 커밋 `feat: ApcForm.FunctionText — 로고 | 프로그램 이름 / 기능명 2단 제목`
+- [ ] **Step 5:** Put `FunctionText = "컨트롤 갤러리"` in `GalleryForm`, and `FunctionText = ""` (screen function name) with a comment in `tools/project-template/MainForm.cs`. Open the gallery at 1024×768 and visually confirm long titles ellipsize (Review Focus 5).
+- [ ] **Step 6:** Commit `feat: ApcForm.FunctionText — logo | program name / function name two-line title`
 
-### Task 3: 패널·라벨·입력칸·표 머리·헤더 띠 다시 그리기
+### Task 3: Redraw panels, labels, fields, table header, header band
 
 **Files:**
 - Modify: `src/APC.UI/Controls/ApcGroup.cs` (OnPaint)
 - Modify: `src/APC.UI/Drawing/Cards.cs` (`DrawFrame`)
-- Modify: `src/APC.UI/Drawing/FieldFrame.cs` (`DrawBorder`의 비포커스 테두리 색)
-- Modify: `src/APC.UI/Controls/ApcGrid.cs` (`OnCellPainting` 머리줄, 묶음 머리 `OnPaint`)
+- Modify: `src/APC.UI/Drawing/FieldFrame.cs` (unfocused border color in `DrawBorder`)
+- Modify: `src/APC.UI/Controls/ApcGrid.cs` (header row in `OnCellPainting`, group header `OnPaint`)
 - Modify: `src/APC.UI/Controls/ApcHeaderBar.cs` (OnPaint)
 - Test: `src/APC.UI.Checks/DisplayChecks.cs`, `GridChecks.cs`
 
 **Interfaces:**
 - Consumes: `Panel`, `BorderStrong` (Task 1)
 
-- [ ] **Step 1: 실패하는 점검** (픽셀 검사, 기존 `DrawToBitmap` 방식을 따른다):
-  - `group: ink bar beside label` — `ApcGroup { Text = "LOT 바코드", Size = 300×120 }`을 그렸을 때, 라벨 왼쪽 막대 위치의 픽셀이 `text` 색이다.
-  - `grid: header has 2px ink underline` — 열 1개짜리 `ApcGrid`의 머리 셀 아래 2px 픽셀이 `text` 색이다.
-  - `card: panel gradient fill` — `ApcValueCard`(Status=Run) 안쪽 위(2px 아래) 픽셀이 `panel[0]`이다(흰색 `#FFFFFF`가 아님).
-  - `header bar: light with ink title` — `ApcHeaderBar`의 (2, Height/2) 픽셀이 `titleBar` 범위에 있고 남색(`#2A4058`)이 아니다.
-- [ ] **Step 2:** `./build.sh` → 4개 FAIL.
-- [ ] **Step 3: 구현** (값은 spec 6.3~6.6을 따른다)
-  - `ApcGroup`: `panel` 그라데이션, 1px `border`, 위쪽 1px 흰 하이라이트. 제목 띠 그라데이션을 없애고, 왼쪽 위에 3px `text` 막대 + Bold 라벨을 둔다. 제목 높이(`TitleHeight`)와 Padding은 바꾸지 않는다(구성 유지).
-  - `Cards.DrawFrame`: `g.Clear(White)` 대신 `panel` 그라데이션을 칠한다(선택 상태는 기존대로 `gridSelected`). 알람과 하이라이트 테두리 로직은 그대로 둔다.
-  - `FieldFrame`: 비포커스 테두리를 `borderStrong`으로 바꾸고, 안쪽 그림자 알파를 48 → 64로 올린다.
-  - `ApcGrid` 머리: 기존 그라데이션과 세로 구분선은 유지하고, 아래선을 2px `text`로 바꾼다. 글자는 Bold `text`로 한다(이미 Bold면 색만 바꾼다).
-  - `ApcHeaderBar`: 배경을 `titleBar` 그라데이션으로 바꾸고 아래에 1px `border`를 긋는다. 제목과 상태 문구는 `text` 색으로 한다. 램프 배치는 그대로 둔다.
-- [ ] **Step 4:** `./build.sh` → `ALL PASSED`. 기존 `card: alarm draws thick alarm border`도 통과해야 한다(Review Focus 4).
-- [ ] **Step 5:** 커밋 `feat: 패널·구역 라벨·입력칸·표 머리·헤더 띠를 Steel + Ink로`
+- [ ] **Step 1: Failing checks** (pixel tests, following the existing `DrawToBitmap` approach):
+  - `group: ink bar beside label` — drawing `ApcGroup { Text = "LOT 바코드", Size = 300×120 }`, the pixel at the bar left of the label is the `text` color.
+  - `grid: header has 2px ink underline` — for a one-column `ApcGrid`, the 2px below the header cell are the `text` color.
+  - `card: panel gradient fill` — the pixel inside the top (2px down) of `ApcValueCard` (Status=Run) is `panel[0]` (not white `#FFFFFF`).
+  - `header bar: light with ink title` — the pixel at (2, Height/2) of `ApcHeaderBar` is within the `titleBar` range and not navy (`#2A4058`).
+- [ ] **Step 2:** `./build.sh` → 4 FAIL.
+- [ ] **Step 3: Implement** (values per spec 6.3–6.6)
+  - `ApcGroup`: `panel` gradient, 1px `border`, 1px white highlight on top. Remove the title band gradient; put a 3px `text` bar + Bold label at the top left. Do not change title height (`TitleHeight`) or Padding (composition stays).
+  - `Cards.DrawFrame`: fill the `panel` gradient instead of `g.Clear(White)` (selected state stays `gridSelected`). Keep the alarm and highlight border logic.
+  - `FieldFrame`: unfocused border becomes `borderStrong`; inner shadow alpha 48 → 64.
+  - `ApcGrid` header: keep the existing gradient and vertical dividers; the bottom line becomes 2px `text`. Text Bold `text` (if already Bold, change only the color).
+  - `ApcHeaderBar`: background becomes the `titleBar` gradient with a 1px `border` line below. Title and status text use `text`. Lamp placement unchanged.
+- [ ] **Step 4:** `./build.sh` → `ALL PASSED`. The existing `card: alarm draws thick alarm border` must pass too (Review Focus 4).
+- [ ] **Step 5:** Commit `feat: panels, section labels, fields, table header, header band in Steel + Ink`
 
-### Task 4: 버튼·창 버튼 SVG와 탭·InfoStrip 톤
+### Task 4: Button and window button SVGs; tab and InfoStrip tone
 
 **Files:**
-- Modify: `assets-src/btn_primary_{normal,hover,pressed,disabled}.svg`, `assets-src/btn_normal_*.svg`, `assets-src/win_*_*.svg`(색만)
+- Modify: `assets-src/btn_primary_{normal,hover,pressed,disabled}.svg`, `assets-src/btn_normal_*.svg`, `assets-src/win_*_*.svg` (colors only)
 - Regenerate: `themes/default/assets/*.png` (`node tools/render-assets.mjs`)
-- Check: `src/APC.UI/Controls/ApcTabStrip.cs`, `ApcInfoStrip.cs` (이들은 `header`를 쓰므로 Task 1 값으로 자동으로 남색이 된다. 글자가 `textInverse`인지만 확인)
+- Check: `src/APC.UI/Controls/ApcTabStrip.cs`, `ApcInfoStrip.cs` (they use `header`, so the Task 1 value makes them navy automatically. Only confirm their text is `textInverse`)
 
-- [ ] **Step 1:** `btn_primary_normal`: 그라데이션 `#4A6687 → #3F5A78 → #2A4058`, 테두리 `#213347`, 모서리 `rx="3"`, 위쪽 흰 하이라이트 opacity 0.2. hover는 한 단계 밝게, pressed는 한 단계 어둡게 하고 하이라이트를 없앤다. disabled는 채도를 빼서 `#A9B4C0` 계열로 한다.
-- [ ] **Step 2:** `btn_normal_*`: `#FDFDFE → #DFE5EB`, 테두리 `#9AA7B4`, `rx="3"`. 상태별 변화는 기존 파일의 명도 차이를 따른다.
-- [ ] **Step 3:** `win_*`의 회색 계열을 `#5D6B7A`/`#B9C3CD` 톤으로 맞춘다(닫기 hover 빨강은 유지).
-- [ ] **Step 4:** `node tools/render-assets.mjs` 실행 후 `./build.sh` → `ALL PASSED`(AssetChecks와 nine-slice 점검 포함).
-- [ ] **Step 5:** 커밋 `feat: 버튼·창 버튼 SVG를 남색/금속 톤으로`
+- [ ] **Step 1:** `btn_primary_normal`: gradient `#4A6687 → #3F5A78 → #2A4058`, border `#213347`, corners `rx="3"`, white top highlight opacity 0.2. hover one step lighter, pressed one step darker without the highlight. disabled desaturated toward `#A9B4C0`.
+- [ ] **Step 2:** `btn_normal_*`: `#FDFDFE → #DFE5EB`, border `#9AA7B4`, `rx="3"`. Per-state changes follow the lightness differences of the existing files.
+- [ ] **Step 3:** Shift the grays of `win_*` to the `#5D6B7A`/`#B9C3CD` tone (keep the red close-hover).
+- [ ] **Step 4:** Run `node tools/render-assets.mjs`, then `./build.sh` → `ALL PASSED` (including AssetChecks and nine-slice checks).
+- [ ] **Step 5:** Commit `feat: button and window button SVGs in navy/metal tone`
 
-### Task 5: 마무리 — 문서·스킬·버전·시각 확인
+### Task 5: Wrap-up — docs, skill, version, visual check
 
 **Files:**
-- Modify: `src/APC.UI/Properties/AssemblyInfo.cs` (`1.20.0.0`, File 버전도 같이)
-- Modify: `docs/api.md` (`ApcForm.FunctionText`, `ThemeColors` 새 키 3개와 기본값 규칙). `./build.sh`가 api 문서를 갱신하면 그 결과를 확인한다.
-- Modify: `skills/apc-field-ui/SKILL.md` 128행 표: "창 제목 | 화면 이름만 (`TitleText`) … 기능명은 `FunctionText`(예: "작업 시작 · LOT 스캔"), dialog에는 쓰지 않음". 63행 TitleText 안내 옆에 FunctionText를 추가한다.
+- Modify: `src/APC.UI/Properties/AssemblyInfo.cs` (`1.20.0.0`, File version too)
+- Modify: `docs/api.md` (`ApcForm.FunctionText`, the 3 new `ThemeColors` keys and their default rule). When `./build.sh` regenerates the api doc, check the result.
+- Modify: the table at line 128 of `skills/apc-field-ui/SKILL.md`: "Window title | screen name only (`TitleText`) … function name in `FunctionText` (e.g. "작업 시작 · LOT 스캔"), not used in dialogs". Add FunctionText next to the TitleText guidance at line 63.
 - Run: `bash tools/install-skill.sh`
 
-- [ ] **Step 1:** 위 문서와 버전을 반영한다.
-- [ ] **Step 2:** `./build.sh` → `ALL PASSED`, render 점검 0건(참고 줄은 무관).
-- [ ] **Step 3:** brand 사용처를 확인한다: `grep -rn "\.Brand" src/APC.UI --include=*.cs` → `ApcForm.cs`와 `ThemeLoader.cs`(기본값)만 나와야 한다.
-- [ ] **Step 4:** 갤러리와 템플릿 14개를 render 캡처한다. 알람 카드와 램프가 예전 캡처보다 덜 띄지 않는지 비교한다. 캡처를 사용자에게 보여 주고 시안과 같은 인상인지 확인받는다.
-- [ ] **Step 5:** `bash tools/install-skill.sh` 실행 후 커밋 `docs: FunctionText·테마 토큰 문서, 스킬 갱신 (APC.UI 1.20.0.0)`
+- [ ] **Step 1:** Apply the docs and version above.
+- [ ] **Step 2:** `./build.sh` → `ALL PASSED`, 0 render findings (`참고` lines do not count).
+- [ ] **Step 3:** Check brand usage: `grep -rn "\.Brand" src/APC.UI --include=*.cs` → only `ApcForm.cs` and `ThemeLoader.cs` (defaults).
+- [ ] **Step 4:** Render-capture the gallery and the 14 templates. Compare that alarm cards and lamps do not stand out less than in the old captures. Show the captures to the user and confirm the impression matches the mockup.
+- [ ] **Step 5:** Run `bash tools/install-skill.sh`, then commit `docs: FunctionText and theme token docs, skill update (APC.UI 1.20.0.0)`

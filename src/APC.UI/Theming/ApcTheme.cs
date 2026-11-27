@@ -5,7 +5,7 @@ using System.IO;
 
 namespace APC.UI.Theming
 {
-    /// <summary>현재 테마 한 곳. 앱 시작 시 Load 한 번, 이후 컨트롤들이 여기서 색·폰트·이미지를 가져간다.</summary>
+    /// <summary>The single current theme. Load once at app start; controls then take colors, fonts and images from here.</summary>
     public static class ApcTheme
     {
         public const int BaseMinHeight = 28;
@@ -23,10 +23,10 @@ namespace APC.UI.Theming
         public static int MinHeight { get { return (int)Math.Round(BaseMinHeight * Scale); } }
         public static string AssetsDir { get { return Path.Combine(ThemeDir, "assets"); } }
 
-        /// <summary>96dpi 기준 px을 현재 배율로. 화면·dialog 어디서나 크기·여백에 쓴다(ApcTemplateView의 S()와 같다).</summary>
+        /// <summary>Converts 96-dpi px to the current scale. Use for sizes and margins anywhere in screens and dialogs (same as ApcTemplateView's S()).</summary>
         public static int Px(int px) { return (int)Math.Round(px * Scale); }
 
-        /// <summary>필수 이미지. Load 때 @1x 존재를 확인해 첫 OnPaint가 아니라 시작 시점에 실패하게 한다.</summary>
+        /// <summary>Required images. Load checks that the @1x files exist so failure happens at startup, not on the first OnPaint.</summary>
         internal static readonly string[] RequiredImages = BuildRequiredImages();
 
         private static string[] BuildRequiredImages()
@@ -38,7 +38,7 @@ namespace APC.UI.Theming
             return list.ToArray();
         }
 
-        /// <exception cref="ThemeException">theme.json 문제 또는 필수 이미지 누락. 실패하면 기존 테마 유지.</exception>
+        /// <exception cref="ThemeException">theme.json problem or a missing required image. On failure the previous theme is kept.</exception>
         public static void Load(string themeDir)
         {
             var data = ThemeLoader.Load(themeDir);
@@ -58,7 +58,7 @@ namespace APC.UI.Theming
             if (handler != null) handler(null, EventArgs.Empty);
         }
 
-        /// <summary>캐시된 이미지. 호출 측에서 Dispose 하지 않는다.</summary>
+        /// <summary>Cached image. Callers must not Dispose it.</summary>
         public static Image GetImage(string baseName)
         {
             EnsureLoaded();
@@ -73,7 +73,7 @@ namespace APC.UI.Theming
             return img;
         }
 
-        /// <summary>이미지가 몇 배율 파일인지(9-slice 여백 환산용).</summary>
+        /// <summary>Scale of the image file (for converting 9-slice margins).</summary>
         public static float ImageScale(Image img)
         {
             return img.Tag is float ? (float)img.Tag : 1f;
@@ -98,8 +98,8 @@ namespace APC.UI.Theming
         }
 
         /// <summary>
-        /// 밝은 바탕(흰·패널) 위 글자용 상태색. 상태색 그대로면 노랑(경고)·초록은 흰 바탕 대비가 낮아 멀리서 안 읽힌다 →
-        /// 명도만 낮춰 대비 4.5:1 이상으로. 색상(hue)은 같다. 램프·배너 면 색은 Status.
+        /// Status color for text on light backgrounds (white, panel). Raw status yellow (warning) and green have low contrast on white and are unreadable from a distance →
+        /// only lightness is lowered to reach 4.5:1 contrast or more. Hue is unchanged. Lamp and banner fill colors use Status.
         /// </summary>
         public static Color StatusText(StatusKind kind)
         {

@@ -10,8 +10,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 추이 꺾은선. SetValues로 시간순 값(왼쪽=과거), XLabels로 가로축 글자(양끝·가운데 등, 고르게 배치).
-    /// Reference = 설정값(회색 점선), UpperLimit/LowerLimit = 상·하한(알람색 점선). 세로축은 값과 기준선을 모두 담게 자동으로 잡는다.
+    /// Trend line. SetValues takes values in time order (left = past); XLabels sets x-axis labels (ends, middle, etc., spread evenly).
+    /// Reference = set value (gray dashed), UpperLimit/LowerLimit = limits (alarm-color dashed). The y-axis range auto-fits both the values and the reference lines.
     /// </summary>
     public class ApcTrendChart : Control
     {
@@ -41,7 +41,7 @@ namespace APC.UI.Controls
         [Browsable(false)]
         public string[] XLabels { get { return (string[])_xLabels.Clone(); } set { _xLabels = value == null ? new string[0] : (string[])value.Clone(); Invalidate(); } }
 
-        /// <summary>null·NaN·무한대 = 선 없음.</summary>
+        /// <summary>null, NaN, infinity = no line.</summary>
         [Browsable(false)] public double? Reference { get { return _reference; } set { _reference = Finite(value); Invalidate(); } }
         [Browsable(false)] public double? UpperLimit { get { return _upper; } set { _upper = Finite(value); Invalidate(); } }
         [Browsable(false)] public double? LowerLimit { get { return _lower; } set { _lower = Finite(value); Invalidate(); } }
@@ -51,13 +51,13 @@ namespace APC.UI.Controls
             return v.HasValue && !double.IsNaN(v.Value) && !double.IsInfinity(v.Value) ? v : null;
         }
 
-        /// <summary>min~max를 담는 보기 좋은 눈금 범위(1·2·5×10ⁿ 간격).</summary>
+        /// <summary>Nice tick range covering min~max (steps of 1·2·5×10ⁿ).</summary>
         internal static void NiceRange(double min, double max, int ticks, out double lo, out double hi, out double step)
         {
             NiceRange(min, max, ticks, int.MaxValue, out lo, out hi, out step);
         }
 
-        /// <summary>maxLabels: 세로 높이에 들어가는 눈금 글자 수. 넘으면 간격을 한 단계씩 넓힌다(1→2→5→10).</summary>
+        /// <summary>maxLabels: number of tick labels that fit the height. If exceeded, the step widens one level at a time (1→2→5→10).</summary>
         internal static void NiceRange(double min, double max, int ticks, int maxLabels, out double lo, out double hi, out double step)
         {
             if (max < min) { var t = min; min = max; max = t; }

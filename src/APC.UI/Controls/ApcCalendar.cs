@@ -6,7 +6,7 @@ using APC.UI.Theming;
 
 namespace APC.UI.Controls
 {
-    /// <summary>ApcDateBox가 펼치는 달력. 맨 위 ◀ 년월 ▶, 요일 줄, 6주×7일 칸. 칸을 누르면 DateSelected.</summary>
+    /// <summary>Calendar dropped down by ApcDateBox. Top ◀ year-month ▶, weekday row, 6 weeks × 7 day cells. Clicking a cell raises DateSelected.</summary>
     internal sealed class ApcCalendar : Control
     {
         private static readonly string[] DayNames = { "일", "월", "화", "수", "목", "금", "토" };
@@ -30,7 +30,7 @@ namespace APC.UI.Controls
         public DateTime Value { get { return _value; } }
         public DateTime Month { get { return _month; } }
 
-        /// <summary>달력 첫 칸(그 달 1일이 속한 주의 일요일).</summary>
+        /// <summary>First cell of the calendar (Sunday of the week containing the 1st of the month).</summary>
         internal static DateTime FirstCell(DateTime month)
         {
             var first = new DateTime(month.Year, month.Month, 1);
@@ -45,7 +45,7 @@ namespace APC.UI.Controls
             Invalidate();
         }
 
-        /// <summary>점 p가 가리키는 날짜. 날짜 칸이 아니면 null.</summary>
+        /// <summary>Date at point p; null if not on a date cell.</summary>
         internal DateTime? DateAt(Point p)
         {
             int top = S(HeaderH) + S(DayRowH), cell = S(Cell);

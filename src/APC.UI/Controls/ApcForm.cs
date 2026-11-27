@@ -10,8 +10,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 테두리 없는 APCSOFT 창. 타이틀바(로고·제목·[설정]·최소화·닫기 이미지 버튼), 드래그 이동,
-    /// 더블클릭 최대화, 가장자리 리사이즈. 최대화해도 작업표시줄을 가리지 않는다.
+    /// Borderless APCSOFT window. Title bar (logo, title, [settings], minimize, close image buttons), drag to move,
+    /// double-click to maximize, edge resize. Maximizing does not cover the taskbar.
     /// </summary>
     public partial class ApcForm : Form
     {
@@ -58,8 +58,8 @@ namespace APC.UI.Controls
         private string _functionText = string.Empty;
 
         /// <summary>
-        /// 제목 아랫줄의 기능명(예: "작업 시작 · LOT 스캔"). 브랜드 색으로 그린다.
-        /// 메인 창(ShowLogo)에서만 보이고, 비어 있으면 한 줄 제목·기본 높이.
+        /// Function name on the line below the title (e.g. "작업 시작 · LOT 스캔"). Drawn in the brand color.
+        /// Shown only on the main window (ShowLogo); when empty the title is one line at the default height.
         /// </summary>
         [DefaultValue("")]
         public string FunctionText
@@ -82,8 +82,8 @@ namespace APC.UI.Controls
         private bool _showSettings;
 
         /// <summary>
-        /// 타이틀바 최소화 왼쪽에 설정(톱니) 버튼. 설정 화면이 있는 창에서만 켠다. 누르면 <see cref="SettingsClick"/>.
-        /// 화면(ApcTemplateView)에서는 직접 켜지 말고 UseSettingsButton을 쓴다.
+        /// Settings (gear) button left of minimize in the title bar. Turn it on only for windows that have a settings screen. Clicking raises <see cref="SettingsClick"/>.
+        /// In a screen (ApcTemplateView) do not set this directly; use UseSettingsButton.
         /// </summary>
         [DefaultValue(false)]
         public bool ShowSettings
@@ -98,7 +98,7 @@ namespace APC.UI.Controls
             }
         }
 
-        /// <summary>타이틀바 설정 버튼을 눌렀다(<see cref="ShowSettings"/>가 true일 때만).</summary>
+        /// <summary>The title-bar settings button was clicked (only when <see cref="ShowSettings"/> is true).</summary>
         public event EventHandler SettingsClick;
 
         public int TitleBarHeight
@@ -112,10 +112,10 @@ namespace APC.UI.Controls
             }
         }
 
-        /// <summary>가장자리 리사이즈 감지 폭(px).</summary>
+        /// <summary>Edge resize hit width (px).</summary>
         public int ResizeGrip { get { return (int)(BaseResizeGrip * ApcTheme.Scale); } }
 
-        /// <summary>타이틀바·1px 테두리를 뺀 내용 영역(클라이언트 좌표) = Padding 안쪽.</summary>
+        /// <summary>Content area without the title bar and 1px border (client coordinates) = inside Padding.</summary>
         public Rectangle ContentBounds
         {
             get
@@ -223,7 +223,7 @@ namespace APC.UI.Controls
 
         internal string ClockText { get { return DateTime.Now.ToString(ClockFormat); } }
 
-        /// <summary>메인 창 현재 시각 자리: 창 버튼 왼쪽, 제목 줄 세로 가운데. 글자 폭은 고정 형식 견본으로 잰다.</summary>
+        /// <summary>Main-window clock position: left of the window buttons, vertically centered on the title line. Text width is measured from a fixed-format sample.</summary>
         internal Rectangle ClockBounds
         {
             get
@@ -248,7 +248,7 @@ namespace APC.UI.Controls
         private const int BaseSeparatorHeight = 28;
         private static readonly Color SeparatorColor = Color.FromArgb(0xC4, 0xCC, 0xD5);
 
-        /// <summary>메인 창: 로고 │ 프로그램 이름(크게), 기능명이 있으면 그 아래 브랜드 색 작은 줄. 왼쪽 정렬, 버튼 앞에서 말줄임.</summary>
+        /// <summary>Main window: logo │ program name (large), and below it a small brand-color line with the function name if set. Left aligned, ellipsized before the buttons.</summary>
         private void DrawMainTitle(Graphics g, Rectangle area, TextFormatFlags flags)
         {
             var c = ApcTheme.Current.Colors;
@@ -268,7 +268,7 @@ namespace APC.UI.Controls
 
         private Font _functionFont;
 
-        /// <summary>기능명 글꼴: 테마 글꼴 굵게, 1pt 작게.</summary>
+        /// <summary>Function name font: theme font, bold, 1pt smaller.</summary>
         private Font FunctionFont()
         {
             var b = ApcTheme.GetFont(FontStyle.Bold);
@@ -283,7 +283,7 @@ namespace APC.UI.Controls
 
         private Font _titleFont;
 
-        /// <summary>메인 창 제목 글꼴: 테마 글꼴 굵게 × 1.5.</summary>
+        /// <summary>Main window title font: theme font, bold × 1.5.</summary>
         private Font TitleFont()
         {
             var b = ApcTheme.GetFont(FontStyle.Bold);
@@ -298,7 +298,7 @@ namespace APC.UI.Controls
 
         private bool _showLogo = true;
 
-        /// <summary>타이틀바 왼쪽 로고 + 가운데 큰 제목(메인 창). false면 로고 없이 왼쪽 제목(dialog, SetupDialog가 끈다).</summary>
+        /// <summary>Logo on the left of the title bar + large centered title (main window). false = no logo, title on the left (dialog; SetupDialog turns it off).</summary>
         [DefaultValue(true)]
         public bool ShowLogo
         {
@@ -383,7 +383,7 @@ namespace APC.UI.Controls
             return HTCLIENT;
         }
 
-        /// <summary>폼이 뜰 때 첫 입력칸이 포커스를 받으며 글자 전체가 파랗게 선택되는 것을 막는다(커서는 끝으로).</summary>
+        /// <summary>Stops the first field from getting focus with all its text selected in blue when the form opens (caret goes to the end).</summary>
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
@@ -400,7 +400,7 @@ namespace APC.UI.Controls
             base.OnLocationChanged(e);
         }
 
-        /// <summary>MaximizedBounds는 해당 모니터 기준 좌표여야 한다(보조 모니터 대응).</summary>
+        /// <summary>MaximizedBounds must be in that monitor's coordinates (secondary monitor support).</summary>
         private void UpdateMaximizedBounds()
         {
             var screen = IsHandleCreated ? Screen.FromHandle(Handle) : Screen.PrimaryScreen;
@@ -408,13 +408,13 @@ namespace APC.UI.Controls
             MaximizedBounds = new Rectangle(wa.X - screen.Bounds.X, wa.Y - screen.Bounds.Y, wa.Width, wa.Height);
         }
 
-        /// <summary>내용은 1px 테두리 안을 꽉 채운다. 가장자리 리사이즈는 자식 위에서도 EdgeResizeFilter가 처리한다.</summary>
+        /// <summary>Content fills the inside of the 1px border. EdgeResizeFilter handles edge resize even over child controls.</summary>
         private void UpdatePadding()
         {
             Padding = new Padding(1, TitleBarHeight + 1, 1, 1);
         }
 
-        /// <summary>자식 컨트롤 좌표의 점이 창 가장자리 리사이즈 영역이면 HT 코드, 아니면 HTCLIENT.</summary>
+        /// <summary>HT code if a point in child-control coordinates is in the window's edge resize area, otherwise HTCLIENT.</summary>
         internal int EdgeHit(Control child, Point childPoint)
         {
             if (!Resizable || WindowState != FormWindowState.Normal) return HTCLIENT;
@@ -439,8 +439,8 @@ namespace APC.UI.Controls
         private EdgeResizeFilter _edgeFilter;
 
         /// <summary>
-        /// Dock=Fill 자식이 가장자리를 덮으면 마우스 메시지가 자식에게 간다. 이 창의 자식이 받는 마우스 이동·누름 중
-        /// 가장자리 그립 안의 것을 가로채 커서를 바꾸고 창 리사이즈를 시작한다(여백 없이 꽉 채우기 위해).
+        /// When a Dock=Fill child covers the edge, mouse messages go to the child. Of the mouse moves and presses this window's children receive,
+        /// those inside the edge grip are intercepted to change the cursor and start a window resize (so content can fill edge to edge).
         /// </summary>
         private sealed class EdgeResizeFilter : IMessageFilter
         {

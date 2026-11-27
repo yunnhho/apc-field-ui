@@ -7,8 +7,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 상태색 범례: 램프 + 뜻을 왼→오로("● 관리선 내  ● 관리선 이탈  ● SPEC 초과"). 표·그래프 칸의 램프 색이 무엇인지 화면에서 읽히게.
-    /// 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다. 구획 제목 줄 오른쪽에 둘 때는 Titled("...", content, legend)의 tools로 넘긴다(Dock은 주지 않는다).
+    /// Status color legend: lamp + meaning, left to right ("● 관리선 내  ● 관리선 이탈  ● SPEC 초과"), so the screen tells what the lamp colors in tables and charts mean.
+    /// Give the items with SetItems in that screen's verdict wording. Width follows the items. To place it at the right of a section title row, pass it as tools of Titled("...", content, legend) (no Dock).
     /// </summary>
     public class ApcStatusLegend : Control
     {
@@ -27,7 +27,7 @@ namespace APC.UI.Controls
             ApcTheme.Changed += OnThemeChanged;
         }
 
-        /// <summary>범례 항목(상태 + 뜻). 부르면 Width가 항목에 맞게 바뀐다.</summary>
+        /// <summary>Legend items (status + meaning). Calling it resizes Width to the items.</summary>
         public void SetItems(params ApcLampValue[] items)
         {
             _items = items ?? new ApcLampValue[0];
@@ -35,7 +35,7 @@ namespace APC.UI.Controls
             Invalidate();
         }
 
-        /// <summary>항목을 모두 그리는 폭(배율 적용 px).</summary>
+        /// <summary>Width that draws all items (scaled px).</summary>
         public int PreferredWidth
         {
             get

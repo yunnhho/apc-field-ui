@@ -9,8 +9,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 설비 타일: 램프 + 설비명(부제 없음 — 상태는 램프 색, 사유는 화면의 배너·표가 말한다). 누르면 Click(상세 dialog 열기 등). 마우스를 올리거나 포커스면 파란 테두리,
-    /// 알람이면 굵은 알람색 테두리. Tab으로 옮겨 Enter·Space로도 누른다.
+    /// Equipment tile: lamp + equipment name (no subtitle — the lamp color is the status; the screen's banner or table gives the reason). Click raises Click (open a detail dialog, etc.). Blue border on hover or focus,
+    /// thick alarm-color border on alarm. Reachable with Tab, pressed with Enter or Space.
     /// </summary>
     public class ApcStatusTile : Control
     {
@@ -32,10 +32,10 @@ namespace APC.UI.Controls
         [DefaultValue(StatusKind.Stop)] public StatusKind Status { get { return _status; } set { _status = value; Invalidate(); } }
 
         private bool _selected;
-        /// <summary>선택 표시(바탕이 표 선택 행 색). 타일을 눌러 아래 카드·그래프가 그 설비를 보여 줄 때 그 타일 하나만 true.</summary>
+        /// <summary>Selected mark (background = table selected-row color). When clicking a tile makes the cards and charts below show that unit, only that one tile is true.</summary>
         [DefaultValue(false)] public bool Selected { get { return _selected; } set { _selected = value; Invalidate(); } }
 
-        /// <summary>설비명(굵게, 램프 오른쪽 세로 가운데).</summary>
+        /// <summary>Equipment name (bold, right of the lamp, vertically centered).</summary>
         public override string Text { get { return base.Text; } set { base.Text = value; } }
 
         protected override void OnTextChanged(EventArgs e) { base.OnTextChanged(e); Invalidate(); }

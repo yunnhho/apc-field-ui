@@ -8,13 +8,13 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 날짜 입력: 입력칸(yyyy-MM-dd) + 칸 안 오른쪽 ▼ 버튼 영역(콤보와 같은 모양). 누르면 달력이 펼쳐지고, 날짜를 누르면 닫힌다.
-    /// 직접 입력은 yyyy-MM-dd / yyyyMMdd를 받아 Enter 또는 칸을 떠날 때 확정, 틀리면 이전 값. ↑↓ 키는 하루씩.
+    /// Date input: text box (yyyy-MM-dd) + ▼ button area inside its right edge (same look as the combo). Clicking opens a calendar; clicking a date closes it.
+    /// Typed input accepts yyyy-MM-dd / yyyyMMdd and commits on Enter or on leaving the field; invalid input reverts to the previous value. ↑↓ keys move one day.
     /// </summary>
     public class ApcDateBox : ApcButtonField
     {
         public const string Format = "yyyy-MM-dd";
-        /// <summary>받는 범위. 달력 이동·하루 이동이 DateTime 끝에서 예외를 내지 않게.</summary>
+        /// <summary>Accepted range, so calendar and day stepping never throw at the ends of DateTime.</summary>
         public static readonly DateTime MinDate = new DateTime(1900, 1, 1), MaxDate = new DateTime(2999, 12, 31);
         private static readonly string[] InputFormats = { "yyyy-MM-dd", "yyyyMMdd", "yyyy-M-d", "yyyy/MM/dd", "yyyy/M/d", "yyyy.MM.dd" };
 
@@ -53,7 +53,7 @@ namespace APC.UI.Controls
                 && value >= MinDate && value <= MaxDate;
         }
 
-        /// <summary>입력칸 글자를 확정한다. 날짜가 아니면 이전 값을 다시 보여 준다.</summary>
+        /// <summary>Commits the typed text. If it is not a date, shows the previous value again.</summary>
         public void Commit()
         {
             DateTime d;

@@ -7,11 +7,11 @@ using APC.UI.Theming;
 
 namespace APC.UI.Drawing
 {
-    /// <summary>모서리는 그대로, 변·가운데만 늘려 그린다. 둥근 모서리·광택이 크기와 무관하게 유지된다.</summary>
+    /// <summary>Corners drawn as is; only edges and center stretch. Rounded corners and gloss stay the same at any size.</summary>
     public static class NineSlice
     {
-        /// <param name="slice">@1x 기준 여백(px)</param>
-        /// <param name="imageScale">img가 몇 배율 파일인지 (ApcTheme.ImageScale)</param>
+        /// <param name="slice">Margins at @1x (px)</param>
+        /// <param name="imageScale">Scale of the img file (ApcTheme.ImageScale)</param>
         public static void Draw(Graphics g, Image img, Rectangle dest, Padding slice, float imageScale)
         {
             if (dest.Width <= 0 || dest.Height <= 0) return;

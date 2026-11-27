@@ -1,141 +1,141 @@
-# APCSOFT 현장 프로그램 UI 기준 — 설계 문서
+# APCSOFT Field Program UI Baseline — Design
 
-작성일: 2026-11-17 · 상태: 승인됨 (2026-11-17)
+Written: 2026-11-17 · Status: approved (2026-11-17)
 
-## 1. 의도
+## 1. Intent
 
-APCSOFT가 고객사마다 새로 만드는 현장 프로그램(WinForms)에 **바로 가져다 쓰는 컨트롤·스타일·이미지 묶음**을 만든다.
-고객사 요구가 무엇이든 "테마 파일과 이미지 파일을 교체하고 컨트롤을 조립하면" 일관된 APCSOFT 품질의 화면이 나오게 하는 것이 목표다.
+Build a **ready-to-use bundle of controls, styles and images** for the field programs (WinForms) APCSOFT builds anew for each customer.
+The goal: whatever the customer asks for, "swap the theme file and image files and assemble the controls" yields screens of consistent APCSOFT quality.
 
-사용 환경은 **작업용 PC** 하나다. (키오스크형은 2026-11-17 범위에서 제외)
+The target environment is a single **work PC**. (Kiosk style was excluded from scope on 2026-11-17.)
 
-| | 작업용 PC |
+| | Work PC |
 |---|---|
-| 입력 | 마우스, 키보드, 바코드 스캐너 |
-| 사용 방식 | 앉아서, 반복 입력, 그리드·폼 위주 |
-| 기준 해상도 | 1920×1080 (창 크기 가변) |
+| Input | Mouse, keyboard, barcode scanner |
+| Usage | Seated, repetitive input, mostly grids and forms |
+| Reference resolution | 1920×1080 (resizable window) |
 
-## 2. 목표 / 비목표 / 반목표
+## 2. Goals / Non-goals / Anti-goals
 
-**목표**
-- WinForms 컨트롤 라이브러리 `APC.UI.dll`: 새 프로젝트에서 참조만 하면 바로 쓸 수 있어야 한다.
-- 버튼·램프·창 버튼·로고 등 모든 이미지는 **개별 이미지 파일**로 관리한다. 고객사별로 교체할 수 있어야 한다.
-- 기능별(작업 시작, 실적 입력, 불량 등록, 설비 상태, 이력 조회) PC 화면 템플릿을 데모 앱으로 제공한다.
+**Goals**
+- WinForms control library `APC.UI.dll`: a new project only needs to reference it.
+- Every image — buttons, lamps, window buttons, logo — is a **separate image file**, replaceable per customer.
+- PC screen templates per function (job start, production entry, defect registration, equipment status, history lookup) in a demo app.
 
-**비목표**
-- 기존에 납품된 프로그램을 리팩터링하지 않는다.
-- WPF·웹 버전은 만들지 않는다.
-- 상용 컨트롤(DevExpress 등)과 연동하지 않는다.
-- 브랜드 컬러 시스템은 만들지 않는다. APCSOFT 빨강은 **로고에만** 쓴다.
-- 키오스크·터치 UI(큰 버튼 크기 세트, 전체화면 잠금, 숫자패드)는 만들지 않는다.
+**Non-goals**
+- No refactoring of programs already delivered.
+- No WPF or web version.
+- No integration with commercial controls (DevExpress etc.).
+- No brand color system. APCSOFT red is used **only in the logo**.
+- No kiosk/touch UI (large button size set, full-screen lock, number pad).
 
-**반목표** (동작은 하더라도 이렇게 되면 실패로 본다)
-- 고객사 테마를 바꿀 때 라이브러리 코드를 수정해야 하는 경우
-- 상태색(정상/경고/알람/정지)의 의미가 고객사마다 달라지는 경우. 이는 현장 안전 문제다.
-- 바코드 입력이 엉뚱한 입력칸에 섞여 들어가는 경우
+**Anti-goals** (counted as failure even if it works)
+- Changing a customer theme requires modifying library code.
+- The meaning of status colors (normal/warning/alarm/stop) differs per customer. This is a field safety issue.
+- Barcode input leaks into the wrong input field.
 
-## 3. 제약
+## 3. Constraints
 
-- **.NET Framework 4.0 타깃**으로 4.0~4.8 환경에서 모두 동작해야 한다. 따라서 `async/await`, `System.Text.Json`, 모니터별 DPI API를 쓰지 않는다. C# 언어 버전은 7.3까지 허용한다.
-- 외부 NuGet 의존성은 0개를 기본으로 한다. JSON 파싱은 `DataContractJsonSerializer`(net40 내장)로 한다.
-- 테스트 프로젝트를 강제하지 않는다. 대신 데모 갤러리 앱에서 빌드하고 눈으로 확인한다. 로직이 들어간 부분(스캔 판별, 테마 로드, 이미지 해석)에만 최소한의 자가 점검을 둔다.
+- **Target .NET Framework 4.0**; must run on 4.0–4.8. So no `async/await`, `System.Text.Json`, or per-monitor DPI APIs. C# language version up to 7.3.
+- Zero external NuGet dependencies by default. JSON parsing uses `DataContractJsonSerializer` (built into net40).
+- No mandatory test project. Instead, build the demo gallery app and check visually. Only logic parts (scan detection, theme loading, image resolution) get minimal self-checks.
 
-## 4. 검토한 접근
+## 4. Approaches considered
 
-### 4.1 구현 방식 — **A 선택**
-| | 내용 | 결론 |
+### 4.1 Implementation — **A chosen**
+| | Description | Verdict |
 |---|---|---|
-| **A. 자체 커스텀 컨트롤 라이브러리** | 표준 컨트롤을 상속하고 OnPaint로 직접 그린다. 테마는 파일 하나로 관리한다. | **선택.** 라이선스 비용이 없고, 입체 스타일을 원하는 만큼 표현할 수 있으며, 테마와 이미지 교체만으로 고객사 대응이 가능하다. |
-| B. 표준 컨트롤 + 테마 적용기 | 폼 로드 시 컨트롤을 순회하며 색을 입힌다. | 코드는 가장 적지만 입체 표현과 눌림 피드백에 한계가 있다. |
-| C. 상용 스위트 스킨 | DevExpress/Telerik | 라이선스 비용이 들고 납품물이 특정 업체에 종속된다. |
+| **A. Own custom control library** | Inherit standard controls and draw in OnPaint. Theme managed in one file. | **Chosen.** No license cost, the raised style can be expressed as far as needed, and customers are served by swapping theme and images only. |
+| B. Standard controls + theme applier | Walk controls on form load and apply colors. | Least code, but limited raised look and press feedback. |
+| C. Commercial suite skin | DevExpress/Telerik | License cost, and deliverables are locked to a vendor. |
 
-### 4.2 시각 스타일 — **B(기존 입체 스타일 계승) 선택**
-| | 내용 | 결론 |
+### 4.2 Visual style — **B (continue the existing raised style) chosen**
+| | Description | Verdict |
 |---|---|---|
-| 플랫 | 단색 면과 얇은 테두리 | 미선택 |
-| **기존 입체 계승** | 광택 램프, 베벨·그라데이션 버튼, 그라데이션 헤더 | **선택.** 기존 납품 프로그램과 이어지는 연속성을 우선했다. |
-| 혼합 | 플랫 화면에 램프만 입체 | 미선택 |
+| Flat | Solid surfaces and thin borders | Not chosen |
+| **Continue existing raised style** | Glossy lamps, bevel/gradient buttons, gradient headers | **Chosen.** Continuity with delivered programs came first. |
+| Mixed | Flat screens with raised lamps only | Not chosen |
 
-비교 목업은 `.superpowers/brainstorm/735-1794878105/content/visual-style.html`에 있다.
+Comparison mockups: `.superpowers/brainstorm/735-1794878105/content/visual-style.html`.
 
-**입체 스타일을 택하면서 생기는 결과**: 그라데이션은 색만 바꿔서 재사용하기 어렵다. 그래서 *버튼·램프·창 버튼은 이미지 파일로 그리고(9-slice), 텍스트·면·테두리 색은 테마 파일로 관리한다.* 고객사 대응 범위는 이미지 세트 교체와 테마 값 교체 두 가지다.
+**Consequence of the raised style**: gradients are hard to reuse by changing colors alone. So *buttons, lamps and window buttons are drawn as image files (9-slice), and text, surface and border colors are managed in the theme file.* Customer adaptation covers two things: swapping the image set and swapping theme values.
 
-## 5. 설계
+## 5. Design
 
-### 5.1 3층 구조
-1. **불변 원칙** (`APC.UI` 코드에 고정, 고객사가 바꿀 수 없음)
-   - 상태색의 의미: 정상/가동 = 초록, 경고 = 노랑, 알람 = 빨강, 정지/미사용 = 회색, 정보 = 파랑
-   - 최소 컨트롤 높이: 28px (96dpi 기준)
-   - 바코드 스캔 피드백: 성공 시 초록 플래시와 짧은 비프, 실패 시 빨강 플래시와 긴 비프
-   - 파괴적 동작(삭제, 작업 종료)은 반드시 확인 단계를 거친다.
-2. **테마** (`themes/<고객사>/theme.json` + 같은 폴더의 `assets/`)
-   - 색: 배경 그라데이션(시작/끝), 헤더 그라데이션, 테두리, 텍스트(기본/약함/반전), 그리드(헤더/구분선/선택행 — 행 배경은 한 색, 번갈아 칠하지 않음)
-   - 폰트: 패밀리(기본 `맑은 고딕`), 크기
-   - 로고 파일 경로
-   - 상태색은 **명도만** 조정할 수 있고 색상(hue)은 고정이다. 로드할 때 검증한다.
-3. **패턴**: 기능별 PC 화면 템플릿 (§5.5)
+### 5.1 Three layers
+1. **Invariant principles** (fixed in `APC.UI` code; customers cannot change them)
+   - Status color meaning: normal/running = green, warning = yellow, alarm = red, stopped/unused = gray, info = blue
+   - Minimum control height: 28px (at 96dpi)
+   - Barcode scan feedback: success = green flash + short beep, failure = red flash + long beep
+   - Destructive actions (delete, end job) always go through a confirmation step.
+2. **Theme** (`themes/<customer>/theme.json` + `assets/` in the same folder)
+   - Colors: background gradient (start/end), header gradient, border, text (default/weak/inverse), grid (header/divider/selected row — one row background color, no alternating)
+   - Font: family (default `맑은 고딕`), size
+   - Logo file path
+   - Status colors may adjust **lightness only**; hue is fixed. Validated on load.
+3. **Patterns**: PC screen templates per function (§5.5)
 
-### 5.2 저장소 구조
+### 5.2 Repository layout
 ```
-/assets-src/            원본 SVG (수정용 마스터)
-/themes/default/        theme.json + assets/*.png  (APCSOFT 기본 테마)
-/src/APC.UI/            컨트롤 라이브러리 (net40)
-/src/APC.UI.Demo/       갤러리 앱: 컨트롤 카탈로그 + 기능별 템플릿
-/tools/                 SVG → PNG 일괄 변환 스크립트
-/Resources/             기존 납품 이미지 원본 (참고용, 수정하지 않음)
-/docs/                  설계·가이드 문서
+/assets-src/            source SVGs (editable masters)
+/themes/default/        theme.json + assets/*.png  (APCSOFT default theme)
+/src/APC.UI/            control library (net40)
+/src/APC.UI.Demo/       gallery app: control catalog + function templates
+/tools/                 SVG → PNG batch conversion script
+/Resources/             original delivered images (reference, do not modify)
+/docs/                  design and guide documents
 ```
 
-### 5.3 이미지 규격
-- **형식**: PNG(32bit, 투명). 원본은 SVG로 `assets-src/`에 둔다.
-- **이름**: `{종류}_{이름}_{상태}@{배율}.png`
-  - 종류: `btn`, `lamp`, `win`(창 버튼), `icon`, `logo`
-  - 상태: `normal`, `hover`, `pressed`, `disabled`. 램프는 상태 대신 의미를 쓴다: `run`, `warn`, `alarm`, `stop`, `info`
-  - 배율: `@1x`, `@1.5x`, `@2x`
-  - 예: `btn_primary_pressed@2x.png`, `lamp_alarm@1x.png`, `win_close_hover@1.5x.png`
-- **9-slice**: 크기가 변하는 버튼 이미지는 모서리 여백을 테마 파일에 적는다(`"slice": [8,8,8,8]`). 늘어나도 모서리와 광택이 깨지지 않게 한다.
-- **배율 선택**: 시작 시 `Graphics.DpiX`로 배율을 판단하고 가장 가까운 이미지 세트를 고른다. 해당 파일이 없으면 `@1x`를 쓴다. 앱 매니페스트에 system DPI aware를 선언한다.
-- **기존 이미지 이관** (모양은 유지하고 다시 그린다)
-  | 기존 | 새 이름 |
+### 5.3 Image specification
+- **Format**: PNG (32-bit, transparent). Sources are SVGs in `assets-src/`.
+- **Name**: `{kind}_{name}_{state}@{scale}.png`
+  - kind: `btn`, `lamp`, `win` (window button), `icon`, `logo`
+  - state: `normal`, `hover`, `pressed`, `disabled`. Lamps use meaning instead of state: `run`, `warn`, `alarm`, `stop`, `info`
+  - scale: `@1x`, `@1.5x`, `@2x`
+  - e.g. `btn_primary_pressed@2x.png`, `lamp_alarm@1x.png`, `win_close_hover@1.5x.png`
+- **9-slice**: resizable button images record corner margins in the theme file (`"slice": [8,8,8,8]`) so corners and gloss do not break when stretched.
+- **Scale selection**: at startup decide the scale from `Graphics.DpiX` and pick the nearest image set; fall back to `@1x` if the file is missing. Declare system DPI awareness in the app manifest.
+- **Migrating existing images** (keep the shape, redraw)
+  | Existing | New name |
   |---|---|
-  | `1.png` 빨강 | `lamp_alarm` |
-  | `2.png` 초록 | `lamp_run` |
-  | `3.png` 회색 | `lamp_stop` |
-  | `4.png` 노랑 | `lamp_warn` |
-  | `btn_close(_over).jpg` | `win_close_{normal,hover,pressed,disabled}` — hover 차이가 잘 보이도록 강화 |
+  | `1.png` red | `lamp_alarm` |
+  | `2.png` green | `lamp_run` |
+  | `3.png` gray | `lamp_stop` |
+  | `4.png` yellow | `lamp_warn` |
+  | `btn_close(_over).jpg` | `win_close_{normal,hover,pressed,disabled}` — stronger hover difference |
   | `btn_minimize(_over).jpg` | `win_minimize_{…}` |
   | `APCSOFT.png` | `logo_apcsoft@{1x,1.5x,2x}` |
-  - 정보(파랑) 램프 `lamp_info`는 새로 그린다.
+  - The info (blue) lamp `lamp_info` is newly drawn.
 
-### 5.4 1차 컨트롤 목록
-| 컨트롤 | 기반 | 역할 |
+### 5.4 First control set
+| Control | Base | Role |
 |---|---|---|
-| `ApcForm` | `Form` | 테두리 없는 창. 그라데이션 타이틀바, 로고, `win_*` 이미지 버튼 사용. |
-| `ApcButton` | `Button` | 9-slice 이미지 버튼. 4가지 상태. 변형은 `Primary`/`Normal`/`Danger`. |
-| `ApcLamp` | `Control` | 상태 램프. `Status` 속성에 따라 `lamp_*` 이미지를 쓰고, 알람일 때 깜빡일 수 있다. |
-| `ApcScanBox` | `TextBox` | 바코드 입력란. 폼의 `KeyPreview`로 포커스와 무관하게 스캔을 받는다. 키 간격이 짧으면(임계값은 테마에 설정, 기본 50ms) 스캔으로 판단한다. Enter를 종료 문자로 쓰며 `Scanned` 이벤트를 발생시킨다. |
-| `ApcGrid` | `DataGridView` | 테마 스타일을 적용한다. 상태 컬럼(`ApcLampColumn`)을 제공한다. |
-| `ApcTheme` | 정적 클래스 | 테마 로드·검증, 이미지 해석(배율 선택), 변경 이벤트 |
+| `ApcForm` | `Form` | Borderless window. Gradient title bar, logo, `win_*` image buttons. |
+| `ApcButton` | `Button` | 9-slice image button. 4 states. Variants `Primary`/`Normal`/`Danger`. |
+| `ApcLamp` | `Control` | Status lamp. Uses `lamp_*` images by `Status`; can blink on alarm. |
+| `ApcScanBox` | `TextBox` | Barcode input. Receives scans regardless of focus via the form's `KeyPreview`. Short key intervals (threshold in the theme, default 50ms) mean a scan. Enter terminates and raises `Scanned`. |
+| `ApcGrid` | `DataGridView` | Applies the theme style. Provides a status column (`ApcLampColumn`). |
+| `ApcTheme` | static class | Theme load/validation, image resolution (scale selection), change event |
 
-목록에 없는 컨트롤(체크박스, 콤보 등)은 실제 템플릿에서 필요해질 때 추가한다.
+Controls not listed (checkbox, combo, etc.) are added when a real template needs them.
 
-### 5.5 화면 템플릿 (데모 앱)
-| 기능 | PC 화면 |
+### 5.5 Screen templates (demo app)
+| Function | PC screen |
 |---|---|
-| 작업 시작 | 작업 지시 그리드와 상세 폼 |
-| 실적 입력 | 스캔 → 그리드 행 추가 → F9 저장 |
-| 불량 등록 | 유형 콤보와 수량, 스캔 입력 |
-| 설비 상태 | 설비 목록 그리드에 램프 표시 |
-| 이력 조회 | 기간 필터와 그리드, 엑셀 내보내기 버튼 자리 |
+| Job start | Work order grid and detail form |
+| Production entry | Scan → add grid row → F9 save |
+| Defect registration | Type combo, quantity, scan input |
+| Equipment status | Equipment list grid with lamps |
+| History lookup | Period filter, grid, slot for an Excel export button |
 
-## 6. 구현자 판단에 맡기는 것
-- SVG → PNG 변환 도구(Inkscape CLI, resvg 등)
-- 그라데이션 색 값과 광택 표현의 세부. 기존 `Resources/` 이미지의 톤을 기준으로 한다.
-- 컨트롤 내부의 더블버퍼링과 깜빡임 방지 방식
-- 데모 앱의 화면 전환 방식
+## 6. Left to the implementer
+- SVG → PNG conversion tool (Inkscape CLI, resvg, etc.)
+- Gradient color values and gloss details, based on the tone of the existing `Resources/` images
+- Double buffering and flicker prevention inside controls
+- How the demo app switches screens
 
-## 7. 확인 방법
-- `APC.UI.Demo`를 빌드한 뒤 갤러리 화면에서 모든 컨트롤의 4가지 상태를 확인한다.
-- `themes/default`를 복사해 색과 이미지를 바꾼 `themes/sample`을 만든다. 코드를 수정하지 않고 실행 인자 `--theme sample`만으로 전환되는지 확인한다.
-- `ApcScanBox`: 사람의 타이핑과 스캐너 입력이 구분되는지 자가 점검(키 간격 시뮬레이션)과 실제 스캐너로 확인한다.
-- 125%/150%/200% 배율 환경에서 이미지가 깨지지 않는지 확인한다.
+## 7. Verification
+- Build `APC.UI.Demo` and check all 4 states of every control on the gallery screen.
+- Copy `themes/default` into `themes/sample` with changed colors and images. Confirm switching works with only the `--theme sample` argument, no code changes.
+- `ApcScanBox`: confirm human typing and scanner input are distinguished, with a self-check (key interval simulation) and a real scanner.
+- Confirm images do not break at 125%/150%/200% scale.
