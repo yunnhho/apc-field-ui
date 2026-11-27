@@ -212,6 +212,8 @@ namespace APC.UI.Checks
                 Check(TitledProbe.HeightOf(v.OtherGrid.Height, true) == v.Other.Height, "titled height: with tool button (" + TitledProbe.HeightOf(v.OtherGrid.Height, true) + "/" + v.Other.Height + ")");
                 Check(v.Legend.Height > 0 && v.Legend.Width == v.Legend.PreferredWidth && v.Legend.Parent.Height >= v.Legend.Height,
                       "titled: legend tool keeps its size (" + v.Legend.Width + "x" + v.Legend.Height + ")");
+                Check(v.DockedLegend.Height > 0 && v.DockedLegend.Width == v.DockedLegend.PreferredWidth,
+                      "titled: legend tool with Dock = Right (as api.md says) keeps its size (" + v.DockedLegend.Width + "x" + v.DockedLegend.Height + ")");
             }
             var w = ApcInfoStrip.ValueWidths(600, new[] { 100, 300, 100 });
             Check(w[1] >= 300 && w[0] >= 100 && w[0] + w[1] + w[2] <= 600, "info strip: long value keeps its width when space remains");
@@ -226,6 +228,7 @@ namespace APC.UI.Checks
             public readonly ApcButton Tool = Button("새로 고침", ApcButtonVariant.Normal);
             public readonly System.Windows.Forms.Label Reason = Caption("합격 Lot · 대상 아님");
             public readonly ApcStatusLegend Legend = new ApcStatusLegend();
+            public readonly ApcStatusLegend DockedLegend = new ApcStatusLegend { Dock = System.Windows.Forms.DockStyle.Right };
             public readonly System.Windows.Forms.Panel Panel, Tools, Other, WithLegend;
             public readonly System.Windows.Forms.TableLayoutPanel Fill;
             public TitledProbe() : base("probe")
@@ -238,6 +241,11 @@ namespace APC.UI.Checks
                 WithLegend.Dock = System.Windows.Forms.DockStyle.Top;
                 WithLegend.Height = 200;
                 Body.Controls.Add(WithLegend);
+                DockedLegend.SetItems(new ApcLampValue(StatusKind.Run, "적재"), new ApcLampValue(StatusKind.Stop, "빈칸"));
+                var docked = Titled("적재 도식", new System.Windows.Forms.Panel(), DockedLegend);
+                docked.Dock = System.Windows.Forms.DockStyle.Top;
+                docked.Height = 200;
+                Body.Controls.Add(docked);
                 Fill = FillColumns(new System.Windows.Forms.Control[] { Other });
                 Body.Controls.Add(Fill);
                 Body.Controls.Add(Panel);

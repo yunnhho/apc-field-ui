@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Media;
 using System.Runtime.InteropServices;
@@ -24,8 +25,8 @@ namespace APC.UI.Controls
     /// 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다).
     /// Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) —
     /// 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다.
-    /// 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach한다: 포커스된 스캔 칸이 받고, 포커스가 다른 곳이면 먼저 Attach한 칸이 받는다.
-    /// 받은 칸의 Scanned에서 다음 스캔 칸으로 Focus()를 옮기면 순서대로 스캔된다.
+    /// 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach하고 칸마다 Accepts(받는 코드 판별)를 준다:
+    /// 코드는 그 코드를 받는 칸으로 간다(포커스·스캔 순서와 무관). 어느 칸도 받지 않는 코드는 포커스된 스캔 칸(없으면 먼저 Attach한 칸)이 받아 앱이 거부한다.
     /// </summary>
     public class ApcScanBox : ApcTextBox, IMessageFilter
     {
@@ -45,7 +46,17 @@ namespace APC.UI.Controls
         private int _snapStart;
         private int _snapLength;
 
+        // 같은 폼의 스캔 칸끼리 코드를 넘겨주기 위한 목록(UI 스레드에서만 쓴다).
+        private static readonly List<ApcScanBox> AttachedBoxes = new List<ApcScanBox>();
+
         public event EventHandler<ScanEventArgs> Scanned;
+
+        /// <summary>
+        /// 이 칸이 받는 코드인지(예: <c>c => c.StartsWith("EMP-")</c>). 한 폼에 스캔 칸이 둘 이상이면 칸마다 준다 —
+        /// 포커스된 칸이 받지 않는 코드는 같은 폼에서 Accepts가 그 코드를 받는 칸으로 옮겨 그 칸의 Scanned가 난다.
+        /// null이면 이 칸에 온 코드는 모두 받지만, 다른 칸이 받지 않은 코드를 넘겨받지는 않는다(넘겨받으려면 Accepts를 준다).
+        /// </summary>
+        public Predicate<string> Accepts { get; set; }
 
         public ApcScanBox()
         {
@@ -74,7 +85,8 @@ namespace APC.UI.Controls
             _host = host;
             ResetDetector();
             Application.AddMessageFilter(this);
-            _hostClosed = (s, e) => Application.RemoveMessageFilter(this);
+            if (!AttachedBoxes.Contains(this)) AttachedBoxes.Add(this);
+            _hostClosed = (s, e) => { Application.RemoveMessageFilter(this); AttachedBoxes.Remove(this); };
             host.FormClosed += _hostClosed;
         }
 
@@ -137,7 +149,7 @@ namespace APC.UI.Controls
 
         private void Snapshot(TextBoxBase box)
         {
-            _snapBox = box == this ? null : box;
+            _snapBox = box;
             if (_snapBox == null) return;
             _snapText = box.Text;
             _snapStart = box.SelectionStart;
@@ -146,7 +158,23 @@ namespace APC.UI.Controls
 
         private void OnScanned(string code, TextBoxBase focused)
         {
-            RestoreSnapshot(focused);
+            var target = RouteTarget(code);
+            RestoreSnapshot(focused, target);
+            target.Receive(code);
+        }
+
+        /// <summary>이 칸이 받지 않는 코드면 같은 폼에서 받는 칸(켜져 있고 보이는 칸). 없으면 이 칸.</summary>
+        private ApcScanBox RouteTarget(string code)
+        {
+            if (Accepts == null || Accepts(code)) return this;
+            foreach (var box in AttachedBoxes)
+                if (box != this && box._host == _host && box.Enabled && box.Visible && box.FindForm() == _host && box.Accepts != null && box.Accepts(code))
+                    return box;
+            return this;
+        }
+
+        private void Receive(string code)
+        {
             Text = code;
             SelectAll();
             var args = new ScanEventArgs(code);
@@ -155,12 +183,12 @@ namespace APC.UI.Controls
             Flash(args.Accepted);
         }
 
-        /// <summary>스캔 글자가 다른 칸에 들어갔으면(선택 영역 덮어쓰기·필터된 글자 포함) 버스트 전 값으로 되돌린다.</summary>
-        private void RestoreSnapshot(TextBoxBase focused)
+        /// <summary>스캔 글자가 받는 칸이 아닌 칸에 들어갔으면(선택 영역 덮어쓰기·필터된 글자 포함) 버스트 전 값으로 되돌린다.</summary>
+        private void RestoreSnapshot(TextBoxBase focused, ApcScanBox target)
         {
             var box = _snapBox;
             _snapBox = null;
-            if (box == null || box != focused || box.IsDisposed || box.ReadOnly) return;
+            if (box == null || box == target || box != focused || box.IsDisposed || box.ReadOnly) return;
             if (box.Text != _snapText) box.Text = _snapText;
             box.Select(_snapStart, _snapLength);
         }
@@ -186,6 +214,7 @@ namespace APC.UI.Controls
             if (disposing)
             {
                 Application.RemoveMessageFilter(this);
+                AttachedBoxes.Remove(this);
                 ApcTheme.Changed -= OnThemeChanged;
                 _flashTimer.Dispose();
             }

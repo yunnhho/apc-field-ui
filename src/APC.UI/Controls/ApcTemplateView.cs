@@ -95,6 +95,8 @@ namespace APC.UI.Controls
                 var right = new FlowLayoutPanel { Dock = DockStyle.Right, AutoSize = true, WrapContents = false, FlowDirection = FlowDirection.RightToLeft, BackColor = Color.Transparent, Padding = Padding.Empty, Margin = Padding.Empty };
                 for (int i = tools.Length - 1; i >= 0; i--)   // RightToLeft: 마지막 것이 오른쪽 끝
                 {
+                    tools[i].Dock = DockStyle.None;   // FlowLayoutPanel 안의 Dock은 "줄 높이로 늘이기"라 혼자 있는 범례가 높이 0으로 접힌다
+                    tools[i].Anchor = AnchorStyles.Top | AnchorStyles.Left;
                     tools[i].Margin = new Padding(i == tools.Length - 1 ? 0 : S(ApcLayout.ItemGap), 0, 0, 0);
                     right.Controls.Add(tools[i]);
                 }

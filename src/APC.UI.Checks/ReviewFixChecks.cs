@@ -55,6 +55,8 @@ namespace APC.UI.Checks
             box5b.Process(WM_KEYDOWN, VK_RETURN, 40090, num);
             Check(num.Text == "1", "#5b filtered field restored (was '" + num.Text + "')");
 
+            CheckScanRouting();
+
             // #7 내용은 창을 꽉 채우고(1px 테두리만), 가장자리 리사이즈는 그 위를 덮은 자식 컨트롤에서도 된다
             using (var f = new ApcForm { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new Point(-32000, -32000), Size = new Size(800, 600) })
             {
@@ -75,6 +77,51 @@ namespace APC.UI.Checks
             // #8 이미지가 빠진 테마는 Load 시점에 ThemeException (기존 테마 유지)
             Check(Throws<ThemeException>(() => ApcTheme.Load(Fx("alarm-dark")), "@1x.png"), "#8 missing assets rejected at load");
             Check(ApcTheme.ThemeDir == DefaultTheme, "#8 previous theme kept after failed load");
+        }
+
+        /// <summary>스캔 칸 둘(시리얼 + 사원증): 코드는 Accepts가 받는 칸으로 간다 — 스캔 순서·포커스와 무관하게.</summary>
+        private static void CheckScanRouting()
+        {
+            using (var f = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new Point(-32000, -32000), Size = new Size(400, 200) })
+            {
+                var serial = new ApcScanBox { Accepts = c => c.StartsWith("HC-") };
+                var badge = new ApcScanBox { Accepts = c => c.StartsWith("EMP-"), Top = 40 };
+                f.Controls.Add(serial);
+                f.Controls.Add(badge);
+                f.Show();
+                serial.Attach(f);
+                badge.Attach(f);
+                string got = null;
+                serial.Scanned += (s, e) => got = "serial:" + e.Code;
+                badge.Scanned += (s, e) => got = "badge:" + e.Code;
+
+                serial.Text = "HC-261127-0042";
+                serial.SelectAll();
+                ScanChars(serial, "EMP-10234", 50000, 10, serial);
+                serial.Process(WM_KEYDOWN, VK_RETURN, 50100, serial);
+                Check(got == "badge:EMP-10234", "scan route: badge code scanned in the focused serial box goes to the badge box (" + got + ")");
+                Check(serial.Text == "HC-261127-0042", "scan route: serial box keeps its value (was '" + serial.Text + "')");
+
+                got = null;
+                ScanChars(serial, "XX-0001", 51000, 10, null);
+                serial.Process(WM_KEYDOWN, VK_RETURN, 51080, null);
+                Check(got == "serial:XX-0001", "scan route: code no box accepts stays with the receiving box (" + got + ")");
+
+                got = null;
+                badge.Enabled = false;
+                ScanChars(serial, "EMP-20001", 52000, 10, null);
+                serial.Process(WM_KEYDOWN, VK_RETURN, 52100, null);
+                Check(got == "serial:EMP-20001", "scan route: disabled box does not take codes (" + got + ")");
+
+                got = null;
+                badge.Enabled = true;
+                f.Controls.Remove(badge);   // 화면 교체로 떼어냈지만 Dispose 안 한 칸
+                ScanChars(serial, "EMP-30001", 53000, 10, null);
+                serial.Process(WM_KEYDOWN, VK_RETURN, 53100, null);
+                Check(got == "serial:EMP-30001", "scan route: box removed from the form does not take codes (" + got + ")");
+                badge.Dispose();
+                f.Hide();
+            }
         }
 
         /// <summary>WM_CHAR를 필터에 넣고, 필터가 통과시킨 글자는 실제 디스패치처럼 field에 입력한다.</summary>

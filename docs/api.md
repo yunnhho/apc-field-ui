@@ -1,4 +1,4 @@
-# APC.UI API (v1.27.0.0)
+# APC.UI API (v1.28.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -100,6 +100,7 @@
 테마 스타일을 입힌 DataGridView. 헤더 그라데이션, 행 배경 한 색(번갈아 칠하지 않음), 행 전체 선택. 사용자가 표를 누르거나 키로 움직이기 전에는 첫 행이 저절로 선택되지 않는다(CurrentRow = null) — "선택한 행에 대해" 동작하는 버튼은 CurrentRow가 null이면 아무것도 하지 않게 둔다.
 - `ApcGrid()`
 - `bool ClearInitialSelection { get; set; }` — true(기본)면 사용자가 누르기 전엔 선택 행이 없다. 입력 표(스캔으로 칸을 채우는 dialog 등)처럼 앱이 CurrentCell을 정해 두고 바로 입력받아야 하면 false.
+- `bool FillRows { get; set; }` — 정해진 행 수 표(체결 포인트 10개, 층 5개)가 Fill 칸을 채울 때 true: 행들이 표 높이를 나눠 가진다(기본 행 높이보다 낮아지지 않음). 이력·목록처럼 행이 늘어나는 표는 false 그대로(샘플 행으로 채운다).
 - `static int HeightForRows(int rows)` — 머리줄 + 행 rows개가 빈 줄·스크롤바 없이 들어가는 표 높이(배율 적용 px). dialog의 AddContent 표 높이에 쓴다.
 - `static int HeightForRows(int rows, bool columnGroups)` — HeightForRows와 같고, 묶음 머리줄(AddColumnGroup)이 있는 표면 columnGroups = true(머리줄 2단).
 - `static void DrawHeaderText(Graphics g, Rectangle cell, string text, Font font)` — 머리줄 글자를 칸 정가운데에. 기본 그리기는 정렬 화살표 자리·안쪽 여백만큼 왼쪽으로 1~2px 치우친다. 오른쪽 구분선·아래 선 1px은 빼고 가운데를 잡는다. 묶음 머리줄 등 직접 그리는 곳도 이것을 쓴다.
@@ -198,23 +199,26 @@
 
 `APC.UI.Controls` · class : ApcButtonField
 
-숫자 입력: 칸 안 오른쪽에 ▲(위)/▼(아래) 버튼 영역(콤보 화살표와 같은 모양). 버튼·↑↓ 키·마우스 휠은 Increment만큼, 직접 입력은 Enter 또는 칸을 떠날 때 확정. 범위 밖은 Minimum/Maximum으로 잘리고, 숫자가 아니면 이전 값으로 되돌린다. 소수 자릿수는 DecimalPlaces.
+숫자 입력: 칸 안 오른쪽에 ▲(위)/▼(아래) 버튼 영역(콤보 화살표와 같은 모양). 버튼·↑↓ 키·마우스 휠은 Increment만큼, 직접 입력은 Enter 또는 칸을 떠날 때 확정. 범위 밖은 Minimum/Maximum으로 잘리고, 숫자가 아니면 이전 값으로 되돌린다. 소수 자릿수는 DecimalPlaces. 측정값처럼 "아직 입력 안 함"이 있는 칸은 Clear()로 비우고 HasValue로 입력 여부를 본다(빈칸에서 ▲는 Minimum부터 한 칸).
 - `ApcNumericBox()`
+- `bool HasValue { get; }` — 값이 입력됐는지. Clear() 뒤에는 false(칸이 비어 있다), Value를 넣거나 입력을 확정하면 true. 기본 true.
 - `decimal Increment { get; set; }`
 - `decimal Maximum { get; set; }`
 - `decimal Minimum { get; set; }`
-- `decimal Value { get; set; }`
+- `decimal Value { get; set; }` — 입력값. HasValue가 false(Clear 뒤 빈칸)이면 의미 없는 값이다 — 판정 전에 HasValue를 먼저 본다.
 - `event EventHandler ValueChanged`
 - `int DecimalPlaces { get; set; }`
 - `protected void OnValueChanged(EventArgs e)`
+- `void Clear()` — 칸을 비운다(아직 입력 안 함). 측정값 입력 칸의 처음 상태, 다음 부품·다음 포인트로 넘어갈 때.
 - `void Commit()` — 입력칸 글자를 확정한다. 숫자가 아니면 이전 값을 다시 보여 준다.
 
 ## ApcScanBox
 
 `APC.UI.Controls` · class : ApcTextBox
 
-바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다. 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다. 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다. 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다). Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) — 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다. 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach한다: 포커스된 스캔 칸이 받고, 포커스가 다른 곳이면 먼저 Attach한 칸이 받는다. 받은 칸의 Scanned에서 다음 스캔 칸으로 Focus()를 옮기면 순서대로 스캔된다.
+바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다. 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다. 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다. 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다). Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) — 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다. 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach하고 칸마다 Accepts(받는 코드 판별)를 준다: 코드는 그 코드를 받는 칸으로 간다(포커스·스캔 순서와 무관). 어느 칸도 받지 않는 코드는 포커스된 스캔 칸(없으면 먼저 Attach한 칸)이 받아 앱이 거부한다.
 - `ApcScanBox()`
+- `Predicate<string> Accepts { get; set; }` — 이 칸이 받는 코드인지(예: c => c.StartsWith("EMP-")). 한 폼에 스캔 칸이 둘 이상이면 칸마다 준다 — 포커스된 칸이 받지 않는 코드는 같은 폼에서 Accepts가 그 코드를 받는 칸으로 옮겨 그 칸의 Scanned가 난다. null이면 이 칸에 온 코드는 모두 받지만, 다른 칸이 받지 않은 코드를 넘겨받지는 않는다(넘겨받으려면 Accepts를 준다).
 - `const int FlashMs`
 - `event EventHandler<ScanEventArgs> Scanned`
 - `void Attach(Form host)` — 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로 화면의 OnHandleCreated에서 FindForm()으로 부른다: var f = FindForm(); if (f != null) _scan.Attach(f); dialog(ApcForm)는 폼 자신이므로 생성자에서 _scan.Attach(this)로 부른다.
@@ -224,7 +228,7 @@
 
 `APC.UI.Controls` · class : Control
 
-상태색 범례: 램프 + 뜻을 왼→오로("● 관리선 내 ● 관리선 이탈 ● SPEC 초과"). 표·그래프 칸의 램프 색이 무엇인지 화면에서 읽히게. 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다(구획 제목 줄 오른쪽에 Dock = Right).
+상태색 범례: 램프 + 뜻을 왼→오로("● 관리선 내 ● 관리선 이탈 ● SPEC 초과"). 표·그래프 칸의 램프 색이 무엇인지 화면에서 읽히게. 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다. 구획 제목 줄 오른쪽에 둘 때는 Titled("...", content, legend)의 tools로 넘긴다(Dock은 주지 않는다).
 - `ApcStatusLegend()`
 - `int PreferredWidth { get; }` — 항목을 모두 그리는 폭(배율 적용 px).
 - `void SetItems(params ApcLampValue[] items)` — 범례 항목(상태 + 뜻). 부르면 Width가 항목에 맞게 바뀐다.
