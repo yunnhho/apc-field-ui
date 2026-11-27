@@ -1,144 +1,144 @@
-# Steel + Ink 리디자인 — 설계
+# Steel + Ink Redesign — Design
 
-날짜: 2026-11-24 · 상태: 승인됨
+Date: 2026-11-24 · Status: approved
 
-## 1. 의도와 이유
+## 1. Intent and reason
 
-현재 APC.UI 화면은 쓰기 불편하지는 않지만 "디자이너가 없는 회사가 만든 것" 같고 단조롭다. 기본 테마가 회색 그라데이션(`#E6E6E6→#CFCFCF`, 헤더 `#5A6A7E→#2F3B4A`, 테두리 `#888888`)만 겹쳐 있고, 브랜드 색과 글자 위계가 없기 때문이다.
+The current APC.UI screens are not hard to use, but they look "made by a company without a designer" and monotonous. The default theme stacks only gray gradients (`#E6E6E6→#CFCFCF`, header `#5A6A7E→#2F3B4A`, border `#888888`) with no brand color and no text hierarchy.
 
-목표는 **겉모습만 세련되게 다시 입히는 것**이다. 화면을 보는 순간 다음 세 가지가 한 번에 읽혀야 한다.
-1. 만든 회사(APCSOFT)
-2. 프로그램의 목적(예: "체결 공정 관리")
-3. 지금 보고 있는 기능(예: "작업 시작 · LOT 스캔")
+The goal is **a refined reskin of the look only**. At a glance, these three must read together:
+1. The maker (APCSOFT)
+2. The program's purpose (e.g. "체결 공정 관리")
+3. The function being viewed (e.g. "작업 시작 · LOT 스캔")
 
-화려한 색은 쓰지 않는다. 세련된 인상은 절제된 톤, 단단한 입체감, 분명한 글자 위계로 만든다.
+No flashy colors. The refined impression comes from restrained tones, solid depth and clear text hierarchy.
 
-사용자: 연령과 숙련도가 다양한 작업자, 반장, 품질 담당. 환경: 일반 PC, 또는 스캐너·키보드·마우스가 달린 키오스크형 데스크톱. 기존 고객이 없는 새 제품이다.
+Users: workers, foremen and quality staff of varied age and skill. Environment: a regular PC, or a kiosk-style desktop with scanner, keyboard and mouse. A new product with no existing customers.
 
-## 2. 목표 · 비목표 · 실패 조건
+## 2. Goals · Non-goals · Failure conditions
 
-**목표**
-- 브라우저 시안 `visual-direction-v2.html`(B Steel + C 글자)과 같은 인상을 WinForms에서 재현한다.
-- 모든 창 상단에서 로고, 프로그램 이름, 기능명이 한 줄로 읽힌다.
-- 데모 템플릿 14개와 갤러리가 새 모습으로 그려진다.
+**Goals**
+- Reproduce in WinForms the impression of the browser mockup `visual-direction-v2.html` (B Steel + C type).
+- At the top of every window, logo, program name and function name read as one line.
+- The 14 demo templates and the gallery draw in the new look.
 
-**비목표**
-- 화면 구성(무엇이 어디 있는지) 변경. 사용자가 구성에는 불만이 없다고 했다.
-- 새 컨트롤 추가, 새 글꼴 추가.
-- 다크 모드, 플랫 패널. 둘 다 예전에 제외된 방향이며 이번에도 유지한다.
+**Non-goals**
+- Changing screen composition (what is where). The user said they are happy with the composition.
+- New controls or new fonts.
+- Dark mode, flat panels. Both were excluded before and stay excluded.
 
-**실패 조건 (동작은 해도 실패로 본다)**
-- 브랜드 붉은색이 로고와 기능명 말고 다른 곳(버튼, 선택 행, 탭, 배경)에 번진다. 알람 빨강과 헷갈리게 된다.
-- 알람·경고 표시가 예전보다 눈에 덜 띈다.
-- 여전히 "회색 일색"으로 보인다. 톤이 회청색으로 바뀌었는지, 제목과 라벨의 굵기 차이가 보이는지가 기준이다.
+**Failure conditions (counted as failure even if it works)**
+- Brand red spreads beyond the logo and function name (buttons, selected rows, tabs, backgrounds) and gets confused with alarm red.
+- Alarm and warning indications stand out less than before.
+- It still looks "all gray". The criteria: has the tone shifted to blue-gray, and is the weight difference between titles and labels visible?
 
-## 3. 제약
+## 3. Constraints
 
-- .NET Framework 4.0 / C# 7.3, NuGet 추가 금지.
-- `theme.json`의 상태색(run/warn/alarm/stop/info)은 색상을 바꾸지 않는다.
-- 글꼴은 맑은 고딕을 유지한다(Regular/Bold 두 굵기). 키오스크에 별도 글꼴을 설치하지 않아도 되게 하기 위해서다.
-- `themes/*/assets/*.png`는 직접 고치지 않는다. `assets-src/*.svg`를 고친 뒤 `node tools/render-assets.mjs`로 다시 만든다.
-- 완료 기준: `./build.sh` 결과 `ALL PASSED`, render 점검 0건.
-- public API가 바뀌므로 `AssemblyInfo.cs` 버전을 올린다. 스킬 문서에 영향이 있으면 SKILL.md를 고치고 다시 설치한다.
+- .NET Framework 4.0 / C# 7.3, no NuGet additions.
+- Do not change the hue of `theme.json` status colors (run/warn/alarm/stop/info).
+- Keep the font 맑은 고딕 (Regular/Bold). Kiosks must not need an extra font installed.
+- Do not edit `themes/*/assets/*.png` directly. Edit `assets-src/*.svg`, then regenerate with `node tools/render-assets.mjs`.
+- Done when: `./build.sh` prints `ALL PASSED` and render reports 0 findings.
+- The public API changes, so bump the `AssemblyInfo.cs` version. If the skill document is affected, update SKILL.md and reinstall.
 
-## 4. 검토한 방법
+## 4. Approaches considered
 
-| 방법 | 내용 | 판단 |
+| Approach | Description | Verdict |
 |---|---|---|
-| **1. 기존 라이브러리를 다시 칠하기** | `themes/default`의 색·SVG를 바꾸고 컨트롤 그리기 코드를 고친다. API는 거의 그대로 둔다 | **선택.** 가장 빠르고, 기존 점검이 안전망이 된다. 구성은 유지하므로 새로 만들 이유가 없다 |
-| 2. 새 라이브러리 | APC.UI와 나란히 컨트롤 26개를 새로 만든다 | 작업량이 몇 배인데 겉모습은 1과 같다 |
-| 3. 색·그림만 교체 | `theme.json`과 SVG만 바꾼다 | 제목 2단, 라벨 막대, 표 머리 굵은 선을 만들 수 없어 시안과 달라진다 |
+| **1. Repaint the existing library** | Change colors and SVGs in `themes/default` and fix the control drawing code. API mostly unchanged | **Chosen.** Fastest, and existing checks act as a safety net. Composition stays, so there is no reason to rebuild |
+| 2. New library | Build 26 new controls alongside APC.UI | Several times the work for the same look as 1 |
+| 3. Swap colors and art only | Change only `theme.json` and SVGs | Cannot produce the two-line title, label bars, or bold header rule, so it diverges from the mockup |
 
-사용자가 1을 골랐다.
+The user chose 1.
 
-## 5. 사용자가 정한 것
+## 5. User decisions
 
-- **붉은색은 정체성 영역에만 쓴다(A안).** 로고와 제목 줄의 기능명에만 쓴다. 조작 요소에는 쓰지 않는다.
-- **브랜드 색은 로고의 붉은색 계열**로 한다. 로고 이미지는 그대로 쓴다.
-- **시각 방향: B(Steel) + C(Ink) 글자.**
-  - B(Steel)에서 가져오는 것: 회청색 금속 패널, 각진 모서리(2~3px), 오목한 입력칸, 남색 주요 버튼.
-  - C(Ink)에서 가져오는 것: 굵은 제목, 붉은 기능명, 먹색 막대가 붙은 구역 라벨, 굵은 먹색 선의 표 머리.
-- 밝은 입체 계열, WinForms, 상태색 규칙은 유지한다.
+- **Red only in identity areas (option A).** Only the logo and the function name on the title row. Never on controls.
+- **Brand color is the logo's red family.** The logo image is used as is.
+- **Visual direction: B (Steel) + C (Ink) type.**
+  - From B (Steel): blue-gray metal panels, square corners (2–3px), inset input fields, navy primary buttons.
+  - From C (Ink): bold titles, red function name, section labels with an ink-color bar, table header with a bold ink rule.
+- Keep the light raised family, WinForms, and the status color rules.
 
-## 6. 디자인 기준 (시안에서 옮긴 값)
+## 6. Design baseline (values taken from the mockup)
 
-### 6.1 색 토큰
+### 6.1 Color tokens
 
-| 용도 | 값 | 현재 키 / 신규 |
+| Use | Value | Existing key / new |
 |---|---|---|
-| 창 배경 | `#E9EDF1 → #DDE3E9` | `background` |
-| 타이틀바 | `#FBFCFD → #E8EDF2` + 아래 1px `#B9C3CD` | `titleBar` |
-| 패널·카드 바탕 | `#FDFDFE → #F1F4F7`, 위쪽 1px 흰 하이라이트 | **신규 `panel`** |
-| 일반 테두리 | `#B9C3CD` | `border` |
-| 입력칸 테두리 | `#9AA7B4` | **신규 `borderStrong`** |
-| 글자 / 먹색 강조 | `#1A1F26` | `text` (라벨 막대·표 머리 선도 이 색) |
-| 보조 글자 | `#5D6B7A` | `textMuted` |
-| 표 머리 | `#F7F9FB → #E4E9EE` + 아래 2px `text` | `gridHeader` |
-| 표 줄 | `#E3E8ED` | `gridLine` |
-| 브랜드 | 로고 PNG의 실제 빨강 (시안 `#D8232A`) | **신규 `brand`** |
-| 주요 버튼 | `#3F5A78 → #2A4058`, 테두리 `#213347` | SVG `btn_primary_*` |
-| 보조 버튼 | `#FDFDFE → #DFE5EB`, 테두리 `#9AA7B4` | SVG `btn_normal_*` |
+| Window background | `#E9EDF1 → #DDE3E9` | `background` |
+| Title bar | `#FBFCFD → #E8EDF2` + 1px `#B9C3CD` below | `titleBar` |
+| Panel and card background | `#FDFDFE → #F1F4F7`, 1px white highlight on top | **new `panel`** |
+| General border | `#B9C3CD` | `border` |
+| Input field border | `#9AA7B4` | **new `borderStrong`** |
+| Text / ink emphasis | `#1A1F26` | `text` (also the label bar and table header rule) |
+| Secondary text | `#5D6B7A` | `textMuted` |
+| Table header | `#F7F9FB → #E4E9EE` + 2px `text` below | `gridHeader` |
+| Table lines | `#E3E8ED` | `gridLine` |
+| Brand | The actual red of the logo PNG (mockup `#D8232A`) | **new `brand`** |
+| Primary button | `#3F5A78 → #2A4058`, border `#213347` | SVG `btn_primary_*` |
+| Secondary button | `#FDFDFE → #DFE5EB`, border `#9AA7B4` | SVG `btn_normal_*` |
 
-상태색 5개는 그대로 둔다.
+The 5 status colors stay as they are.
 
-### 6.2 창 제목 줄 (`ApcForm`)
+### 6.2 Window title row (`ApcForm`)
 
 ```
-[APCSOFT 로고] │ 체결 공정 관리            (상태·시각 등 기존 오른쪽 요소) [_][x]
+[APCSOFT logo] │ 체결 공정 관리            (existing right-side items: status, time) [_][x]
                │ 작업 시작 · LOT 스캔
 ```
 
-- 로고 → 1px 세로 구분선(`#C4CCD5`) → 제목 2단, 모두 왼쪽 정렬. 지금은 로고를 켜면 제목이 가운데 오는데, 이를 바꾼다.
-- 윗줄은 프로그램 이름(Bold, 기본 글자 크기 +6pt 안팎), 아랫줄은 기능명(Bold, 기본 −1pt 안팎, `brand` 색).
-- **신규 속성 `ApcForm.FunctionText`**. 비어 있으면 지금처럼 한 줄 제목이고, 타이틀바 높이도 늘리지 않는다.
-- dialog(`ShowLogo=false`)는 지금처럼 왼쪽 한 줄 제목이고 붉은색을 쓰지 않는다.
+- Logo → 1px vertical divider (`#C4CCD5`) → two-line title, all left aligned. Today the title is centered when the logo is on; change that.
+- Top line: program name (Bold, about +6pt over the base size). Bottom line: function name (Bold, about −1pt, `brand` color).
+- **New property `ApcForm.FunctionText`**. When empty, the title stays one line as today and the title bar does not grow.
+- Dialogs (`ShowLogo=false`) keep the one-line left title as today, with no red.
 
-### 6.3 구역·카드
+### 6.3 Sections and cards
 
-- `ApcGroup`: 그라데이션 제목 띠를 없앤다. 카드 바탕(`panel`) 안 왼쪽 위에 **3px 먹색 막대 + Bold 라벨**을 둔다.
-- 카드형 컨트롤(`Cards.DrawFrame` 사용처: 값 카드, 상태 타일 등): 흰색 단색 대신 `panel` 그라데이션 + 1px `border` + 위쪽 흰 하이라이트. 알람일 때의 굵은 알람 테두리 규칙은 유지한다.
+- `ApcGroup`: remove the gradient title band. Put a **3px ink bar + Bold label** at the top left inside the card background (`panel`).
+- Card controls (users of `Cards.DrawFrame`: value cards, status tiles, etc.): `panel` gradient + 1px `border` + white top highlight instead of solid white. Keep the thick alarm border rule.
 
-### 6.4 입력칸·버튼
+### 6.4 Input fields and buttons
 
-- 입력칸(`FieldFrame`): 흰 바탕, `borderStrong` 테두리, 안쪽 위 그림자(오목함)는 유지하고 조금 진하게 한다. 모서리는 각지게.
-- 포커스 색은 지금의 파랑 계열을 유지한다. 주요 버튼 남색과 겹쳐 보이면 builder가 조정한다.
-- 버튼은 SVG를 다시 그려 남색/보조색으로 바꾼다. 모서리 반경은 3px 안팎.
-- 위험 버튼(`btn_danger`)은 알람 빨강 계열을 유지한다. 위험 동작은 상태 의미라서 브랜드 규칙의 예외로 둔다.
+- Input fields (`FieldFrame`): white background, `borderStrong` border; keep the inner top shadow (inset), slightly darker. Square corners.
+- Keep the current blue focus color. If it looks too close to the navy primary button, the builder adjusts it.
+- Redraw button SVGs in navy/secondary. Corner radius about 3px.
+- The danger button (`btn_danger`) stays in the alarm red family. Danger is a status meaning, so it is an exception to the brand rule.
 
-### 6.5 표 (`ApcGrid`)
+### 6.5 Tables (`ApcGrid`)
 
-- 머리: `gridHeader` 그라데이션, Bold 먹색 글자, 아래 2px 먹색 선.
-- 줄: 1px `gridLine`. 선택 행 색(`gridSelected`)은 회청 톤에 맞춰 명도만 맞춘다(파랑 계열 유지).
+- Header: `gridHeader` gradient, Bold ink text, 2px ink rule below.
+- Rows: 1px `gridLine`. Selected row color (`gridSelected`) only adjusts lightness to the blue-gray tone (stays blue).
 
-### 6.6 화면 헤더 띠 (`ApcHeaderBar`)
+### 6.6 Screen header band (`ApcHeaderBar`)
 
-- 지금의 어두운 남색 띠를 밝은 금속 톤(`titleBar` 계열)으로 바꾼다. 글자는 먹색 Bold, 아래 1px `border`.
-- 램프와 상태 문구의 위치는 그대로 둔다(구성 유지).
+- Change the current dark navy band to a light metal tone (`titleBar` family). Ink Bold text, 1px `border` below.
+- Lamp and status text stay where they are (composition unchanged).
 
-## 7. builder에게 맡기는 것 (판단 기준 포함)
+## 7. Left to the builder (with criteria)
 
-- 위 값의 ±명도 미세 조정. 기준은 시안 `visual-direction-v2.html`과 나란히 봤을 때 같은 인상인지다.
-- 각 컨트롤의 모서리 반경, 그림자 세기, 여백 px.
-- `theme.json`에 새 키(`panel`, `borderStrong`, `brand`)를 넣을 때, 이전 theme.json(`themes/sample`)에 키가 없으면 어떻게 할지. 권장은 기존 키에서 유도한 기본값이다. 로드를 거부하면 안 된다.
-- 탭(`ApcTabStrip`), 달력, 콤보, 추이 차트 등 위에서 언급하지 않은 컨트롤은 같은 토큰으로 톤만 맞춘다.
-- 데모 템플릿 중 기능명이 있는 화면에 `FunctionText`를 채워 넣는다.
+- Fine ± lightness adjustments of the values above. Criterion: same impression side by side with the mockup `visual-direction-v2.html`.
+- Corner radius, shadow strength and padding px of each control.
+- What to do when an older theme.json (`themes/sample`) lacks the new keys (`panel`, `borderStrong`, `brand`). Recommended: defaults derived from existing keys. Must not reject loading.
+- Controls not mentioned above (`ApcTabStrip`, calendar, combo, trend chart, etc.) only match tone with the same tokens.
+- Fill `FunctionText` in demo templates that have a function name.
 
-## 8. 확인 방법
+## 8. Verification
 
 1. `./build.sh` → `ALL PASSED`.
-2. `APC.UI.Tools render`로 템플릿 14개와 갤러리를 캡처하고 render 점검 0건을 확인한다. 캡처를 시안과 나란히 놓고 사용자 검토를 받는다.
-3. 브랜드색 사용처 확인: `brand` 키를 참조하는 곳이 `ApcForm` 제목 줄 한 곳뿐인지 grep으로 본다.
-4. 알람 카드와 알람 램프가 새 배경에서 예전보다 덜 띄지 않는지 캡처로 비교한다.
-5. 신규 public API(`FunctionText`, ThemeColors 새 속성)를 `docs/api.md`에 기록하고 버전을 올린다. SKILL.md의 창 제목 규칙(128행)에 기능명 규칙을 추가하고 스킬을 다시 설치한다.
+2. Capture the 14 templates and the gallery with `APC.UI.Tools render` and confirm 0 render findings. Put the captures next to the mockup for user review.
+3. Brand color usage: grep that the `brand` key is referenced only in the `ApcForm` title row.
+4. Compare captures to confirm alarm cards and alarm lamps do not stand out less on the new background.
+5. Record the new public API (`FunctionText`, new ThemeColors properties) in `docs/api.md` and bump the version. Add the function name rule to SKILL.md's window title rule (line 128) and reinstall the skill.
 
-## 9. 2차 수정 (사용자 피드백, 2026-11-24)
+## 9. Second revision (user feedback, 2026-11-24)
 
-1. 버튼 모서리 반경 3px → 2px(1.5.0.0 피드백과 같은 문제 재발). `AssetChecks`에 `btn_*.svg` 반경 ≤ 2 점검 추가.
-2. 묶음 상자(`ApcGroup`)·구획 제목(`SectionTitle()`) 왼쪽 막대는 **브랜드 빨강**. 5장 "붉은색은 기능명에만"을 이렇게 넓힌다 — 기능명 + 제목 막대. 그 밖(버튼·선택·배경)에는 여전히 쓰지 않는다.
-3. 로고 높이 22 → 28px, 창 버튼은 오른쪽 끝에서 12px 띄운다.
-4. 화면 헤더 띠(`ApcHeaderBar`): 제목 글자를 그리지 않는다(창 제목 줄과 중복). 오른쪽 끝에 현재 시각(`yyyy-MM-dd HH:mm:ss`, 1초 갱신), 그 왼쪽에 상태 램프 + 문구. 6.6의 "제목은 먹색 Bold"를 대체한다.
+1. Button corner radius 3px → 2px (the same problem as the 1.5.0.0 feedback came back). Add an `AssetChecks` check that `btn_*.svg` radius ≤ 2.
+2. The left bar of group boxes (`ApcGroup`) and section titles (`SectionTitle()`) is **brand red**. This widens section 5's "red only in the function name" to: function name + title bars. Still never on buttons, selection, or backgrounds.
+3. Logo height 22 → 28px; window buttons 12px from the right edge.
+4. Screen header band (`ApcHeaderBar`): do not draw title text (duplicates the window title row). Current time at the right end (`yyyy-MM-dd HH:mm:ss`, updated every second), status lamp + text to its left. Replaces 6.6's "title in ink Bold".
 
-## 10. 3차 수정 (사용자 피드백, 2026-11-24, APC.UI 1.21.0.0)
+## 10. Third revision (user feedback, 2026-11-24, APC.UI 1.21.0.0)
 
-- 헤더 띠에서 가동 상태 표시(램프·문구)를 모두 지운다. 띠에는 오른쪽 끝 현재 시각만. `Header.Status`/`StatusText`는 호환을 위해 값만 보관한다. 9장 4번의 "그 왼쪽에 상태"를 대체한다. 상태는 본문(타일·카드·램프·알람 띠)이 보여 준다.
-- 탭이 필요한 화면은 탭을 본문이 아니라 헤더 띠 왼쪽에 둔다: `ApcTemplateView.HeaderTools(params Control[])`(띠 48px, 탭 아래끝을 띠 아래선에, 나머지는 세로 가운데).
+- Remove all running-status display (lamp, text) from the header band. The band shows only the current time at the right end. `Header.Status`/`StatusText` only keep values for compatibility. Replaces "status to its left" in section 9 item 4. Status is shown by the body (tiles, cards, lamps, alarm band).
+- Screens that need tabs put them at the left of the header band, not in the body: `ApcTemplateView.HeaderTools(params Control[])` (band 48px, tab bottoms on the band's bottom line, everything else vertically centered).
