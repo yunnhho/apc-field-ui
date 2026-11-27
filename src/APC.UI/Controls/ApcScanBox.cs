@@ -58,6 +58,21 @@ namespace APC.UI.Controls
         /// </summary>
         public Predicate<string> Accepts { get; set; }
 
+        private bool _scanOnly;
+
+        /// <summary>
+        /// 스캔으로만 채우는 칸: 손으로 치거나 고치거나 붙여 넣을 수 없다(ReadOnly). 모양은 입력칸 그대로(흰 바탕) — 스캔할 곳으로 보인다.
+        /// 사원증·라벨처럼 "스캔한 값만 인정"하는 칸에 쓴다. Text가 곧 스캔한 값이다.
+        /// </summary>
+        [System.ComponentModel.DefaultValue(false)]
+        public bool ScanOnly
+        {
+            get { return _scanOnly; }
+            set { _scanOnly = value; ReadOnly = value; ResetFieldColor(); }
+        }
+
+        internal override bool LooksReadOnly { get { return ReadOnly && !_scanOnly; } }
+
         public ApcScanBox()
         {
             ImeMode = ImeMode.Disable;   // 한글 IME 상태에서도 바코드가 자모로 조합되지 않게

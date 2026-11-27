@@ -54,7 +54,10 @@ namespace APC.UI.Controls
         [Browsable(false)]
         public bool HasValue { get { return _hasValue; } }
 
-        /// <summary>칸을 비운다(아직 입력 안 함). 측정값 입력 칸의 처음 상태, 다음 부품·다음 포인트로 넘어갈 때.</summary>
+        /// <summary>
+        /// 칸을 비운다(아직 입력 안 함). 측정값 입력 칸의 처음 상태, 다음 부품·다음 포인트로 넘어갈 때.
+        /// 값이 있던 칸이면 ValueChanged가 난다 — 생성자에서는 ValueChanged를 구독하기 전에 부른다.
+        /// </summary>
         public void Clear()
         {
             if (!_hasValue) return;

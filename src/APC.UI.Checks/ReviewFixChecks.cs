@@ -56,6 +56,7 @@ namespace APC.UI.Checks
             Check(num.Text == "1", "#5b filtered field restored (was '" + num.Text + "')");
 
             CheckScanRouting();
+            CheckScanOnly();
 
             // #7 내용은 창을 꽉 채우고(1px 테두리만), 가장자리 리사이즈는 그 위를 덮은 자식 컨트롤에서도 된다
             using (var f = new ApcForm { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new Point(-32000, -32000), Size = new Size(800, 600) })
@@ -77,6 +78,21 @@ namespace APC.UI.Checks
             // #8 이미지가 빠진 테마는 Load 시점에 ThemeException (기존 테마 유지)
             Check(Throws<ThemeException>(() => ApcTheme.Load(Fx("alarm-dark")), "@1x.png"), "#8 missing assets rejected at load");
             Check(ApcTheme.ThemeDir == DefaultTheme, "#8 previous theme kept after failed load");
+        }
+
+        /// <summary>스캔 전용 칸: 손으로 치거나 고칠 수 없지만 입력칸 모양(흰 바탕)이고 스캔은 받는다.</summary>
+        private static void CheckScanOnly()
+        {
+            using (var box = new ApcScanBox { ScanOnly = true })
+            {
+                string got = null;
+                box.Scanned += (s, e) => got = e.Code;
+                Check(box.ReadOnly, "scan only: typing and editing blocked (ReadOnly)");
+                Check(box.BackColor == APC.UI.Drawing.FieldFrame.Fill(true, false), "scan only: looks like an input field, not read-only gray");
+                ScanChars(box, "EMP-40001", 60000, 10, null);
+                box.Process(WM_KEYDOWN, VK_RETURN, 60100, box);
+                Check(got == "EMP-40001" && box.Text == "EMP-40001", "scan only: scan still fills the box (" + got + ")");
+            }
         }
 
         /// <summary>스캔 칸 둘(시리얼 + 사원증): 코드는 Accepts가 받는 칸으로 간다 — 스캔 순서·포커스와 무관하게.</summary>

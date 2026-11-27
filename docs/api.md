@@ -1,4 +1,4 @@
-# APC.UI API (v1.28.1.0)
+# APC.UI API (v1.29.0.0)
 
 > build.sh가 자동 생성한다. 직접 고치지 않는다.
 
@@ -209,7 +209,7 @@
 - `event EventHandler ValueChanged`
 - `int DecimalPlaces { get; set; }`
 - `protected void OnValueChanged(EventArgs e)`
-- `void Clear()` — 칸을 비운다(아직 입력 안 함). 측정값 입력 칸의 처음 상태, 다음 부품·다음 포인트로 넘어갈 때.
+- `void Clear()` — 칸을 비운다(아직 입력 안 함). 측정값 입력 칸의 처음 상태, 다음 부품·다음 포인트로 넘어갈 때. 값이 있던 칸이면 ValueChanged가 난다 — 생성자에서는 ValueChanged를 구독하기 전에 부른다.
 - `void Commit()` — 입력칸 글자를 확정한다. 숫자가 아니면 이전 값을 다시 보여 준다.
 
 ## ApcScanBox
@@ -219,6 +219,7 @@
 바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다. 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다. 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다. 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다). Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) — 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다. 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach하고 칸마다 Accepts(받는 코드 판별)를 준다: 코드는 그 코드를 받는 칸으로 간다(포커스·스캔 순서와 무관). 어느 칸도 받지 않는 코드는 포커스된 스캔 칸(없으면 먼저 Attach한 칸)이 받아 앱이 거부한다.
 - `ApcScanBox()`
 - `Predicate<string> Accepts { get; set; }` — 이 칸이 받는 코드인지(예: c => c.StartsWith("EMP-")). 한 폼에 스캔 칸이 둘 이상이면 칸마다 준다 — 포커스된 칸이 받지 않는 코드는 같은 폼에서 Accepts가 그 코드를 받는 칸으로 옮겨 그 칸의 Scanned가 난다. null이면 이 칸에 온 코드는 모두 받지만, 다른 칸이 받지 않은 코드를 넘겨받지는 않는다(넘겨받으려면 Accepts를 준다).
+- `bool ScanOnly { get; set; }` — 스캔으로만 채우는 칸: 손으로 치거나 고치거나 붙여 넣을 수 없다(ReadOnly). 모양은 입력칸 그대로(흰 바탕) — 스캔할 곳으로 보인다. 사원증·라벨처럼 "스캔한 값만 인정"하는 칸에 쓴다. Text가 곧 스캔한 값이다.
 - `const int FlashMs`
 - `event EventHandler<ScanEventArgs> Scanned`
 - `void Attach(Form host)` — 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로 화면의 OnHandleCreated에서 FindForm()으로 부른다: var f = FindForm(); if (f != null) _scan.Attach(f); dialog(ApcForm)는 폼 자신이므로 생성자에서 _scan.Attach(this)로 부른다.
