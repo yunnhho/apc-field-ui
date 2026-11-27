@@ -1,0 +1,719 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>APC.UI</name>
+    </assembly>
+    <members>
+        <member name="T:APC.UI.Controls.ApcButton">
+            <summary>9-slice image button. Images: btn_{variant}_{normal|hover|pressed|disabled}</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcButtonField">
+            <summary>
+            Input field + a button area inside its right edge (same look as the combo arrow). This control draws the border and focus border;
+            the inner text box has no border. The button area can be split top/bottom (numeric ▲▼). Base of ApcNumericBox and ApcDateBox.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcButtonField.TextBox">
+            <summary>Inner text box (focus target, restored after a scan).</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcButtonField.SegmentCount">
+            <summary>Number of stacked cells the button area is split into.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcButtonField.SegmentAt(System.Drawing.Point)">
+            <summary>Index of the button cell under the point; -1 outside the button area.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcCalendar">
+            <summary>Calendar dropped down by ApcDateBox. Top ◀ year-month ▶, weekday row, 6 weeks × 7 day cells. Clicking a cell raises DateSelected.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcCalendar.FirstCell(System.DateTime)">
+            <summary>First cell of the calendar (Sunday of the week containing the 1st of the month).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcCalendar.DateAt(System.Drawing.Point)">
+            <summary>Date at point p; null if not on a date cell.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcCheckBox">
+            <summary>
+            Confirmation check (preheat temperature checked, safety check done, etc.). Same height as an input field, box on the left + sentence on the right. Clicking the box or the text toggles it.
+            When checked, the box fills with the confirm-button blue and shows a white check mark. Width follows the text (as the field of AddFieldRow it takes the field width).
+            For actions that require the check, change the confirm button's Enabled and its reason (SetFooterNote) together in CheckedChanged.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcCheckBox.PreferredWidth">
+            <summary>Box + gap + text width (scaled px).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcComboBox">
+            <summary>
+            Themed selection list (drop-down only, no free typing). The closed state is drawn as an input field + gradient arrow button on the right;
+            the open list has items at least 28px × scale tall (easy to hit with mouse or pen). Height is set by ItemHeight.
+            </summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcDateBox">
+            <summary>
+            Date input: text box (yyyy-MM-dd) + ▼ button area inside its right edge (same look as the combo). Clicking opens a calendar; clicking a date closes it.
+            Typed input accepts yyyy-MM-dd / yyyyMMdd and commits on Enter or on leaving the field; invalid input reverts to the previous value. ↑↓ keys move one day.
+            </summary>
+        </member>
+        <member name="F:APC.UI.Controls.ApcDateBox.MinDate">
+            <summary>Accepted range, so calendar and day stepping never throw at the ends of DateTime.</summary>
+        </member>
+        <member name="F:APC.UI.Controls.ApcDateBox.MaxDate">
+            <summary>Accepted range, so calendar and day stepping never throw at the ends of DateTime.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcDateBox.Commit">
+            <summary>Commits the typed text. If it is not a date, shows the previous value again.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcDialog">
+            <summary>
+            Confirmation for irreversible actions (delete, end job, etc.). Default focus, Enter and Esc are all "취소" (Cancel) —
+            so a barcode scan's Enter or a habitual Enter never confirms by mistake.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcDialog.Confirm(System.Windows.Forms.IWin32Window,System.String)">
+            <summary>Destructive action confirmation: the confirm button is a red "확인".</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcDialog.Confirm(System.Windows.Forms.IWin32Window,System.String,System.String,APC.UI.Controls.ApcButtonVariant)">
+            <summary>Sets the confirm button's text and variant. For non-dangerous confirmations such as save use ("저장", Primary).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcDialog.Warn(System.Windows.Forms.IWin32Window,System.String)">
+            <summary>
+            Warning box (input errors and operation warnings: reversed period, empty LOT, wrong or duplicate scan, etc.). Title "경고" + yellow lamp.
+            One "확인" button; Enter and Esc close it.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcDialog.Alert(System.Windows.Forms.IWin32Window,System.String)">
+            <summary>Information box (nothing is wrong: connection result, completion notice). Title "알림" + blue lamp. For warnings use <see cref="M:APC.UI.Controls.ApcDialog.Warn(System.Windows.Forms.IWin32Window,System.String)"/>.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcDialog.AddKindIcon(APC.UI.Controls.ApcForm,System.String)">
+            <summary>Kind lamp left of the message (warning yellow / info blue) — told apart by the title text too, not by color alone.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcForm">
+            <summary>
+            Borderless APCSOFT window. Title bar (logo, title, [settings], minimize, close image buttons), drag to move,
+            double-click to maximize, edge resize. Maximizing does not cover the taskbar.
+            </summary>
+            <summary>
+            Dialog layout helpers. In the constructor: SetupDialog → AddFieldRow/AddGroup/AddContent/AddContentFill (top to bottom) → SetFooter.
+            Sizes come from ApcLayout; layout runs once right before showing (OnLoad): one caption column (widest caption), aligned field left edges (AddCaptionRow table groups align separately),
+            bottom-right [Confirm][Cancel] (Cancel at the end), height computed from content (SetupDialog height when there is Fill content).
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcForm.FunctionText">
+            <summary>
+            Function name on the line below the title (e.g. "작업 시작 · LOT 스캔"). Drawn in the brand color.
+            Shown only on the main window (ShowLogo); when empty the title is one line at the default height.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcForm.ShowSettings">
+            <summary>
+            Settings (gear) button left of minimize in the title bar. Turn it on only for windows that have a settings screen. Clicking raises <see cref="E:APC.UI.Controls.ApcForm.SettingsClick"/>.
+            In a screen (ApcTemplateView) do not set this directly; use UseSettingsButton.
+            </summary>
+        </member>
+        <member name="E:APC.UI.Controls.ApcForm.SettingsClick">
+            <summary>The title-bar settings button was clicked (only when <see cref="P:APC.UI.Controls.ApcForm.ShowSettings"/> is true).</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcForm.ResizeGrip">
+            <summary>Edge resize hit width (px).</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcForm.ContentBounds">
+            <summary>Content area without the title bar and 1px border (client coordinates) = inside Padding.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcForm.ClockBounds">
+            <summary>Main-window clock position: left of the window buttons, vertically centered on the title line. Text width is measured from a fixed-format sample.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.DrawMainTitle(System.Drawing.Graphics,System.Drawing.Rectangle,System.Windows.Forms.TextFormatFlags)">
+            <summary>Main window: logo │ program name (large), and below it a small brand-color line with the function name if set. Left aligned, ellipsized before the buttons.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.FunctionFont">
+            <summary>Function name font: theme font, bold, 1pt smaller.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.TitleFont">
+            <summary>Main window title font: theme font, bold × 1.5.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcForm.ShowLogo">
+            <summary>Logo on the left of the title bar + large centered title (main window). false = no logo, title on the left (dialog; SetupDialog turns it off).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.OnShown(System.EventArgs)">
+            <summary>Stops the first field from getting focus with all its text selected in blue when the form opens (caret goes to the end).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.UpdateMaximizedBounds">
+            <summary>MaximizedBounds must be in that monitor's coordinates (secondary monitor support).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.UpdatePadding">
+            <summary>Content fills the inside of the 1px border. EdgeResizeFilter handles edge resize even over child controls.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.EdgeHit(System.Windows.Forms.Control,System.Drawing.Point)">
+            <summary>HT code if a point in child-control coordinates is in the window's edge resize area, otherwise HTCLIENT.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcForm.EdgeResizeFilter">
+            <summary>
+            When a Dock=Fill child covers the edge, mouse messages go to the child. Of the mouse moves and presses this window's children receive,
+            those inside the edge grip are intercepted to change the cursor and start a window resize (so content can fill edge to edge).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.SetupDialog(System.String,System.Int32,System.Int32)">
+            <summary>Dialog base properties and size (unscaled px). height 0 = auto from content (required when using AddContentFill).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddFieldRow(System.String,System.Windows.Forms.Control,System.Windows.Forms.Control[])">
+            <summary>One row: caption + field. Without trailing the field fills the remaining width; with trailing every control uses its own Width, left to right.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddFieldRow(APC.UI.Controls.ApcGroup,System.String,System.Windows.Forms.Control,System.Windows.Forms.Control[])">
+            <summary>One row inside a group. The caption column aligns with rows outside the group.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddCaptionRow(APC.UI.Controls.ApcGroup,System.String[])">
+            <summary>
+            Column caption row inside a group. Placed in order above [caption, field, trailing...] of the next AddFieldRow(group, ...) row ("" = no caption for that cell).
+            When several rows share the same cells (port, signal, logic…), write the captions once on top instead of repeating FieldCaption in every row.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddGroup(System.String)">
+            <summary>Titled group (ApcGroup). Add rows with AddFieldRow(group, ...).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddContent(System.Windows.Forms.Control)">
+            <summary>Free element such as a table or judge panel. Height is c.Height (set with ApcTheme.Px), width is the content width.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddContentRow(System.Windows.Forms.Control[])">
+            <summary>Several cards in one row with equal width and height (the largest c.Height). Gap is ApcLayout.ItemGap. For 2×2 call it twice.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.AddContentFill(System.Windows.Forms.Control)">
+            <summary>Element that fills the remaining height (chart etc.). Requires a height in SetupDialog; one per dialog.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.SetFooter(APC.UI.Controls.ApcButton,APC.UI.Controls.ApcButton,APC.UI.Controls.ApcButton[])">
+            <summary>Bottom button row: [Confirm][Cancel] on the right (Cancel at the end, cancel may be null), helper buttons on the left. Esc = cancel (confirm if no cancel).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.SetFooterNote(System.String)">
+            <summary>
+            Note text immediately left of [Confirm] in the bottom button row (the reason a confirm button is disabled: "원인 확인 전 · Release 불가").
+            Change the returned Label's Text ("" when there is no reason). Default text color; only alarm reasons use ForeColor = ApcTheme.StatusText(StatusKind.Alarm).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.SectionTitle(System.String)">
+            <summary>Section title (brand-color bar on the left + bold + full-width divider below — same look as group and screen section titles). Added with AddContent it keeps a tight gap to the element below. Use it to split input rows without a box (AddGroup).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.FieldCaption(System.String)">
+            <summary>Trailing caption inside a row (regular weight, text width).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcForm.FooterW(APC.UI.Controls.ApcButton,System.Int32)">
+            <summary>Footer button width: 110 by default; widened to text + side padding when the text is long (e.g. 비밀번호 변경 at font 12).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcGrid">
+            <summary>
+            DataGridView with the theme style. Gradient header, one row background color (no alternating), full-row selection.
+            No row is selected automatically until the user clicks the table or moves with the keys (CurrentRow = null) —
+            buttons that act "on the selected row" should do nothing while CurrentRow is null.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.HeightForRows(System.Int32)">
+            <summary>Table height that fits the header + rows rows with no empty space or scrollbar (scaled px). Use it for table heights in dialog AddContent.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.HeightForRows(System.Int32,System.Boolean)">
+            <summary>Same as HeightForRows; columnGroups = true for a table with a group header (AddColumnGroup, two header tiers).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.AddColumnGroup(System.String,System.Int32,System.Int32)">
+            <summary>
+            Group header: one group caption cell above columns firstColumn~lastColumn (column indexes, inclusive) (e.g. "온도 (℃)" on top, "NI"·"SN" below).
+            The first call makes the header two tiers; ungrouped column captions are drawn centered across both tiers. Call after all columns are added.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcGrid.FillRows">
+            <summary>
+            true for a fixed-row-count table (10 tightening points, 5 floors) filling a Fill cell: the rows share the table height (never lower than the default row height).
+            Tables whose rows grow, such as history and lists, keep false (fill them with sample rows).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.OnColumnAdded(System.Windows.Forms.DataGridViewColumnEventArgs)">
+            <summary>The default width of 100px clips code values (WO-24117-01 etc.) in Korean fonts.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.OnSizeChanged(System.EventArgs)">
+            <summary>
+            DataGridView adjusts Fill column widths incrementally from the previous width, so an error caught once at a narrow width (around 100px) before showing
+            persists (the first column stayed narrow and grew 3px on every query). On resize the widths are redistributed by FillWeight
+            (widths the user dragged are kept because they live in FillWeight).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.DrawHeaderText(System.Drawing.Graphics,System.Drawing.Rectangle,System.String,System.Drawing.Font)">
+            <summary>
+            Header text exactly centered in the cell. Default painting shifts it 1–2px left by the sort-arrow slot and inner padding.
+            Centers excluding the 1px right divider and bottom line. Custom-drawn parts such as the group header use this too.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcGrid.ClearInitialSelection">
+            <summary>
+            true (default): no row is selected until the user clicks. For input tables (e.g. a dialog whose cells are filled by scanning)
+            where the app sets CurrentCell and takes input immediately, set false.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGrid.OnCellFormatting(System.Windows.Forms.DataGridViewCellFormattingEventArgs)">
+            <summary>In an editable table, read-only columns get a gray background — so it is obvious which cells take input.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcGroup">
+            <summary>
+            Titled group box (blocks in a settings dialog etc., instead of the standard GroupBox). Panel background + bold title with a brand-color bar on the left.
+            Child controls are laid out inside Padding (below the title band + margin) — use Dock or a FlowLayoutPanel (Dock=Fill).
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcGroup.Text">
+            <summary>Title band text.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGroup.HeightFor(System.Int32)">
+            <summary>Group height that holds content of the given height (scaled px) = title band + top/bottom margin + content. On a screen holding Columns() rows, content = sum of row heights.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcGroup.ApplyTheme">
+            <summary>Background is the solid panel start color, so children inheriting BackColor do not clash with the gradient.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcIconColumn">
+            <summary>
+            Row action icon column (send ▶, reset ↻, etc.). Cell value true = blue icon (clickable), false = gray icon (not available now), anything else = empty cell.
+            Images are the theme's "{IconName}_normal" / "{IconName}_disabled". Handle clicks in the table's CellClick, checking IsEnabled(cell).
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcIconColumn.IconName">
+            <summary>Theme image name prefix (e.g. "icon_play", "icon_reset").</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcIconColumn.IsEnabled(System.Windows.Forms.DataGridViewCell)">
+            <summary>Whether the cell is clickable (value true).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcInfoStrip">
+            <summary>
+            One-line name-value strip: dark name cells and white value cells alternate, e.g. [공정 | 적층] [설비 | 12인치 적층기] [관리 항목 | 온도·Cycle time].
+            The line below the screen header that says "what you are looking at" (process, equipment, LOT, SPEC, etc.). Name cells take their text width; value cells take their text width + an equal share of the rest (so long values are not clipped first).
+            No value = empty. Not an input field (read-only display).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcInfoStrip.SetItems(System.String[])">
+            <summary>Name cells (left to right). All values start empty.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcInfoStrip.SetValue(System.String,System.String)">
+            <summary>Value next to name cell name. ArgumentException for an unknown name.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcInfoStrip.PreferredWidth">
+            <summary>
+            Width at which no name or value is clipped (scaled px). A dialog's AddContent(strip) widens the dialog to this width.
+            On a screen inside Row(), set Width to at least this value.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcInfoStrip.ValueWidths(System.Int32,System.Int32[])">
+            <summary>
+            Value cell widths: with spare room, text width + an equal share of the rest. When short, the longest values shrink first — a common cap is lowered for all cells
+            so values shorter than the cap (V2, 닫힘) stay fully visible and only long values get an ellipsis (shrinking all proportionally clips every value even when only a few px are missing).
+            </summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcJudgePanel">
+            <summary>
+            Judge panel: big text (OK / NG / READY etc.) on a status-color background + one guidance line below. The largest element of a judging screen.
+            OK=Run, NG=Alarm, waiting=Stop, needs check=Warn. Text size follows the height.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcJudgePanel.SubText">
+            <summary>One line below the big text (e.g. "시리얼을 스캔하세요", "하중 19.4 kN > 상한 18.0").</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcJudgePanel.Text">
+            <summary>Big text (OK / NG / READY etc.).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcJudgePanel.ForeFor(APC.UI.Theming.StatusKind)">
+            <summary>Text color on the background. White text is unreadable on yellow (warning), so that uses the default text color.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcLamp">
+            <summary>Status lamp. Images: lamp_{run|warn|alarm|stop|info}. Blink works only for Alarm.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcLampColumn">
+            <summary>
+            Status lamp column. Cell value StatusKind = lamp only (centered); ApcLampValue = lamp + word ("전송됨", "대기") in one cell (lamp fixed at the left, word right next to it — same lamp position in every row); anything else (null etc.) = empty cell.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcLampColumn.WidthFor(System.String,System.Drawing.Font)">
+            <summary>Width that fits lamp + word (ApcLampValue). ApcGrid widens the column to this when adding rows (at the default 56px even "가동" is clipped).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcLampValue">
+            <summary>Lamp + word cell value (ApcLampColumn). Sorts by status, then word.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcNoticeBar">
+            <summary>
+            Persistent status notice band (one line): states that are not a verdict but must stay visible, such as interlock bypass, test mode, manual operation.
+            Light status-color background + status-color bar on the left + lamp + bold text (Text) + regular text (Detail). About input-field height —
+            keep a single big surface (ApcJudgePanel) on a screen and put such states in this band so they do not compete with the judge panel.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcNoticeBar.Detail">
+            <summary>Regular text after the bold text (e.g. "15:52까지 · 생산분은 추가 검사").</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcNoticeBar.Text">
+            <summary>Bold text (e.g. "인터락 E05 우회 중").</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcNumericBox">
+            <summary>
+            Numeric input: ▲(up)/▼(down) button area inside the right edge (same look as the combo arrow). Buttons, ↑↓ keys and mouse wheel step by Increment; typed input commits on Enter or on leaving the field.
+            Out-of-range values are clamped to Minimum/Maximum; non-numbers revert to the previous value. Decimal places: DecimalPlaces.
+            For fields that can be "not entered yet" such as measurements, empty them with Clear() and check HasValue (▲ on an empty field goes to Minimum plus one step).
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcNumericBox.Value">
+            <summary>Entered value. Meaningless while HasValue is false (empty after Clear) — check HasValue before judging.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcNumericBox.HasValue">
+            <summary>Whether a value has been entered. false after Clear() (field is empty); true after setting Value or committing input. Default true.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcNumericBox.Clear">
+            <summary>
+            Empties the field (not entered yet). Initial state of a measurement field, and when moving to the next part or point.
+            Raises ValueChanged if the field had a value — in a constructor call it before subscribing to ValueChanged.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcNumericBox.TryParse(System.String,System.Decimal,System.Decimal,System.Int32,System.Decimal@)">
+            <summary>Parses typed text into a value; false if not a number. The result is clamped to range and rounded to the decimal places.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcNumericBox.Reclamp">
+            <summary>Re-fits the value when range or decimals change. An empty field stays empty.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcNumericBox.Commit">
+            <summary>Commits the typed text. If it is not a number, shows the previous value again.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ScanEventArgs.Accepted">
+            <summary>Set to false when the app rejects the code → failure feedback (red + alarm sound). Default true.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcScanBox">
+            <summary>
+            Barcode input field. After Attach(form) it receives scans wherever focus is on that form.
+            When input is detected as a scan, the focused field is restored to its value before the burst, the code moves here, and Scanned is raised.
+            The scan's Enter is swallowed so it does not press the form's default button (AcceptButton).
+            Feedback happens once after Scanned is handled: success/failure per e.Accepted. A rejected code stays selected in the field so the next scan overwrites it (not cleared).
+            A field that is not attached never raises Scanned (plain input field). Typed text + Enter is not Scanned either (scanner-speed input only) —
+            if manual entry must be accepted, handle KeyDown Enter separately.
+            With several scan fields on one form (mold + employee badge), attach all and give each an Accepts (which codes it takes):
+            a code goes to the field that accepts it (regardless of focus or scan order). A code no field accepts goes to the focused scan field (or the first attached one) and the app rejects it.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcScanBox.Accepts">
+            <summary>
+            Whether this field takes the code (e.g. <c>c => c.StartsWith("EMP-")</c>). Give one per field when a form has two or more scan fields —
+            a code the focused field does not accept moves to the field on the same form whose Accepts takes it, and that field raises Scanned.
+            null = takes every code that arrives here, but does not take over codes other fields refused (set Accepts for that).
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcScanBox.ScanOnly">
+            <summary>
+            Scan-only field: cannot be typed, edited or pasted into (ReadOnly). Looks like a normal input field (white) — it reads as a place to scan.
+            Use for fields that "accept scanned values only", such as employee badges and labels. Text is the scanned value.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcScanBox.Attach(System.Windows.Forms.Form)">
+            <summary>
+            Starts receiving scans on this form. A screen (UserControl) has no form yet in its constructor, so
+            call it from the screen's OnHandleCreated via FindForm(): <c>var f = FindForm(); if (f != null) _scan.Attach(f);</c>
+            A dialog (ApcForm) is the form itself, so call <c>_scan.Attach(this)</c> in its constructor.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcScanBox.Flash(System.Boolean)">
+            <summary>Success = green flash + short beep, failure = red flash + alarm sound.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcScanBox.WParamOf(System.IntPtr)">
+            <summary>On 64-bit, WParam can exceed int range (timer and pointer messages). Take only the low 32 bits that key messages use.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcScanBox.Process(System.Int32,System.Int32,System.Int64,System.Windows.Forms.TextBoxBase)">
+            <summary>Filter body. true = swallow the message. timeMs = message time.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcScanBox.RouteTarget(System.String)">
+            <summary>If this field does not accept the code, the field on the same form that does (enabled and visible). Otherwise this field.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcScanBox.RestoreSnapshot(System.Windows.Forms.TextBoxBase,APC.UI.Controls.ApcScanBox)">
+            <summary>If scanned characters landed in a field other than the receiving one (including overwritten selections and filtered characters), restores its value from before the burst.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcStatusLegend">
+            <summary>
+            Status color legend: lamp + meaning, left to right ("● 관리선 내  ● 관리선 이탈  ● SPEC 초과"), so the screen tells what the lamp colors in tables and charts mean.
+            Give the items with SetItems in that screen's verdict wording. Width follows the items. To place it at the right of a section title row, pass it as tools of Titled("...", content, legend) (no Dock).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcStatusLegend.SetItems(APC.UI.Controls.ApcLampValue[])">
+            <summary>Legend items (status + meaning). Calling it resizes Width to the items.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcStatusLegend.PreferredWidth">
+            <summary>Width that draws all items (scaled px).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcStatusTile">
+            <summary>
+            Equipment tile: lamp + equipment name (no subtitle — the lamp color is the status; the screen's banner or table gives the reason). Click raises Click (open a detail dialog, etc.). Blue border on hover or focus,
+            thick alarm-color border on alarm. Reachable with Tab, pressed with Enter or Space.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcStatusTile.Selected">
+            <summary>Selected mark (background = table selected-row color). When clicking a tile makes the cards and charts below show that unit, only that one tile is true.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcStatusTile.Text">
+            <summary>Equipment name (bold, right of the lamp, vertically centered).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcTabStrip">
+            <summary>
+            Switch button row (equipment group or line switching, etc.). Each tab is a normal button (btn_normal); the selected one is a pressed button + bold text + navy bar below.
+            The selection does not use the Primary color so it is not confused with action buttons (navy Primary). Place it on the top row of the body (not the window title row or a header band).
+            Button width fits the text automatically (never clipped), 4px between buttons. The screen switches content in <see cref="E:APC.UI.Controls.ApcTabStrip.SelectedIndexChanged"/>.
+            Changed by click, or ←/→ while focused. Height is the theme input-field height.
+            </summary>
+        </member>
+        <member name="E:APC.UI.Controls.ApcTabStrip.SelectedIndexChanged">
+            <summary>Raised when the selection changes (click, ←/→, SelectedIndex assignment).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTabStrip.SetTabs(System.String[])">
+            <summary>Sets all tab texts at once. If there are tabs, the first is selected (raises the event).</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcTabStrip.SelectedIndex">
+            <summary>Selected tab index (-1 if none). ArgumentOutOfRangeException when out of range.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcTabStrip.PreferredTabsWidth">
+            <summary>Width needed to hold all tabs (for layout). Sum of tab widths.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcTemplateView">
+            <summary>Common frame of every function screen: a single Body. Program name, function name and current time are on the window title row (ApcForm).</summary>
+        </member>
+        <member name="F:APC.UI.Controls.ApcTemplateView.Body">
+            <summary>
+            Content area (Padding 16px). Docking order: among controls with the same Dock (Top etc.), the one added later goes outside (on top).
+            Add Fill first, then add Top rows from the bottom of the screen upward (or SetChildIndex(fill, 0)).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.UseSettingsButton(System.EventHandler)">
+            <summary>
+            Puts a settings button in the title bar (left of minimize) of the window hosting this screen. Call once in the constructor, only for screens that have a settings screen.
+            Turned on when the screen is attached to a window and off when the screen is disposed (does not linger in windows that swap screens, like the gallery).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.S(System.Int32)">
+            <summary>Scaled px. Outside this class (ApcForm dialogs etc.) use ApcTheme.Px.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.Titled(System.String,System.Windows.Forms.Control,System.Windows.Forms.Control[])">
+            <summary>
+            Section title + content filling below it (table or chart) as one cell. Put it directly in a Columns()/FillColumns() cell or Body's Fill
+            (title Dock=Top, content Dock=Fill — screen code does not need to manage docking order).
+            tools are buttons etc. placed at the right end of the title row (Button(...)). Change the title later with panel.Text = "...".
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.TitledHeight(System.Int32,System.Boolean)">
+            <summary>
+            Total height of a fixed-height Titled() cell = title row + gap + contentHeight. For a table cell: Columns(TitledHeight(ApcGrid.HeightForRows(n)), ...).
+            hasTools = true if the title row holds buttons (tools) (the title row is taller by the button height).
+            </summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcTemplateView.TitledPanel">
+            <summary>Titled() cell: Text is the title text (to change the title per scanned Lot).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.SectionTitle(System.String)">
+            <summary>Section title (bold, e.g. "최근 알람 이력"). Captions before input fields use Caption (regular weight).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcTemplateView.SectionLabel">
+            <summary>Section title: 3px brand-color bar on the left + bold text (same look as the ApcGroup title).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.Columns(System.Int32,System.Windows.Forms.Control[],System.Single[])">
+            <summary>
+            Cards, tiles and judge panels side by side in one row (Dock=Top). Without percents all cells have equal width. Cell gap 12px (0 after the last), 12px below the row.
+            height is the cell height (scaled, e.g. S(150)).
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.FillColumns(System.Windows.Forms.Control[],System.Single[])">
+            <summary>
+            Side-by-side cells that fill all remaining height (Dock=Fill) — for two list tables next to each other (cells are usually Titled(...)).
+            It is Fill in Body, so add it before the Top rows.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTemplateView.Row(System.Windows.Forms.Control[])">
+            <summary>A row stacked left to right (filter and button rows).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcTextBox">
+            <summary>
+            Themed input field. The inset border and focus border are drawn in the non-client area; text is vertically centered.
+            Height is free (default 34px × scale, minimum 28px × scale). Inherits TextBox, so Text, ReadOnly, MaxLength etc. work as usual.
+            Multiline needs room for a scrollbar, so it falls back to the standard Windows single-line border.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcTextBox.Borderless">
+            <summary>Background only, no border (when an outer control draws the border, as in numeric and date fields).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTextBox.FrameInsets(System.Int32)">
+            <summary>Border + padding thickness for window height h. For single line, splits top/bottom so the text line is vertically centered.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTextBox.ResetFieldColor">
+            <summary>Sets the background for the state (enabled, read-only). Also used to restore the color after a scan flash.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcTextBox.LooksReadOnly">
+            <summary>Whether to draw the read-only look (gray background). A scan-only field keeps the input look even when ReadOnly.</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcTrendChart">
+            <summary>
+            Trend line. SetValues takes values in time order (left = past); XLabels sets x-axis labels (ends, middle, etc., spread evenly).
+            Reference = set value (gray dashed), UpperLimit/LowerLimit = limits (alarm-color dashed). The y-axis range auto-fits both the values and the reference lines.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcTrendChart.Reference">
+            <summary>null, NaN, infinity = no line.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTrendChart.NiceRange(System.Double,System.Double,System.Int32,System.Double@,System.Double@,System.Double@)">
+            <summary>Nice tick range covering min~max (steps of 1·2·5×10ⁿ).</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcTrendChart.NiceRange(System.Double,System.Double,System.Int32,System.Int32,System.Double@,System.Double@,System.Double@)">
+            <summary>maxLabels: number of tick labels that fit the height. If exceeded, the step widens one level at a time (1→2→5→10).</summary>
+        </member>
+        <member name="T:APC.UI.Controls.ApcValueCard">
+            <summary>
+            Current-value card: title band (grid header gradient, lamp on the right with ShowLamp) + big value and unit + one line below (reference, range, received time, etc.).
+            Value color follows Status: status color only for warning/alarm, dimmed for stop. Thick alarm-color border on alarm. Empty Value = value and unit both blank.
+            A card with two values sets the value and Footer text colors separately with ValueStatus/FooterStatus, by each item's verdict (lamp and border follow Status).
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcValueCard.Footer">
+            <summary>The line below. Empty = no line.</summary>
+        </member>
+        <member name="M:APC.UI.Controls.ApcValueCard.SetFooterParts(System.String[],APC.UI.Theming.StatusKind[])">
+            <summary>
+            When the Footer holds several secondary values (humidity · particles), draws each item in its own verdict color. Joined with " · "; Footer becomes the joined text.
+            Use this because a single FooterStatus would paint normal items in the alarm color too. Assigning Footer again clears the item colors.
+            </summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcValueCard.ValueStatus">
+            <summary>Sets only the big value's text color (two-value card: the card warns on humidity but the temperature value is normal). null = Status.</summary>
+        </member>
+        <member name="P:APC.UI.Controls.ApcValueCard.FooterStatus">
+            <summary>Sets only the Footer text color (the secondary value in the Footer is normal but the card is in alarm). null = Status.</summary>
+        </member>
+        <member name="T:APC.UI.Drawing.Cards">
+            <summary>Shared rules for card-style display controls (value cards, equipment tiles).</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.Cards.EmphasisColor(APC.UI.Theming.StatusKind)">
+            <summary>Value/status text color: status color only for warning/alarm, dimmed for stop, default text color otherwise. Painting normal values green hides the abnormal ones.</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.Cards.DrawFrame(System.Drawing.Graphics,System.Drawing.Size,APC.UI.Theming.StatusKind,System.Boolean,System.Boolean)">
+            <summary>Panel gradient + border. Thick alarm-color border on alarm (so the card is identifiable from a distance).</summary>
+        </member>
+        <member name="T:APC.UI.Drawing.FieldFrame">
+            <summary>Common input field look: white background + border + inner top shadow (buttons raised, fields inset). The field being edited gets a 2px blue border + light blue background (visible from 1–2 m).</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.FieldFrame.ButtonWidth(System.Int32)">
+            <summary>Width of the button area inside the right edge (shared by combo arrow, numeric ▲▼, date ▼).</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.FieldFrame.DrawButtonArea(System.Drawing.Graphics,System.Drawing.Rectangle,System.Boolean)">
+            <summary>In-field button area: gradient + left divider. Slightly darker when pressed.</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.FieldFrame.DrawTriangle(System.Drawing.Graphics,System.Drawing.Rectangle,System.Drawing.Color,System.Boolean)">
+            <summary>Triangle centered in the button area (▲ up / ▼ down).</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.Gradients.Fill(System.Drawing.Graphics,System.Drawing.Rectangle,System.String[])">
+            <summary>Vertical gradient. pair = [top, bottom] (#RRGGBB)</summary>
+        </member>
+        <member name="T:APC.UI.Drawing.NineSlice">
+            <summary>Corners drawn as is; only edges and center stretch. Rounded corners and gloss stay the same at any size.</summary>
+        </member>
+        <member name="M:APC.UI.Drawing.NineSlice.Draw(System.Drawing.Graphics,System.Drawing.Image,System.Drawing.Rectangle,System.Windows.Forms.Padding,System.Single)">
+            <param name="slice">Margins at @1x (px)</param>
+            <param name="imageScale">Scale of the img file (ApcTheme.ImageScale)</param>
+        </member>
+        <member name="T:APC.UI.Drawing.TextClip">
+            <summary>
+            Text drawn with an ellipsis (…). When the render check (APC.UI.Tools LayoutLint) turns on Log via reflection, clipped text is recorded.
+            Normally Log is null and it only draws.
+            </summary>
+        </member>
+        <member name="T:APC.UI.Input.ScanDetector">
+            <summary>
+            Barcode scanner input detection. A scanner sends keys much faster than a person and ends with Enter.
+            A scan = every key interval (including Enter) at most maxKeyIntervalMs and length at least minLength.
+            </summary>
+        </member>
+        <member name="M:APC.UI.Input.ScanDetector.Feed(System.Char,System.Int64)">
+            <summary>Feeds one character. On Enter returns the code if detected as a scan, otherwise null.</summary>
+        </member>
+        <member name="P:APC.UI.Input.ScanDetector.Length">
+            <summary>Current burst length. 1 right after Feed means a new burst started.</summary>
+        </member>
+        <member name="T:APC.UI.Theming.ApcLayout">
+            <summary>
+            Shared screen and dialog sizes (unscaled px; use with ApcTheme.Px). Used by ApcTemplateView and the ApcForm dialog helpers,
+            and checked with the same values by LayoutLint in APC.UI.Tools (change the LayoutLint constants along with these).
+            </summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcLayout.Pad">
+            <summary>Outer margin of dialogs and screens.</summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcLayout.RowGap">
+            <summary>Between input rows; between main-screen rows.</summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcLayout.GroupGap">
+            <summary>Between groups (ApcGroup) and blocks; between content and the bottom button row.</summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcLayout.LabelGap">
+            <summary>Between the caption column and the field.</summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcLayout.ItemGap">
+            <summary>Between elements in one row (buttons, fields).</summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcLayout.FieldHeight">
+            <summary>Input field and caption height.</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ApcLayout.Slots(System.Drawing.Rectangle,System.Int32,System.Int32,System.Double,System.Boolean)">
+            <summary>
+            Item bounds for a Label-assembled diagram: splits <paramref name="area"/> into an even cols x rows grid and returns,
+            row by row, one item per cell centered in it and sized to <paramref name="fill"/> (0~1) of the cell, so items grow
+            with the area and are evenly spaced — no fixed px sizes or hand-picked positions. <paramref name="square"/>: the item
+            side is <paramref name="fill"/> of the smaller cell side (bolts, cells); otherwise each side scales separately (tanks).
+            Call it from the panel's <c>OnResize</c> with its <c>ClientRectangle</c> (minus padding) and <c>SetBounds</c> each Label.
+            </summary>
+        </member>
+        <member name="T:APC.UI.Theming.ApcTheme">
+            <summary>The single current theme. Load once at app start; controls then take colors, fonts and images from here.</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ApcTheme.Px(System.Int32)">
+            <summary>Converts 96-dpi px to the current scale. Use for sizes and margins anywhere in screens and dialogs (same as ApcTemplateView's S()).</summary>
+        </member>
+        <member name="F:APC.UI.Theming.ApcTheme.RequiredImages">
+            <summary>Required images. Load checks that the @1x files exist so failure happens at startup, not on the first OnPaint.</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ApcTheme.Load(System.String)">
+            <exception cref="T:APC.UI.Theming.ThemeException">theme.json problem or a missing required image. On failure the previous theme is kept.</exception>
+        </member>
+        <member name="M:APC.UI.Theming.ApcTheme.GetImage(System.String)">
+            <summary>Cached image. Callers must not Dispose it.</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ApcTheme.ImageScale(System.Drawing.Image)">
+            <summary>Scale of the image file (for converting 9-slice margins).</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ApcTheme.StatusText(APC.UI.Theming.StatusKind)">
+            <summary>
+            Status color for text on light backgrounds (white, panel). Raw status yellow (warning) and green have low contrast on white and are unreadable from a distance →
+            only lightness is lowered to reach 4.5:1 contrast or more. Hue is unchanged. Lamp and banner fill colors use Status.
+            </summary>
+        </member>
+        <member name="T:APC.UI.Theming.AssetResolver">
+            <summary>Image name → actual file path. Rule: {baseName}@{1x|1.5x|2x}.png</summary>
+        </member>
+        <member name="M:APC.UI.Theming.AssetResolver.PickScale(System.Single)">
+            <summary>Boundary values (125%, 175%) pick the larger file — downscaling blurs less than upscaling.</summary>
+        </member>
+        <member name="T:APC.UI.Theming.StatusKind">
+            <summary>Status meaning. The hue cannot be changed even in a customer theme.</summary>
+        </member>
+        <member name="T:APC.UI.Theming.ThemeData">
+            <summary>theme.json mapping. JSON keys are camelCase.</summary>
+        </member>
+        <member name="P:APC.UI.Theming.ThemeColors.Background">
+            <summary>Gradient [start, end]</summary>
+        </member>
+        <member name="P:APC.UI.Theming.ThemeColors.TitleBar">
+            <summary>Window title bar (light tone because the logo sits on it)</summary>
+        </member>
+        <member name="P:APC.UI.Theming.ThemeColors.Panel">
+            <summary>Panel and card background gradient [start, end]. White if missing.</summary>
+        </member>
+        <member name="P:APC.UI.Theming.ThemeColors.BorderStrong">
+            <summary>Input field border. border if missing.</summary>
+        </member>
+        <member name="P:APC.UI.Theming.ThemeColors.Brand">
+            <summary>Brand color. Used only for the function name in the window title and the group/section title bars (kept apart from alarm red). text if missing.</summary>
+        </member>
+        <member name="T:APC.UI.Theming.ThemeException">
+            <summary>theme.json cannot be read or breaks a rule. The message includes the file path and field name.</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ThemeLoader.HueIn(System.String,System.String,System.String,System.Single,System.Single)">
+            <summary>Status colors may change lightness only. from &gt; to means a range crossing 0°.</summary>
+        </member>
+        <member name="M:APC.UI.Theming.ThemeLoader.ApplyDefaults(APC.UI.Theming.ThemeColors)">
+            <summary>theme.json before 1.20 has no panel, borderStrong or brand. Fill them so it looks as before (white cards, existing border, no red).</summary>
+        </member>
+    </members>
+</doc>
