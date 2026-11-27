@@ -241,6 +241,18 @@ dialog: 밸브 조작(선택한 밸브 정보 읽기 전용, 열기/닫기, 작�
 </tbody></table></div>
 <p style="margin-top:10px">에이전트 보고 요약과 공통 결과 대조는 <code>M3-tank/REPORT.md</code>.</p>
 
+<h2>근본 수정 뒤 재시연 (APC.UI 1.28.0.0)</h2>
+<p>재현된 문제의 원인을 고친 뒤 같은 화면 3종을 다시 돌렸습니다(<code>skill-test/demo-1127-r</code>). 점수는 R-M1 17 · R-M2 19 · R-M3 19입니다(1127-M은 17 · 18 · 19). 세 시연 모두 고친 기능을 썼고 1127-M의 우회는 모두 사라졌습니다.</p>
+<div class="tbl wide"><table><thead><tr><th>문제</th><th>근본 원인</th><th>수정</th><th class="c">R-M1</th><th class="c">R-M2</th><th class="c">R-M3</th></tr></thead><tbody>
+<tr><td>스캔칸 둘</td><td>칸이 받는 코드를 말할 수단이 없어 포커스 칸이 남의 코드를 받음</td><td><code>ApcScanBox.Accepts</code></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td>숫자칸 미입력</td><td>빈 상태가 없어 늘 0.0 — 지침 "값 없으면 빈칸"과 어긋남</td><td><code>Clear()</code> / <code>HasValue</code></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c">—</td></tr>
+<tr><td>고정 행 표</td><td>정해진 행 수 표가 Fill 칸을 채울 수단이 없음</td><td><code>ApcGrid.FillRows</code></td><td class="c"><span class="m t">△</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td>겹침 점검</td><td>의도한 겹침(선·틀 안 채움)을 표현할 방법이 없음</td><td>얇은 Label 선 허용, 채움은 틀의 자식</td><td class="c">—</td><td class="c">—</td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td><code>Titled</code> 범례 접힘</td><td>설명이 "Dock = Right" 안내 → FlowLayoutPanel에서 높이 0</td><td>tools의 Dock 무시, 설명 정정</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td></tr>
+<tr><td>진행 중 색</td><td>지침 두 줄이 서로 다른 답</td><td>항목의 현재·다음 = Warn, 판정판 정상 진행 = Run</td><td class="c"><span class="m o">✓</span></td><td class="c"><span class="m o">✓</span></td><td class="c">—</td></tr>
+</tbody></table></div>
+<p style="margin-top:10px">R-M1의 △: <code>FillRows</code>를 5행 표에 써서 행 높이가 130 px로 과대해졌습니다. 남은 것: 주 동작(스캔 칸·주 버튼이 작은 한 줄)이 M1·M2에서 4회째 △, <code>ApcInfoStrip</code> 짧은 값 말줄임이 2회 나왔습니다. 다음 손볼 곳입니다.</p>
+
 <h2>한계</h2>
 <ul>
   <li>시연마다 1회 실행입니다. 1~2점 차이는 시연 편차 범위로 봅니다.</li>
