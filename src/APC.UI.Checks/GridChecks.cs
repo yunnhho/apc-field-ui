@@ -8,11 +8,39 @@ namespace APC.UI.Checks
 {
     internal static partial class Program
     {
+        /// <summary>정해진 행 수 표(포인트 10개 등)가 Fill 칸을 채울 때: 행이 높이를 나눠 가진다(기본 행 높이보다 작아지지 않음).</summary>
+        private static void CheckFillRows()
+        {
+            using (var g = new ApcGrid { FillRows = true, Size = new Size(300, ApcGrid.HeightForRows(10)) })
+            {
+                g.Columns.Add("a", "A");
+                for (int r = 0; r < 5; r++) g.Rows.Add("p" + r);
+                int body = g.ClientSize.Height - 2 - g.ColumnHeadersHeight;
+                int used = 0;
+                foreach (DataGridViewRow row in g.Rows) used += row.Height;
+                Check(used <= body && body - used < g.Rows.Count, "fill rows: rows share the height (" + used + "/" + body + ")");
+                g.Height = ApcGrid.HeightForRows(3);
+                Check(g.Rows[0].Height == ApcTheme.MinHeight, "fill rows: never below the default row height when short (" + g.Rows[0].Height + ")");
+                g.Height = ApcGrid.HeightForRows(10);
+                g.Rows.Add("p5");
+                used = 0;
+                foreach (DataGridViewRow row in g.Rows) used += row.Height;
+                Check(body - used < g.Rows.Count && used <= body, "fill rows: re-split after a row is added (" + used + "/" + body + ")");
+            }
+            using (var plain = new ApcGrid { Size = new Size(300, ApcGrid.HeightForRows(10)) })
+            {
+                plain.Columns.Add("a", "A");
+                plain.Rows.Add("p");
+                Check(plain.Rows[0].Height == ApcTheme.MinHeight, "fill rows: off by default (list tables keep the default row height)");
+            }
+        }
+
         private static void RunGridChecks()
         {
             CheckCurrentRowTint();
             CheckColumnGroups();
             CheckHeaderInkUnderline();
+            CheckFillRows();
             using (var g = new ApcGrid())
             {
                 var icon = new ApcIconColumn { IconName = "icon_reset" };

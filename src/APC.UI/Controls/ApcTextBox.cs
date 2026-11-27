@@ -64,8 +64,11 @@ namespace APC.UI.Controls
         /// <summary>바탕색을 상태(사용 가능·읽기 전용)에 맞춘다. 스캔 플래시 등으로 바꾼 색을 되돌릴 때도 쓴다.</summary>
         protected void ResetFieldColor()
         {
-            BackColor = FieldFrame.Fill(Enabled, ReadOnly, Focused);
+            BackColor = FieldFrame.Fill(Enabled, LooksReadOnly, Focused);
         }
+
+        /// <summary>읽기 전용 모양(회색 바탕)으로 그릴지. 스캔 전용 칸은 ReadOnly여도 입력칸 모양이다.</summary>
+        internal virtual bool LooksReadOnly { get { return ReadOnly; } }
 
         protected override void WndProc(ref Message m)
         {
@@ -111,7 +114,7 @@ namespace APC.UI.Controls
                 region.Exclude(client);
                 g.FillRegion(brush, region);
             }
-            if (!Borderless) FieldFrame.DrawBorder(g, win, Focused && !ReadOnly);
+            if (!Borderless) FieldFrame.DrawBorder(g, win, Focused && !LooksReadOnly);
         }
 
         private void RedrawFrame()

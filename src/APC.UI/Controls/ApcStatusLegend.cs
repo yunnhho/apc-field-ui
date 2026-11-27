@@ -8,7 +8,7 @@ namespace APC.UI.Controls
 {
     /// <summary>
     /// 상태색 범례: 램프 + 뜻을 왼→오로("● 관리선 내  ● 관리선 이탈  ● SPEC 초과"). 표·그래프 칸의 램프 색이 무엇인지 화면에서 읽히게.
-    /// 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다(구획 제목 줄 오른쪽에 Dock = Right).
+    /// 항목은 SetItems로 그 화면의 판정 문구대로 준다. Width는 항목에 맞춰 정해진다. 구획 제목 줄 오른쪽에 둘 때는 Titled("...", content, legend)의 tools로 넘긴다(Dock은 주지 않는다).
     /// </summary>
     public class ApcStatusLegend : Control
     {

@@ -93,6 +93,29 @@ namespace APC.UI.Controls
             ColumnHeadersDefaultCellStyle.ForeColor = text;
             ColumnHeadersDefaultCellStyle.SelectionBackColor = ApcTheme.C(c.GridHeader[1]);
             foreach (DataGridViewRow row in Rows) row.Height = RowTemplate.Height;
+            FitRowHeights();
+        }
+
+        private bool _fillRows;
+
+        /// <summary>
+        /// 정해진 행 수 표(체결 포인트 10개, 층 5개)가 Fill 칸을 채울 때 true: 행들이 표 높이를 나눠 가진다(기본 행 높이보다 낮아지지 않음).
+        /// 이력·목록처럼 행이 늘어나는 표는 false 그대로(샘플 행으로 채운다).
+        /// </summary>
+        [System.ComponentModel.DefaultValue(false)]
+        public bool FillRows
+        {
+            get { return _fillRows; }
+            set { _fillRows = value; if (value) FitRowHeights(); else foreach (DataGridViewRow row in Rows) row.Height = RowTemplate.Height; }
+        }
+
+        private void FitRowHeights()
+        {
+            if (!_fillRows || Rows.Count == 0) return;
+            int border = BorderStyle == BorderStyle.FixedSingle ? 2 : BorderStyle == BorderStyle.Fixed3D ? 4 : 0;
+            int body = ClientSize.Height - border - (ColumnHeadersVisible ? ColumnHeadersHeight : 0);
+            int h = Math.Max(RowTemplate.Height, body / Rows.Count);
+            foreach (DataGridViewRow row in Rows) if (row.Height != h) row.Height = h;
         }
 
         /// <summary>기본 폭 100px은 한글 폰트에서 코드값(WO-24117-01 등)이 잘린다.</summary>
@@ -111,6 +134,7 @@ namespace APC.UI.Controls
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
+            FitRowHeights();
             foreach (DataGridViewColumn c in Columns)
             {
                 if (c.AutoSizeMode != DataGridViewAutoSizeColumnMode.Fill) continue;
@@ -219,10 +243,12 @@ namespace APC.UI.Controls
         protected override void OnRowsAdded(DataGridViewRowsAddedEventArgs e)
         {
             base.OnRowsAdded(e);
+            FitRowHeights();
             for (int r = e.RowIndex; r < e.RowIndex + e.RowCount && r < Rows.Count; r++) FitLampText(r, -1);
             // 현재 셀은 RowsAdded 이벤트 뒤에 잡히므로 처리 후로 미룬다.
             if (!_userSelected && IsHandleCreated) BeginInvoke((MethodInvoker)ClearAutoSelection);
         }
+        protected override void OnRowsRemoved(DataGridViewRowsRemovedEventArgs e) { base.OnRowsRemoved(e); FitRowHeights(); }
         protected override void OnCellValueChanged(DataGridViewCellEventArgs e)
         {
             base.OnCellValueChanged(e);

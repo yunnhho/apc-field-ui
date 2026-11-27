@@ -154,8 +154,9 @@ namespace APC.UI.Tools
             int border = grid.BorderStyle == BorderStyle.FixedSingle ? 2 : grid.BorderStyle == BorderStyle.Fixed3D ? 4 : 0;
             int body = grid.ClientSize.Height - border - (grid.ColumnHeadersVisible ? grid.ColumnHeadersHeight : 0);
             int fits = body / grid.RowTemplate.Height;
-            if (grid.RowCount < fits)
-                issues.Add(NotePrefix + path + ": " + UnderfilledNote + "(행 " + grid.RowCount + ", " + fits + "행까지 들어감) — 이력·목록이면 샘플 행을 " + fits + "개로, 설비 수처럼 정해진 목록이면 그대로");
+            int used = grid.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);   // 행이 높이를 나눠 가진 표(ApcGrid.FillRows)는 비지 않았다
+            if (body - used >= grid.RowTemplate.Height)
+                issues.Add(NotePrefix + path + ": " + UnderfilledNote + "(행 " + grid.RowCount + ", " + fits + "행까지 들어감) — 이력·목록이면 샘플 행을 " + fits + "개로, 설비 수처럼 정해진 목록이면 FillRows = true");
             int repeats = RepeatedRows(grid);
             if (repeats >= MinRepeatedRows)
                 issues.Add(NotePrefix + path + ": 시각·ID만 다르고 나머지가 앞 행과 같은 행 " + repeats + "개(샘플이 되풀이로 보임) — 이력이면 설비·값·문구를 섞는다");
@@ -180,6 +181,14 @@ namespace APC.UI.Tools
             return rows.Count(r => !seen.Add(string.Join("\u0001", cols.Select(c => Convert.ToString(r.Cells[c.Index].Value)).ToArray())));
         }
 
+        private const int LineMaxPx = 6;
+
+        /// <summary>글자 없는 얇은 선(Label 조립의 현재 시각선·눈금선·알람선) — 막대·칸 위를 가로지르는 겹침은 의도한 것이다.</summary>
+        private static bool IsLine(Control c)
+        {
+            return c is Label && string.IsNullOrEmpty(c.Text) && Math.Min(c.Width, c.Height) <= LineMaxPx;
+        }
+
         private static void CheckSiblings(Control parent, List<Control> kids, string path, List<string> issues)
         {
             var area = parent.ClientRectangle;
@@ -193,7 +202,7 @@ namespace APC.UI.Tools
                 {
                     var a = kids[i];
                     var b = kids[j];
-                    if (a.Bounds.IntersectsWith(b.Bounds))
+                    if (a.Bounds.IntersectsWith(b.Bounds) && !IsLine(a) && !IsLine(b))
                         issues.Add(path + ": " + Describe(a) + "(" + Fmt(a.Bounds) + ")와(과) " + Describe(b) + "(" + Fmt(b.Bounds) + ") 겹침");
                     else if (SameRow(a, b) && (a.Top != b.Top || a.Height != b.Height))
                         issues.Add(path + ": 같은 줄 " + Describe(a) + "(위 " + a.Top + ", 높이 " + a.Height + ")와(과) " + Describe(b) + "(위 " + b.Top + ", 높이 " + b.Height + ") 어긋남");

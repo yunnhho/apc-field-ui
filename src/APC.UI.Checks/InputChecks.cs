@@ -118,6 +118,27 @@ namespace APC.UI.Checks
                 Check(up && nb.Value == 8, "numeric: up/down step by increment");
             }
 
+            // 측정값 칸: Clear()로 빈칸(아직 입력 안 함) — 0.0을 입력값으로 오인하지 않게
+            using (var m = new ApcNumericBox { Maximum = 30, DecimalPlaces = 1, Increment = 0.1m })
+            {
+                int changed = 0;
+                m.ValueChanged += (s, e) => changed++;
+                Check(m.HasValue, "numeric: has a value by default (settings fields unchanged)");
+                m.Clear();
+                Check(!m.HasValue && m.TextBox.Text == "" && changed == 1, "numeric: Clear empties the field, event once");
+                m.Commit();
+                Check(!m.HasValue && m.TextBox.Text == "", "numeric: empty field stays empty on commit");
+                m.TextBox.Text = "0.0";
+                m.Commit();
+                Check(m.HasValue && m.Value == 0m && m.TextBox.Text == "0.0" && changed == 2, "numeric: typed 0.0 counts as entered");
+                m.Clear();
+                m.OnSegmentClick(0);
+                Check(m.HasValue && m.Value == 0.1m, "numeric: up from empty starts at the first step (" + m.Value + ")");
+                m.TextBox.Text = "";
+                m.Commit();
+                Check(m.HasValue && m.Value == 0.1m, "numeric: deleting the text of an entered value reverts (use Clear to empty)");
+            }
+
             DateTime d;
             Check(ApcDateBox.TryParse("20261117", out d) && d == new DateTime(2026, 11, 17), "date: accepts yyyyMMdd");
             Check(!ApcDateBox.TryParse("2026-13-01", out d), "date: rejects bad month");

@@ -46,6 +46,16 @@ namespace APC.UI.Checks
             Check(Lint(p => { var c = new ApcComboBox { Width = 60 }; c.Items.Add("모델 A-1234567 긴 이름"); p.Controls.Add(c); }).Any(i => i.Contains("글자 잘림")), "lint: narrow combo");
             Check(Lint(p => p.Controls.Add(new ApcButton { Text = "A", Left = 420, Width = 60 })).Any(i => i.Contains("넘침")), "lint: overflow parent");
             Check(Lint(p => { p.Controls.Add(new ApcButton { Text = "A", Width = 60 }); p.Controls.Add(new ApcButton { Text = "B", Left = 30, Width = 60 }); }).Any(i => i.Contains("겹침")), "lint: overlap");
+            Check(!Lint(p =>
+            {
+                p.Controls.Add(new Label { Text = "", Left = 10, Top = 10, Width = 200, Height = 30, BackColor = Color.SteelBlue });   // 막대
+                p.Controls.Add(new Label { Text = "", Left = 100, Top = 0, Width = 2, Height = 60, BackColor = Color.Red });          // 현재 시각선
+            }).Any(i => i.Contains("겹침")), "lint: thin textless line crossing a bar is an intended overlap");
+            Check(Lint(p =>
+            {
+                p.Controls.Add(new Label { Text = "", Left = 10, Top = 10, Width = 200, Height = 30 });
+                p.Controls.Add(new Label { Text = "", Left = 100, Top = 0, Width = 20, Height = 60 });
+            }).Any(i => i.Contains("겹침")), "lint: thick blocks overlapping are still reported");
             Check(Lint(p => { p.Controls.Add(new ApcTextBox { Top = 3, Width = 100 }); p.Controls.Add(new ApcButton { Text = "B", Left = 120, Width = 60, Height = 34 }); }).Any(i => i.Contains("어긋남")), "lint: misaligned row");
             Check(Lint(p => p.Controls.Add(new TextBox())).Any(i => i.Contains("표준 TextBox")), "lint: standard control");
             Check(Lint(p => { var t = new ApcTextBox { Text = "6205-2RS", Width = 150 }; p.Controls.Add(t); t.HideSelection = false; t.SelectAll(); }).Any(i => i.Contains("선택된 채")), "lint: fully selected text reported");
@@ -76,6 +86,13 @@ namespace APC.UI.Checks
                 g.Rows.Add("x");
                 p.Controls.Add(g);
             }).Any(i => LayoutLint.IsNote(i) && i.Contains("표 아래가 빔")), "lint: underfilled read-only grid is a note");
+            Check(!Lint(p =>
+            {
+                var g = new ApcGrid { Width = 300, Height = 250, ReadOnly = true, FillRows = true };
+                g.Columns.Add("a", "A");
+                for (int r = 0; r < 3; r++) g.Rows.Add("x" + r);
+                p.Controls.Add(g);
+            }).Any(i => i.Contains("표 아래가 빔")), "lint: fixed-count grid with FillRows is not underfilled");
             Check(Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3 금형 온도 조절기 (2차)", Status = StatusKind.Warn, Width = 160, Height = 80 }))
                 .Any(i => i.Contains("말줄임")), "lint: ellipsized tile name");
             Check(!Lint(p => p.Controls.Add(new ApcStatusTile { Text = "사출기 3", Width = 160, Height = 80 })).Any(i => i.Contains("말줄임")), "lint: fitting tile text passes");
