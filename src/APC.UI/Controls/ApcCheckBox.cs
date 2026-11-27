@@ -8,9 +8,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 확인 체크(예열 온도 확인, 안전 점검 완료 등). 입력칸과 같은 높이, 왼쪽 네모 + 오른쪽 문장. 네모·글자 어디를 눌러도 바뀐다.
-    /// 체크되면 네모가 확인 버튼 파랑으로 차고 흰 체크 표시. Width는 글자에 맞춰 정해진다(AddFieldRow의 field로 넣으면 칸 폭).
-    /// 체크해야 진행되는 동작은 CheckedChanged에서 확정 버튼 Enabled와 그 이유(SetFooterNote)를 함께 바꾼다.
+    /// Confirmation check (preheat temperature checked, safety check done, etc.). Same height as an input field, box on the left + sentence on the right. Clicking the box or the text toggles it.
+    /// When checked, the box fills with the confirm-button blue and shows a white check mark. Width follows the text (as the field of AddFieldRow it takes the field width).
+    /// For actions that require the check, change the confirm button's Enabled and its reason (SetFooterNote) together in CheckedChanged.
     /// </summary>
     public class ApcCheckBox : CheckBox
     {
@@ -31,7 +31,7 @@ namespace APC.UI.Controls
 
         private static int Px(int px) { return (int)Math.Round(px * ApcTheme.Scale); }
 
-        /// <summary>네모 + 간격 + 글자 폭(배율 적용 px).</summary>
+        /// <summary>Box + gap + text width (scaled px).</summary>
         public int PreferredWidth
         {
             get { return Px(BaseBox) + Px(BaseGap) + TextRenderer.MeasureText(Text ?? "", Font).Width + Px(4); }

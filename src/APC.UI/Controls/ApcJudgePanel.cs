@@ -8,8 +8,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 판정 표시판: 상태색 바탕에 큰 글자(OK / NG / READY 등) + 아래 한 줄 안내. 판정 화면의 가장 큰 요소로 쓴다.
-    /// OK=Run, NG=Alarm, 대기=Stop, 확인 필요=Warn. 글자 크기는 높이에 맞춘다.
+    /// Judge panel: big text (OK / NG / READY etc.) on a status-color background + one guidance line below. The largest element of a judging screen.
+    /// OK=Run, NG=Alarm, waiting=Stop, needs check=Warn. Text size follows the height.
     /// </summary>
     public class ApcJudgePanel : Control
     {
@@ -26,15 +26,15 @@ namespace APC.UI.Controls
 
         [DefaultValue(StatusKind.Stop)] public StatusKind Status { get { return _status; } set { _status = value; Invalidate(); } }
 
-        /// <summary>큰 글자 아래 한 줄(예: "시리얼을 스캔하세요", "하중 19.4 kN > 상한 18.0").</summary>
+        /// <summary>One line below the big text (e.g. "시리얼을 스캔하세요", "하중 19.4 kN > 상한 18.0").</summary>
         [DefaultValue("")] public string SubText { get { return _subText; } set { _subText = value ?? ""; Invalidate(); } }
 
-        /// <summary>큰 글자(OK / NG / READY 등).</summary>
+        /// <summary>Big text (OK / NG / READY etc.).</summary>
         public override string Text { get { return base.Text; } set { base.Text = value; } }
 
         protected override void OnTextChanged(EventArgs e) { base.OnTextChanged(e); Invalidate(); }
 
-        /// <summary>바탕 위 글자색. 노랑(경고) 바탕에는 흰 글자가 안 읽혀 기본 글자색.</summary>
+        /// <summary>Text color on the background. White text is unreadable on yellow (warning), so that uses the default text color.</summary>
         internal static Color ForeFor(StatusKind status)
         {
             var c = ApcTheme.Current.Colors;

@@ -9,9 +9,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 테마 스타일을 입힌 DataGridView. 헤더 그라데이션, 행 배경 한 색(번갈아 칠하지 않음), 행 전체 선택.
-    /// 사용자가 표를 누르거나 키로 움직이기 전에는 첫 행이 저절로 선택되지 않는다(CurrentRow = null) —
-    /// "선택한 행에 대해" 동작하는 버튼은 CurrentRow가 null이면 아무것도 하지 않게 둔다.
+    /// DataGridView with the theme style. Gradient header, one row background color (no alternating), full-row selection.
+    /// No row is selected automatically until the user clicks the table or moves with the keys (CurrentRow = null) —
+    /// buttons that act "on the selected row" should do nothing while CurrentRow is null.
     /// </summary>
     public class ApcGrid : DataGridView
     {
@@ -33,10 +33,10 @@ namespace APC.UI.Controls
             ApplyTheme();
         }
 
-        /// <summary>머리줄 + 행 rows개가 빈 줄·스크롤바 없이 들어가는 표 높이(배율 적용 px). dialog의 AddContent 표 높이에 쓴다.</summary>
+        /// <summary>Table height that fits the header + rows rows with no empty space or scrollbar (scaled px). Use it for table heights in dialog AddContent.</summary>
         public static int HeightForRows(int rows) { return HeightForRows(rows, false); }
 
-        /// <summary>HeightForRows와 같고, 묶음 머리줄(AddColumnGroup)이 있는 표면 columnGroups = true(머리줄 2단).</summary>
+        /// <summary>Same as HeightForRows; columnGroups = true for a table with a group header (AddColumnGroup, two header tiers).</summary>
         public static int HeightForRows(int rows, bool columnGroups)
         {
             return HeaderHeight() * (columnGroups ? 2 : 1) + ApcTheme.MinHeight * Math.Max(0, rows) + 2;
@@ -45,8 +45,8 @@ namespace APC.UI.Controls
         private readonly List<ColumnGroup> _groups = new List<ColumnGroup>();
 
         /// <summary>
-        /// 묶음 머리줄: 열 firstColumn~lastColumn(열 번호, 포함) 위에 묶음 제목 한 칸("온도 (℃)" 위, 아래 칸에 "NI"·"SN").
-        /// 처음 부르면 머리줄이 2단이 되고, 묶이지 않은 열 제목은 두 단에 걸쳐 가운데에 그린다. 열을 모두 추가한 뒤 부른다.
+        /// Group header: one group caption cell above columns firstColumn~lastColumn (column indexes, inclusive) (e.g. "온도 (℃)" on top, "NI"·"SN" below).
+        /// The first call makes the header two tiers; ungrouped column captions are drawn centered across both tiers. Call after all columns are added.
         /// </summary>
         public void AddColumnGroup(string text, int firstColumn, int lastColumn)
         {
@@ -99,8 +99,8 @@ namespace APC.UI.Controls
         private bool _fillRows;
 
         /// <summary>
-        /// 정해진 행 수 표(체결 포인트 10개, 층 5개)가 Fill 칸을 채울 때 true: 행들이 표 높이를 나눠 가진다(기본 행 높이보다 낮아지지 않음).
-        /// 이력·목록처럼 행이 늘어나는 표는 false 그대로(샘플 행으로 채운다).
+        /// true for a fixed-row-count table (10 tightening points, 5 floors) filling a Fill cell: the rows share the table height (never lower than the default row height).
+        /// Tables whose rows grow, such as history and lists, keep false (fill them with sample rows).
         /// </summary>
         [System.ComponentModel.DefaultValue(false)]
         public bool FillRows
@@ -118,7 +118,7 @@ namespace APC.UI.Controls
             foreach (DataGridViewRow row in Rows) if (row.Height != h) row.Height = h;
         }
 
-        /// <summary>기본 폭 100px은 한글 폰트에서 코드값(WO-24117-01 등)이 잘린다.</summary>
+        /// <summary>The default width of 100px clips code values (WO-24117-01 etc.) in Korean fonts.</summary>
         protected override void OnColumnAdded(DataGridViewColumnEventArgs e)
         {
             if (!(e.Column is ApcLampColumn) && e.Column.Width == 100)
@@ -127,9 +127,9 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// DataGridView의 Fill 열 폭은 이전 폭에서 조금씩 고쳐 가는 방식이라, 화면에 뜨기 전 좁은 폭(100px대)에서 한 번 잡힌
-        /// 오차가 남는다(첫 열만 좁았다가 조회 때마다 3px씩 늘어나던 문제). 크기가 바뀌면 FillWeight대로 다시 나눈다
-        /// (사용자가 끌어서 바꾼 폭은 FillWeight에 남으므로 유지된다).
+        /// DataGridView adjusts Fill column widths incrementally from the previous width, so an error caught once at a narrow width (around 100px) before showing
+        /// persists (the first column stayed narrow and grew 3px on every query). On resize the widths are redistributed by FillWeight
+        /// (widths the user dragged are kept because they live in FillWeight).
         /// </summary>
         protected override void OnSizeChanged(EventArgs e)
         {
@@ -203,8 +203,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 머리줄 글자를 칸 정가운데에. 기본 그리기는 정렬 화살표 자리·안쪽 여백만큼 왼쪽으로 1~2px 치우친다.
-        /// 오른쪽 구분선·아래 선 1px은 빼고 가운데를 잡는다. 묶음 머리줄 등 직접 그리는 곳도 이것을 쓴다.
+        /// Header text exactly centered in the cell. Default painting shifts it 1–2px left by the sort-arrow slot and inner padding.
+        /// Centers excluding the 1px right divider and bottom line. Custom-drawn parts such as the group header use this too.
         /// </summary>
         public static void DrawHeaderText(Graphics g, Rectangle cell, string text, Font font)
         {
@@ -273,13 +273,13 @@ namespace APC.UI.Controls
         protected override void OnKeyDown(KeyEventArgs e) { _userSelected = true; base.OnKeyDown(e); }
 
         /// <summary>
-        /// true(기본)면 사용자가 누르기 전엔 선택 행이 없다. 입력 표(스캔으로 칸을 채우는 dialog 등)처럼
-        /// 앱이 CurrentCell을 정해 두고 바로 입력받아야 하면 false.
+        /// true (default): no row is selected until the user clicks. For input tables (e.g. a dialog whose cells are filled by scanning)
+        /// where the app sets CurrentCell and takes input immediately, set false.
         /// </summary>
         [System.ComponentModel.DefaultValue(true)]
         public bool ClearInitialSelection { get; set; } = true;
 
-        /// <summary>편집 가능한 표에서 읽기 전용 열은 회색 바탕 — 어느 칸에 입력하는지 한눈에 보이게.</summary>
+        /// <summary>In an editable table, read-only columns get a gray background — so it is obvious which cells take input.</summary>
         protected override void OnCellFormatting(DataGridViewCellFormattingEventArgs e)
         {
             base.OnCellFormatting(e);

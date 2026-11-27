@@ -6,8 +6,8 @@ using System.Windows.Forms;
 namespace APC.UI.Drawing
 {
     /// <summary>
-    /// 말줄임(…)으로 그리는 글자. render 점검(APC.UI.Tools LayoutLint)이 Log를 리플렉션으로 켜면 잘린 글자를 기록한다.
-    /// 평소에는 Log가 null이라 그리기만 한다.
+    /// Text drawn with an ellipsis (…). When the render check (APC.UI.Tools LayoutLint) turns on Log via reflection, clipped text is recorded.
+    /// Normally Log is null and it only draws.
     /// </summary>
     internal static class TextClip
     {

@@ -2,7 +2,7 @@
 
 namespace APC.UI.Theming
 {
-    /// <summary>theme.json 매핑. JSON 키는 camelCase.</summary>
+    /// <summary>theme.json mapping. JSON keys are camelCase.</summary>
     [DataContract]
     public sealed class ThemeData
     {
@@ -19,10 +19,10 @@ namespace APC.UI.Theming
     [DataContract]
     public sealed class ThemeColors
     {
-        /// <summary>그라데이션 [시작, 끝]</summary>
+        /// <summary>Gradient [start, end]</summary>
         [DataMember(Name = "background")] public string[] Background { get; set; }
         [DataMember(Name = "header")] public string[] Header { get; set; }
-        /// <summary>창 타이틀바(로고가 올라가므로 밝은 톤)</summary>
+        /// <summary>Window title bar (light tone because the logo sits on it)</summary>
         [DataMember(Name = "titleBar")] public string[] TitleBar { get; set; }
         [DataMember(Name = "gridHeader")] public string[] GridHeader { get; set; }
         [DataMember(Name = "border")] public string Border { get; set; }
@@ -31,11 +31,11 @@ namespace APC.UI.Theming
         [DataMember(Name = "textInverse")] public string TextInverse { get; set; }
         [DataMember(Name = "gridLine")] public string GridLine { get; set; }
         [DataMember(Name = "gridSelected")] public string GridSelected { get; set; }
-        /// <summary>패널·카드 바탕 그라데이션 [시작, 끝]. 없으면 흰색.</summary>
+        /// <summary>Panel and card background gradient [start, end]. White if missing.</summary>
         [DataMember(Name = "panel")] public string[] Panel { get; set; }
-        /// <summary>입력칸 테두리. 없으면 border.</summary>
+        /// <summary>Input field border. border if missing.</summary>
         [DataMember(Name = "borderStrong")] public string BorderStrong { get; set; }
-        /// <summary>브랜드 색. 창 제목 기능명과 묶음·구획 제목 막대에만 쓴다(알람 빨강과 섞이지 않게). 없으면 text.</summary>
+        /// <summary>Brand color. Used only for the function name in the window title and the group/section title bars (kept apart from alarm red). text if missing.</summary>
         [DataMember(Name = "brand")] public string Brand { get; set; }
     }
 

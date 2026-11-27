@@ -9,9 +9,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 지속 상태 알림 띠(한 줄): 인터락 우회 중·시험 모드·수동 운전처럼 판정은 아니지만 계속 보여야 하는 상태.
-    /// 연한 상태색 바탕 + 왼쪽 상태색 막대 + 램프 + 굵은 글자(Text) + 보통 글자(Detail). 높이는 입력칸 정도로 낮다 —
-    /// 화면의 큰 면(ApcJudgePanel)은 하나만 두고, 이런 상태는 이 띠로 둬서 판정판과 크기를 다투지 않게 한다.
+    /// Persistent status notice band (one line): states that are not a verdict but must stay visible, such as interlock bypass, test mode, manual operation.
+    /// Light status-color background + status-color bar on the left + lamp + bold text (Text) + regular text (Detail). About input-field height —
+    /// keep a single big surface (ApcJudgePanel) on a screen and put such states in this band so they do not compete with the judge panel.
     /// </summary>
     public class ApcNoticeBar : Control
     {
@@ -32,10 +32,10 @@ namespace APC.UI.Controls
 
         [DefaultValue(StatusKind.Warn)] public StatusKind Status { get { return _status; } set { _status = value; Invalidate(); } }
 
-        /// <summary>굵은 글자 뒤 보통 글자(예: "15:52까지 · 생산분은 추가 검사").</summary>
+        /// <summary>Regular text after the bold text (e.g. "15:52까지 · 생산분은 추가 검사").</summary>
         [DefaultValue("")] public string Detail { get { return _detail; } set { _detail = value ?? ""; Invalidate(); } }
 
-        /// <summary>굵은 글자(예: "인터락 E05 우회 중").</summary>
+        /// <summary>Bold text (e.g. "인터락 E05 우회 중").</summary>
         public override string Text { get { return base.Text; } set { base.Text = value; } }
 
         protected override void OnTextChanged(EventArgs e) { base.OnTextChanged(e); Invalidate(); }

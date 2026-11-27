@@ -6,7 +6,7 @@ namespace APC.UI.Drawing
 {
     public static class Gradients
     {
-        /// <summary>세로 그라데이션. pair = [위, 아래] (#RRGGBB)</summary>
+        /// <summary>Vertical gradient. pair = [top, bottom] (#RRGGBB)</summary>
         public static void Fill(Graphics g, Rectangle r, string[] pair)
         {
             Fill(g, r, ApcTheme.C(pair[0]), ApcTheme.C(pair[1]));

@@ -8,8 +8,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 행 동작 아이콘 열(전송 ▶, 초기화 ↻ 등). 셀 값 true = 파란 아이콘(누를 수 있음), false = 회색 아이콘(지금은 못 함), 그 밖 = 빈 칸.
-    /// 이미지는 테마의 "{IconName}_normal" / "{IconName}_disabled". 누름은 표의 CellClick에서 IsEnabled(셀)로 확인해 처리한다.
+    /// Row action icon column (send ▶, reset ↻, etc.). Cell value true = blue icon (clickable), false = gray icon (not available now), anything else = empty cell.
+    /// Images are the theme's "{IconName}_normal" / "{IconName}_disabled". Handle clicks in the table's CellClick, checking IsEnabled(cell).
     /// </summary>
     public class ApcIconColumn : DataGridViewColumn
     {
@@ -21,11 +21,11 @@ namespace APC.UI.Controls
             IconName = "icon_play";
         }
 
-        /// <summary>테마 이미지 이름 앞부분(예: "icon_play", "icon_reset").</summary>
+        /// <summary>Theme image name prefix (e.g. "icon_play", "icon_reset").</summary>
         [DefaultValue("icon_play")]
         public string IconName { get; set; }
 
-        /// <summary>셀이 누를 수 있는 상태(값 true)인지.</summary>
+        /// <summary>Whether the cell is clickable (value true).</summary>
         public static bool IsEnabled(DataGridViewCell cell) { return cell != null && cell.Value is bool && (bool)cell.Value; }
 
         public override object Clone()

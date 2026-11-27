@@ -14,7 +14,7 @@ namespace APC.UI.Controls
         Danger
     }
 
-    /// <summary>9-slice 이미지 버튼. 이미지: btn_{variant}_{normal|hover|pressed|disabled}</summary>
+    /// <summary>9-slice image button. Images: btn_{variant}_{normal|hover|pressed|disabled}</summary>
     public class ApcButton : Button
     {
 

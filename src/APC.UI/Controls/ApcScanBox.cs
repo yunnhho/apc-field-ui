@@ -14,19 +14,19 @@ namespace APC.UI.Controls
         public ScanEventArgs(string code) { Code = code; Accepted = true; }
         public string Code { get; private set; }
 
-        /// <summary>앱이 코드를 거부하면 false로 둔다 → 실패 피드백(빨강 + 경고음). 기본 true.</summary>
+        /// <summary>Set to false when the app rejects the code → failure feedback (red + alarm sound). Default true.</summary>
         public bool Accepted { get; set; }
     }
 
     /// <summary>
-    /// 바코드 입력란. Attach(form) 하면 그 폼 어디에 포커스가 있든 스캔을 받는다.
-    /// 스캔으로 판정되면 포커스 칸을 버스트 시작 전 값으로 되돌리고 코드를 여기로 옮긴 뒤 Scanned를 낸다.
-    /// 스캔의 Enter는 삼켜서 폼의 기본 버튼(AcceptButton)을 누르지 않게 한다.
-    /// 피드백은 Scanned 처리 후 한 번: e.Accepted에 따라 성공/실패. 거부된 코드는 칸에 선택된 채 남아 다음 스캔이 덮어쓴다(지우지 않는다).
-    /// Attach하지 않은 칸은 Scanned를 내지 않는다(평범한 입력칸). 손으로 친 글자 + Enter도 Scanned가 아니다(스캐너 속도 입력만) —
-    /// 수기 입력을 받아야 하면 KeyDown Enter를 따로 처리한다.
-    /// 한 폼에 스캔 칸이 여럿(금형 + 사원증)이면 모두 Attach하고 칸마다 Accepts(받는 코드 판별)를 준다:
-    /// 코드는 그 코드를 받는 칸으로 간다(포커스·스캔 순서와 무관). 어느 칸도 받지 않는 코드는 포커스된 스캔 칸(없으면 먼저 Attach한 칸)이 받아 앱이 거부한다.
+    /// Barcode input field. After Attach(form) it receives scans wherever focus is on that form.
+    /// When input is detected as a scan, the focused field is restored to its value before the burst, the code moves here, and Scanned is raised.
+    /// The scan's Enter is swallowed so it does not press the form's default button (AcceptButton).
+    /// Feedback happens once after Scanned is handled: success/failure per e.Accepted. A rejected code stays selected in the field so the next scan overwrites it (not cleared).
+    /// A field that is not attached never raises Scanned (plain input field). Typed text + Enter is not Scanned either (scanner-speed input only) —
+    /// if manual entry must be accepted, handle KeyDown Enter separately.
+    /// With several scan fields on one form (mold + employee badge), attach all and give each an Accepts (which codes it takes):
+    /// a code goes to the field that accepts it (regardless of focus or scan order). A code no field accepts goes to the focused scan field (or the first attached one) and the app rejects it.
     /// </summary>
     public class ApcScanBox : ApcTextBox, IMessageFilter
     {
@@ -52,17 +52,17 @@ namespace APC.UI.Controls
         public event EventHandler<ScanEventArgs> Scanned;
 
         /// <summary>
-        /// 이 칸이 받는 코드인지(예: <c>c => c.StartsWith("EMP-")</c>). 한 폼에 스캔 칸이 둘 이상이면 칸마다 준다 —
-        /// 포커스된 칸이 받지 않는 코드는 같은 폼에서 Accepts가 그 코드를 받는 칸으로 옮겨 그 칸의 Scanned가 난다.
-        /// null이면 이 칸에 온 코드는 모두 받지만, 다른 칸이 받지 않은 코드를 넘겨받지는 않는다(넘겨받으려면 Accepts를 준다).
+        /// Whether this field takes the code (e.g. <c>c => c.StartsWith("EMP-")</c>). Give one per field when a form has two or more scan fields —
+        /// a code the focused field does not accept moves to the field on the same form whose Accepts takes it, and that field raises Scanned.
+        /// null = takes every code that arrives here, but does not take over codes other fields refused (set Accepts for that).
         /// </summary>
         public Predicate<string> Accepts { get; set; }
 
         private bool _scanOnly;
 
         /// <summary>
-        /// 스캔으로만 채우는 칸: 손으로 치거나 고치거나 붙여 넣을 수 없다(ReadOnly). 모양은 입력칸 그대로(흰 바탕) — 스캔할 곳으로 보인다.
-        /// 사원증·라벨처럼 "스캔한 값만 인정"하는 칸에 쓴다. Text가 곧 스캔한 값이다.
+        /// Scan-only field: cannot be typed, edited or pasted into (ReadOnly). Looks like a normal input field (white) — it reads as a place to scan.
+        /// Use for fields that "accept scanned values only", such as employee badges and labels. Text is the scanned value.
         /// </summary>
         [System.ComponentModel.DefaultValue(false)]
         public bool ScanOnly
@@ -85,9 +85,9 @@ namespace APC.UI.Controls
         internal int FlashCount { get; private set; }
 
         /// <summary>
-        /// 이 폼에서 스캔을 받기 시작한다. 화면(UserControl) 생성자에서는 아직 폼이 없으므로
-        /// 화면의 OnHandleCreated에서 FindForm()으로 부른다: <c>var f = FindForm(); if (f != null) _scan.Attach(f);</c>
-        /// dialog(ApcForm)는 폼 자신이므로 생성자에서 <c>_scan.Attach(this)</c>로 부른다.
+        /// Starts receiving scans on this form. A screen (UserControl) has no form yet in its constructor, so
+        /// call it from the screen's OnHandleCreated via FindForm(): <c>var f = FindForm(); if (f != null) _scan.Attach(f);</c>
+        /// A dialog (ApcForm) is the form itself, so call <c>_scan.Attach(this)</c> in its constructor.
         /// </summary>
         public void Attach(Form host)
         {
@@ -105,7 +105,7 @@ namespace APC.UI.Controls
             host.FormClosed += _hostClosed;
         }
 
-        /// <summary>성공 = 초록 플래시 + 짧은 비프, 실패 = 빨강 플래시 + 경고음.</summary>
+        /// <summary>Success = green flash + short beep, failure = red flash + alarm sound.</summary>
         public void Flash(bool success)
         {
             LastFlashSuccess = success;
@@ -133,13 +133,13 @@ namespace APC.UI.Controls
             return Process(m.Msg, WParamOf(m.WParam), (uint)GetMessageTime(), focused as TextBoxBase);
         }
 
-        /// <summary>64비트에서 WParam은 int 범위를 넘을 수 있다(타이머·포인터 메시지). 키 메시지가 쓰는 하위 32비트만 취한다.</summary>
+        /// <summary>On 64-bit, WParam can exceed int range (timer and pointer messages). Take only the low 32 bits that key messages use.</summary>
         internal static int WParamOf(IntPtr wParam)
         {
             return unchecked((int)wParam.ToInt64());
         }
 
-        /// <summary>필터 본체. true = 메시지를 삼킴. timeMs = 메시지 발생 시각.</summary>
+        /// <summary>Filter body. true = swallow the message. timeMs = message time.</summary>
         internal bool Process(int msg, int wParam, long timeMs, TextBoxBase focused)
         {
             if (msg == WM_CHAR)
@@ -178,7 +178,7 @@ namespace APC.UI.Controls
             target.Receive(code);
         }
 
-        /// <summary>이 칸이 받지 않는 코드면 같은 폼에서 받는 칸(켜져 있고 보이는 칸). 없으면 이 칸.</summary>
+        /// <summary>If this field does not accept the code, the field on the same form that does (enabled and visible). Otherwise this field.</summary>
         private ApcScanBox RouteTarget(string code)
         {
             if (Accepts == null || Accepts(code)) return this;
@@ -198,7 +198,7 @@ namespace APC.UI.Controls
             Flash(args.Accepted);
         }
 
-        /// <summary>스캔 글자가 받는 칸이 아닌 칸에 들어갔으면(선택 영역 덮어쓰기·필터된 글자 포함) 버스트 전 값으로 되돌린다.</summary>
+        /// <summary>If scanned characters landed in a field other than the receiving one (including overwritten selections and filtered characters), restores its value from before the burst.</summary>
         private void RestoreSnapshot(TextBoxBase focused, ApcScanBox target)
         {
             var box = _snapBox;

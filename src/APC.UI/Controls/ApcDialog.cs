@@ -6,18 +6,18 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 되돌릴 수 없는 동작(삭제, 작업 종료 등) 확인. 기본 포커스와 Enter·Esc는 모두 '취소' —
-    /// 바코드 스캔의 Enter나 습관적 Enter로 실수 확인되지 않게 한다.
+    /// Confirmation for irreversible actions (delete, end job, etc.). Default focus, Enter and Esc are all "취소" (Cancel) —
+    /// so a barcode scan's Enter or a habitual Enter never confirms by mistake.
     /// </summary>
     public static class ApcDialog
     {
-        /// <summary>파괴적 동작 확인: 확인 버튼은 빨간 "확인".</summary>
+        /// <summary>Destructive action confirmation: the confirm button is a red "확인".</summary>
         public static bool Confirm(IWin32Window owner, string message)
         {
             return Confirm(owner, message, "확인", ApcButtonVariant.Danger);
         }
 
-        /// <summary>확인 버튼 글자·종류 지정. 저장처럼 위험하지 않은 확인은 ("저장", Primary).</summary>
+        /// <summary>Sets the confirm button's text and variant. For non-dangerous confirmations such as save use ("저장", Primary).</summary>
         public static bool Confirm(IWin32Window owner, string message, string okText, ApcButtonVariant okVariant)
         {
             using (var dlg = Create(message, okText, okVariant))
@@ -25,15 +25,15 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 경고창(입력 오류·조작 경고: 기간 역순, 빈 LOT, 잘못된·중복 스캔 등). 제목 "경고" + 노란 램프.
-        /// 버튼은 "확인" 하나, Enter·Esc로 닫힌다.
+        /// Warning box (input errors and operation warnings: reversed period, empty LOT, wrong or duplicate scan, etc.). Title "경고" + yellow lamp.
+        /// One "확인" button; Enter and Esc close it.
         /// </summary>
         public static void Warn(IWin32Window owner, string message)
         {
             using (var dlg = CreateAlert(message, true)) dlg.ShowDialog(owner);
         }
 
-        /// <summary>안내창(연결 결과·완료 알림처럼 잘못된 것이 없는 안내). 제목 "알림" + 파란 램프. 경고는 <see cref="Warn"/>.</summary>
+        /// <summary>Information box (nothing is wrong: connection result, completion notice). Title "알림" + blue lamp. For warnings use <see cref="Warn"/>.</summary>
         public static void Alert(IWin32Window owner, string message)
         {
             using (var dlg = CreateAlert(message, false)) dlg.ShowDialog(owner);
@@ -66,7 +66,7 @@ namespace APC.UI.Controls
             return dlg;
         }
 
-        /// <summary>메시지 왼쪽에 종류 램프(경고 노랑 / 알림 파랑) — 색만이 아니라 제목 글자로도 구분된다.</summary>
+        /// <summary>Kind lamp left of the message (warning yellow / info blue) — told apart by the title text too, not by color alone.</summary>
         private static void AddKindIcon(ApcForm dlg, string lamp)
         {
             if (ApcTheme.Current == null) return;

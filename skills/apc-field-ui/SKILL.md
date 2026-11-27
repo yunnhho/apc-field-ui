@@ -37,7 +37,7 @@ Ask for missing required items once, all together. If all three are given, proce
 
 ## 3. API
 
-Read only the needed sections of `/c/apc-field-ui/docs/api.md` (generated): see the `목차:` line at the top, then find a section with `grep -n "^## ApcGrid" /c/apc-field-ui/docs/api.md`. **api.md is the source for usage (properties, methods, arguments)**; this file only decides what to use when. Do not read control sources. Read only the 1–2 templates chosen below from `/c/apc-field-ui/src/APC.UI.Demo/Templates/`.
+Read only the needed sections of `/c/apc-field-ui/docs/api.md` (generated): see the `Contents:` line at the top, then find a section with `grep -n "^## ApcGrid" /c/apc-field-ui/docs/api.md`. **api.md is the source for usage (properties, methods, arguments)**; this file only decides what to use when. Do not read control sources. Read only the 1–2 templates chosen below from `/c/apc-field-ui/src/APC.UI.Demo/Templates/`.
 
 ## 4. Layout
 

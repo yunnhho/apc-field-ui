@@ -7,8 +7,8 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// 제목이 있는 묶음 상자(설정 dialog의 블록 등, 표준 GroupBox 대신). 패널 바탕 + 왼쪽 브랜드색 막대가 붙은 굵은 제목.
-    /// 안에 넣는 컨트롤은 Padding(제목 띠 아래 + 여백) 안쪽에 배치된다 — Dock이나 FlowLayoutPanel(Dock=Fill)을 쓰면 된다.
+    /// Titled group box (blocks in a settings dialog etc., instead of the standard GroupBox). Panel background + bold title with a brand-color bar on the left.
+    /// Child controls are laid out inside Padding (below the title band + margin) — use Dock or a FlowLayoutPanel (Dock=Fill).
     /// </summary>
     public class ApcGroup : Panel
     {
@@ -22,15 +22,15 @@ namespace APC.UI.Controls
             ApplyTheme();
         }
 
-        /// <summary>제목 띠 글자.</summary>
+        /// <summary>Title band text.</summary>
         public override string Text { get { return base.Text; } set { base.Text = value; Invalidate(); } }
 
         internal int TitleHeight { get { return ApcTheme.Px(BaseTitleH); } }
 
-        /// <summary>안 내용 높이(배율 적용 px)를 담는 묶음 높이 = 제목 띠 + 위아래 여백 + 내용. 화면에서 Columns() 줄을 담으면 내용 = 줄 높이 합.</summary>
+        /// <summary>Group height that holds content of the given height (scaled px) = title band + top/bottom margin + content. On a screen holding Columns() rows, content = sum of row heights.</summary>
         public int HeightFor(int contentHeight) { return Padding.Vertical + contentHeight; }
 
-        /// <summary>바탕은 패널 시작색 단색: 안에 든 컨트롤이 BackColor를 물려받아 그라데이션과 어긋나지 않게.</summary>
+        /// <summary>Background is the solid panel start color, so children inheriting BackColor do not clash with the gradient.</summary>
         private void ApplyTheme()
         {
             BackColor = ApcTheme.Current == null ? Color.White : ApcTheme.C(ApcTheme.Current.Colors.Panel[0]);

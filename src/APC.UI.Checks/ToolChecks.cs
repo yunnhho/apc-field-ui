@@ -23,10 +23,10 @@ namespace APC.UI.Checks
             Check(md.Contains("## ApcTemplateView") && md.Contains("## ApcButton"), "api: lists public controls");
             Check(md.Contains("## ApcJudgePanel") && md.Contains("string Text { get; set; }") && md.Contains("static int Px(int px)"), "api: documents Text overrides and ApcTheme.Px");
             Check(md.Contains("Load(string themeDir)"), "api: lists ApcTheme.Load signature");
-            Check(md.Contains("모든 기능 화면의 공통 틀"), "api: includes xml summary text");
+            Check(md.Contains("Common frame of every function screen"), "api: includes xml summary text");
             Check(md == ApiWriter.Write(dll), "api: deterministic");
-            Check(md.Contains("\n목차: ") &&md.Contains(" · ApcTemplateView"), "api: table of contents lists types");
-            Check(md.Contains("누르면 SettingsClick"), "api: see cref rendered as member name");
+            Check(md.Contains("\nContents: ") &&md.Contains(" · ApcTemplateView"), "api: table of contents lists types");
+            Check(md.Contains("Clicking raises SettingsClick"), "api: see cref rendered as member name");
 
             string demo = Path.Combine(Root, @"src\APC.UI.Demo\bin\Debug\APC.UI.Demo.exe");
             string theme = Path.Combine(Root, @"themes\default");

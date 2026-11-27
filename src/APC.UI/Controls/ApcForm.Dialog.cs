@@ -8,9 +8,9 @@ using APC.UI.Theming;
 namespace APC.UI.Controls
 {
     /// <summary>
-    /// dialog 배치 헬퍼. 생성자에서 SetupDialog → AddFieldRow/AddGroup/AddContent/AddContentFill(위에서 아래 순서) → SetFooter.
-    /// 치수는 ApcLayout이 정하고, 표시 직전(OnLoad) 한 번에 배치한다: 이름표 열 하나(가장 긴 이름표 폭), 입력칸 왼쪽 끝 통일(AddCaptionRow 표 묶음은 따로),
-    /// 하단 [확정][취소] 오른쪽(취소가 끝), 높이는 내용으로 계산(Fill 내용이 있으면 SetupDialog 높이).
+    /// Dialog layout helpers. In the constructor: SetupDialog → AddFieldRow/AddGroup/AddContent/AddContentFill (top to bottom) → SetFooter.
+    /// Sizes come from ApcLayout; layout runs once right before showing (OnLoad): one caption column (widest caption), aligned field left edges (AddCaptionRow table groups align separately),
+    /// bottom-right [Confirm][Cancel] (Cancel at the end), height computed from content (SetupDialog height when there is Fill content).
     /// </summary>
     public partial class ApcForm
     {
@@ -35,7 +35,7 @@ namespace APC.UI.Controls
         private ApcButton[] _footerLeft = new ApcButton[0];
         private Label _footerNote;
 
-        /// <summary>dialog 기본 속성과 크기(배율 전 px). height 0 = 내용으로 자동(AddContentFill을 쓰면 필수).</summary>
+        /// <summary>Dialog base properties and size (unscaled px). height 0 = auto from content (required when using AddContentFill).</summary>
         protected void SetupDialog(string title, int width, int height = 0)
         {
             if (width <= 0) throw new ArgumentOutOfRangeException("width");
@@ -53,13 +53,13 @@ namespace APC.UI.Controls
             ClientSize = new Size(ApcTheme.Px(width), height > 0 ? ApcTheme.Px(height) : ClientSize.Height);
         }
 
-        /// <summary>이름표 + 입력칸 한 줄. trailing이 없으면 입력칸이 남은 폭을 채우고, 있으면 모두 자기 Width로 왼→오.</summary>
+        /// <summary>One row: caption + field. Without trailing the field fills the remaining width; with trailing every control uses its own Width, left to right.</summary>
         protected void AddFieldRow(string caption, Control field, params Control[] trailing)
         {
             _blocks.Add(NewRow(caption, field, trailing, this));
         }
 
-        /// <summary>묶음 안 한 줄. 이름표 열은 묶음 밖 행과 같은 위치에 맞춘다.</summary>
+        /// <summary>One row inside a group. The caption column aligns with rows outside the group.</summary>
         protected void AddFieldRow(ApcGroup group, string caption, Control field, params Control[] trailing)
         {
             if (group == null) throw new ArgumentNullException("group");
@@ -69,8 +69,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 묶음 안 열 제목 줄. 바로 다음 AddFieldRow(group, ...) 행의 [이름표, 입력칸, trailing...] 위에 순서대로 맞춰 놓인다("" = 그 칸 제목 없음).
-        /// 여러 행이 같은 칸(포트·신호·로직…)을 가질 때 행마다 FieldCaption을 되풀이하지 않고 위에 한 번만 쓴다.
+        /// Column caption row inside a group. Placed in order above [caption, field, trailing...] of the next AddFieldRow(group, ...) row ("" = no caption for that cell).
+        /// When several rows share the same cells (port, signal, logic…), write the captions once on top instead of repeating FieldCaption in every row.
         /// </summary>
         protected void AddCaptionRow(ApcGroup group, params string[] captions)
         {
@@ -90,7 +90,7 @@ namespace APC.UI.Controls
         private static int CaptionRowHeight { get { return ApcTheme.Px(20); } }
         private static int CaptionRowGap { get { return ApcTheme.Px(4); } }
 
-        /// <summary>제목 있는 묶음(ApcGroup). 행은 AddFieldRow(group, ...)로 넣는다.</summary>
+        /// <summary>Titled group (ApcGroup). Add rows with AddFieldRow(group, ...).</summary>
         protected ApcGroup AddGroup(string title)
         {
             RequireSetup();
@@ -100,7 +100,7 @@ namespace APC.UI.Controls
             return g;
         }
 
-        /// <summary>표·판정판 등 자유 요소. 높이는 c.Height(ApcTheme.Px로 지정), 폭은 내용 폭.</summary>
+        /// <summary>Free element such as a table or judge panel. Height is c.Height (set with ApcTheme.Px), width is the content width.</summary>
         protected void AddContent(Control c)
         {
             RequireSetup();
@@ -109,7 +109,7 @@ namespace APC.UI.Controls
             _blocks.Add(new Block { Kind = c is Label && _sectionTitles.Contains(c) ? BlockKind.Title : BlockKind.Content, Content = c });
         }
 
-        /// <summary>카드 여러 개를 한 줄에 같은 폭·같은 높이(가장 큰 c.Height)로. 칸 간격은 ApcLayout.ItemGap. 2×2는 두 번 부른다.</summary>
+        /// <summary>Several cards in one row with equal width and height (the largest c.Height). Gap is ApcLayout.ItemGap. For 2×2 call it twice.</summary>
         protected void AddContentRow(params Control[] cells)
         {
             RequireSetup();
@@ -118,7 +118,7 @@ namespace APC.UI.Controls
             _blocks.Add(new Block { Kind = BlockKind.Cells, Cells = cells });
         }
 
-        /// <summary>남은 높이를 채우는 요소(그래프 등). SetupDialog에 높이를 줘야 하고 한 dialog에 하나만.</summary>
+        /// <summary>Element that fills the remaining height (chart etc.). Requires a height in SetupDialog; one per dialog.</summary>
         protected void AddContentFill(Control c)
         {
             RequireSetup();
@@ -129,7 +129,7 @@ namespace APC.UI.Controls
             _blocks.Add(new Block { Kind = BlockKind.Fill, Content = c });
         }
 
-        /// <summary>하단 버튼 줄: 오른쪽 [확정][취소](취소가 끝, cancel은 null 가능), 왼쪽 보조 버튼. Esc = 취소(없으면 확정).</summary>
+        /// <summary>Bottom button row: [Confirm][Cancel] on the right (Cancel at the end, cancel may be null), helper buttons on the left. Esc = cancel (confirm if no cancel).</summary>
         protected void SetFooter(ApcButton cancel, ApcButton confirm, params ApcButton[] left)
         {
             RequireSetup();
@@ -145,8 +145,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 하단 버튼 줄의 [확정] 바로 왼쪽 안내 글(꺼진 확정 버튼의 이유: "원인 확인 전 · Release 불가").
-        /// 반환 Label의 Text를 바꿔 쓴다(이유가 없으면 ""). 글자색 기본, 알람인 이유만 ForeColor = ApcTheme.StatusText(StatusKind.Alarm).
+        /// Note text immediately left of [Confirm] in the bottom button row (the reason a confirm button is disabled: "원인 확인 전 · Release 불가").
+        /// Change the returned Label's Text ("" when there is no reason). Default text color; only alarm reasons use ForeColor = ApcTheme.StatusText(StatusKind.Alarm).
         /// </summary>
         protected Label SetFooterNote(string text = "")
         {
@@ -167,7 +167,7 @@ namespace APC.UI.Controls
         private const int SectionBar = 3, SectionBarGap = 7;   // 화면 SectionTitle·ApcGroup 제목 막대와 같은 치수
         private readonly HashSet<Control> _sectionTitles = new HashSet<Control>();
 
-        /// <summary>구획 제목(왼쪽 브랜드색 막대 + 굵게 + 아래 폭 전체 구분선 — 묶음·화면 구획 제목과 같은 표시). AddContent로 넣으면 아래 요소와의 간격이 좁다. 상자(AddGroup) 없이 입력 행을 나눌 때 쓴다.</summary>
+        /// <summary>Section title (brand-color bar on the left + bold + full-width divider below — same look as group and screen section titles). Added with AddContent it keeps a tight gap to the element below. Use it to split input rows without a box (AddGroup).</summary>
         protected Label SectionTitle(string text)
         {
             var l = new Label
@@ -189,7 +189,7 @@ namespace APC.UI.Controls
             return l;
         }
 
-        /// <summary>행 안 trailing 이름표(보통 굵기, 글자 폭).</summary>
+        /// <summary>Trailing caption inside a row (regular weight, text width).</summary>
         protected static Label FieldCaption(string text)
         {
             var font = ApcTheme.GetFont();
@@ -332,7 +332,7 @@ namespace APC.UI.Controls
             if (_footerNote != null) _footerNote.SetBounds(lx, by, Math.Max(0, _footerConfirm.Left - gap - lx), btnH);
         }
 
-        /// <summary>바닥 버튼 폭: 기본 110, 글자가 길면(비밀번호 변경 등, 글꼴 12) 글자 + 양쪽 여백만큼 넓힌다.</summary>
+        /// <summary>Footer button width: 110 by default; widened to text + side padding when the text is long (e.g. 비밀번호 변경 at font 12).</summary>
         private static int FooterW(ApcButton b, int min)
         {
             return Math.Max(min, TextRenderer.MeasureText(b.Text, b.Font).Width + ApcTheme.Px(24));

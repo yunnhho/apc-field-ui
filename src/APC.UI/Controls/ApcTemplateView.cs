@@ -6,12 +6,12 @@ using APC.UI.Theming;
 
 namespace APC.UI.Controls
 {
-    /// <summary>모든 기능 화면의 공통 틀: Body 하나. 프로그램 이름·기능명·현재 시각은 창 제목 줄(ApcForm)에 있다.</summary>
+    /// <summary>Common frame of every function screen: a single Body. Program name, function name and current time are on the window title row (ApcForm).</summary>
     public class ApcTemplateView : UserControl
     {
         /// <summary>
-        /// 내용 영역(Padding 16px). 도킹 순서: 같은 Dock(Top 등)끼리는 나중에 Add한 것이 바깥(위)에 온다.
-        /// Fill을 먼저 Add하고, Top 줄들은 화면 아래쪽 것부터 위쪽 것 순서로 Add한다(또는 SetChildIndex(fill, 0)).
+        /// Content area (Padding 16px). Docking order: among controls with the same Dock (Top etc.), the one added later goes outside (on top).
+        /// Add Fill first, then add Top rows from the bottom of the screen upward (or SetChildIndex(fill, 0)).
         /// </summary>
         protected readonly Panel Body = new Panel { Dock = DockStyle.Fill };
 
@@ -29,8 +29,8 @@ namespace APC.UI.Controls
         private ApcForm _settingsHost;
 
         /// <summary>
-        /// 이 화면이 떠 있는 창의 타이틀바(최소화 왼쪽)에 설정 버튼을 둔다. 설정 화면이 있는 화면만 생성자에서 한 번 부른다.
-        /// 화면이 창에 붙을 때 켜고, 화면을 Dispose하면 끈다(갤러리처럼 화면을 바꿔 끼우는 창에서도 남지 않는다).
+        /// Puts a settings button in the title bar (left of minimize) of the window hosting this screen. Call once in the constructor, only for screens that have a settings screen.
+        /// Turned on when the screen is attached to a window and off when the screen is disposed (does not linger in windows that swap screens, like the gallery).
         /// </summary>
         protected void UseSettingsButton(EventHandler onClick)
         {
@@ -59,7 +59,7 @@ namespace APC.UI.Controls
             base.Dispose(disposing);
         }
 
-        /// <summary>배율 적용 px. ApcForm dialog 등 이 클래스 밖에서는 ApcTheme.Px.</summary>
+        /// <summary>Scaled px. Outside this class (ApcForm dialogs etc.) use ApcTheme.Px.</summary>
         protected static int S(int px) { return ApcTheme.Px(px); }
 
         protected static Label Caption(string text)
@@ -76,9 +76,9 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 구획 제목 + 그 아래를 채우는 내용(표·그래프)을 한 칸으로. Columns()·FillColumns()의 칸이나 Body의 Fill에 그대로 넣는다
-        /// (제목 Dock=Top, 내용 Dock=Fill — 도킹 순서를 화면 코드가 맞추지 않아도 된다).
-        /// tools는 제목 줄 오른쪽 끝에 놓는 버튼 등(Button(...)). 제목은 나중에 panel.Text = "..."로 바꾼다.
+        /// Section title + content filling below it (table or chart) as one cell. Put it directly in a Columns()/FillColumns() cell or Body's Fill
+        /// (title Dock=Top, content Dock=Fill — screen code does not need to manage docking order).
+        /// tools are buttons etc. placed at the right end of the title row (Button(...)). Change the title later with panel.Text = "...".
         /// </summary>
         protected static Panel Titled(string title, Control content, params Control[] tools)
         {
@@ -114,8 +114,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 고정 높이 Titled() 칸의 전체 높이 = 제목 줄 + 간격 + contentHeight. 표 칸이면 Columns(TitledHeight(ApcGrid.HeightForRows(n)), ...).
-        /// 제목 줄에 버튼(tools)을 넣었으면 hasTools = true(버튼 높이만큼 제목 줄이 높다).
+        /// Total height of a fixed-height Titled() cell = title row + gap + contentHeight. For a table cell: Columns(TitledHeight(ApcGrid.HeightForRows(n)), ...).
+        /// hasTools = true if the title row holds buttons (tools) (the title row is taller by the button height).
         /// </summary>
         protected static int TitledHeight(int contentHeight, bool hasTools = false)
         {
@@ -127,7 +127,7 @@ namespace APC.UI.Controls
             return hasTools ? Math.Max(head.PreferredHeight, S(ApcLayout.FieldHeight)) : head.PreferredHeight;
         }
 
-        /// <summary>Titled() 칸: Text가 제목 글자다(스캔한 Lot에 따라 제목을 바꿀 때).</summary>
+        /// <summary>Titled() cell: Text is the title text (to change the title per scanned Lot).</summary>
         private sealed class TitledPanel : Panel
         {
             private readonly Label _head;
@@ -135,7 +135,7 @@ namespace APC.UI.Controls
             public override string Text { get { return _head.Text; } set { _head.Text = value; } }
         }
 
-        /// <summary>구획 제목(굵게, 예: "최근 알람 이력"). 입력칸 앞 이름표는 Caption(보통 굵기).</summary>
+        /// <summary>Section title (bold, e.g. "최근 알람 이력"). Captions before input fields use Caption (regular weight).</summary>
         protected static Label SectionTitle(string text)
         {
             var l = new SectionLabel
@@ -151,7 +151,7 @@ namespace APC.UI.Controls
             return l;
         }
 
-        /// <summary>구획 제목: 왼쪽 3px 브랜드색 막대 + 굵은 글자(ApcGroup 제목과 같은 표시).</summary>
+        /// <summary>Section title: 3px brand-color bar on the left + bold text (same look as the ApcGroup title).</summary>
         private sealed class SectionLabel : Label
         {
             internal const int BaseBar = 3, BaseGap = 7;
@@ -172,8 +172,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 카드·타일·판정판을 한 줄에 나란히(Dock=Top). percents가 없으면 같은 폭. 칸 간격 12px(마지막 칸 0), 줄 아래 간격 12px.
-        /// height는 칸 높이(배율 적용한 값, 예: S(150)).
+        /// Cards, tiles and judge panels side by side in one row (Dock=Top). Without percents all cells have equal width. Cell gap 12px (0 after the last), 12px below the row.
+        /// height is the cell height (scaled, e.g. S(150)).
         /// </summary>
         protected static TableLayoutPanel Columns(int height, Control[] cells, float[] percents = null)
         {
@@ -192,8 +192,8 @@ namespace APC.UI.Controls
         }
 
         /// <summary>
-        /// 남은 높이를 모두 채우는 나란한 칸(Dock=Fill) — 목록 표 두 개를 나란히 둘 때(칸은 보통 Titled(...)).
-        /// Body에서는 Fill이므로 Top 줄들보다 먼저 Add한다.
+        /// Side-by-side cells that fill all remaining height (Dock=Fill) — for two list tables next to each other (cells are usually Titled(...)).
+        /// It is Fill in Body, so add it before the Top rows.
         /// </summary>
         protected static TableLayoutPanel FillColumns(Control[] cells, float[] percents = null)
         {
@@ -203,7 +203,7 @@ namespace APC.UI.Controls
             return t;
         }
 
-        /// <summary>왼쪽→오른쪽으로 쌓는 한 줄(필터·버튼 줄).</summary>
+        /// <summary>A row stacked left to right (filter and button rows).</summary>
         protected static FlowLayoutPanel Row(params Control[] controls)
         {
             var row = new FlowLayoutPanel
